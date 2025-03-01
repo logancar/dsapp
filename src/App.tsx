@@ -1,38 +1,28 @@
-
-import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import styles from './App.module.css';
-
-type FormValues = {
-  email: string;
-};
+import { useState } from 'react';
+import HomePage from './HomePage'; // import your new component
+import styles from './App.module.css'; // optional if you have global container style
 
 function App() {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const [validated, setValidated] = useState(false);
+  const [employeeID, setEmployeeID] = useState('');
 
-  const onSubmit = (data: FormValues) => {
-    alert(`Submitted Email: ${data.email}`);
+  // Called when HomePage has a valid 4-digit code
+  const handleIdSubmit = (id: string) => {
+    console.log('Employee ID submitted:', id);
+    setEmployeeID(id);
+    setValidated(true);
   };
 
-  return (
-    <motion.div
-      className={styles.container}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-    >
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-        <input
-          {...register('email', { required: 'Email is required' })}
-          placeholder="Enter your email"
-        />
-        {errors.email && <p className={styles.error}>{errors.email.message}</p>}
+  if (!validated) {
+    return <HomePage onIdSubmit={handleIdSubmit} />;
+  }
 
-        <button type="submit">
-          Submit
-        </button>
-      </form>
-    </motion.div>
+  // If validated, show next screen or kiosk content
+  return (
+    <div className={styles.container}>
+      <h2>Welcome, employee #{employeeID}!</h2>
+      <p>This is the next kiosk screen (placeholder).</p>
+    </div>
   );
 }
 
