@@ -1,40 +1,56 @@
 .container {
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .kiosk {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: black;
+  
+    background-color: #222;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+  
     color: white;
-    padding: 1rem;
   }
   
   .title {
+    color: #3bb554;
     font-size: 2rem;
     margin-bottom: 0.5rem;
-    color: #3bb554; /* your kiosk brand color */
   }
   
   .subtitle {
     font-size: 1.25rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .input {
     text-align: center;
     font-size: 2rem;
-    width: 180px;
+    width: 200px;
     padding: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     border: 2px solid #ddd;
     border-radius: 0.5rem;
+    background-color: white;
+    color: black;
   }
   
   .numpad {
     display: grid;
     grid-template-columns: repeat(3, 80px);
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .numpadButton {
@@ -46,7 +62,6 @@
     padding: 0.75rem;
     transition: background-color 0.2s ease;
   }
-  
   .numpadButton:hover {
     background-color: #34a44d;
   }
@@ -54,7 +69,6 @@
   .actions {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
   }
   
   .clearButton,
@@ -69,7 +83,6 @@
     background-color: red;
     color: white;
   }
-  
   .clearButton:hover {
     background-color: #cc0000;
   }
@@ -78,7 +91,6 @@
     background-color: #3bb554;
     color: white;
   }
-  
   .submitButton:hover {
     background-color: #34a44d;
   }
