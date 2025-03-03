@@ -1,30 +1,45 @@
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './DashboardPage.module.css';
 
-// Import your images from src/assets
-import dropoffImg from './assets/dropoff.jpg';
+// Import your local images from the assets folder:
 import rentalImg from './assets/rental.jpg';
+import dropoffImg from './assets/dropoff.jpg';
 import pickupImg from './assets/pickup.jpg';
 
 function DashboardPage() {
   const navigate = useNavigate();
+  const location = useLocation() as any;
 
-  // This function runs when a thumbnail is clicked
+  // The name was passed from HomePage in route state
+  const estimatorName = location.state?.name || 'Unknown';
+
+  // We'll define an array of forms with local images
+  const forms = [
+    { id: 'Rental',   label: 'Rental Forms',  img: rentalImg  },
+    { id: 'DropOff',  label: 'Drop-Off Forms',img: dropoffImg },
+    { id: 'PickUp',   label: 'Pick-Up Forms', img: pickupImg  },
+  ];
+
   const handleClick = (pdfName: string) => {
     navigate(`/pdf/${pdfName}`);
   };
 
-  // Define your three forms with their images
-  const forms = [
-    { id: 'Rental',  img: rentalImg,  label: 'Rental'  },
-    { id: 'Dropoff', img: dropoffImg, label: 'Drop Off' },
-    { id: 'Pickup',  img: pickupImg,  label: 'Pick Up'  },
-  ];
-
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>Select a Form</h2>
+      {/* 
+        Top-left label:
+        "Logged in as: " in white,
+        the estimator's name in green
+      */}
+      <div className={styles.nameLabel}>
+        Logged in as: <span className={styles.nameGreen}>{estimatorName}</span>
+      </div>
+
+      <h2 className={styles.heading}>
+        Welcome <span className={styles.nameGreen}>{estimatorName}</span>. Please select which documents you would like to view.
+      </h2>
+
       <div className={styles.thumbnails}>
         {forms.map((form) => (
           <motion.div
@@ -36,7 +51,7 @@ function DashboardPage() {
           >
             <img
               src={form.img}
-              alt={`${form.label} thumbnail`}
+              alt={`${form.id} thumbnail`}
               className={styles.thumbnailImage}
             />
             <p className={styles.thumbnailText}>{form.label}</p>
