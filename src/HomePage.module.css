@@ -1,70 +1,74 @@
 .container {
-  width: 100vw;
-  height: 100vh;
-  background-color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.kiosk {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background-primary, #0D0D0D);
+  padding: 20px;
+}
 
-  background-color: #222;
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
-
-  color: white;
+.kiosk {
+  background-color: var(--background-secondary, #1A1A1A);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .title {
-  color: #3bb554;
+  color: var(--accent-primary, #3BB554);
   font-size: 2rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .subtitle {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
+  color: var(--text-secondary, #B0B0B0);
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .input {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--background-tertiary, #222);
+  border: 1px solid var(--border-color, #2A2A2A);
+  border-radius: 12px;
+  color: white;
+  font-size: 1.5rem;
   text-align: center;
-  font-size: 2rem;
-  width: 200px;
-  padding: 0.5rem;
-  margin-bottom: 1.5rem;
-  border: 2px solid #ddd;
-  border-radius: 0.5rem;
-  background-color: white;
-  color: black;
+  letter-spacing: 8px;
+  margin-bottom: 32px;
 }
 
-/* 4 rows x 3 columns grid => last row is [⌫, 0, ✓] */
 .numpad {
   display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-template-rows: repeat(4, 80px);
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 16px;
+  width: 100%;
 }
 
 .numpadButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70px;
   font-size: 1.5rem;
-  background-color: #3bb554;
+  font-weight: 500;
+  background-color: var(--accent-primary, #3BB554);
   color: white;
   border: none;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  transition: background-color 0.2s ease;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .numpadButton:hover {
-  background-color: #34a44d;
+  background-color: var(--accent-hover, #2e9141);
+}
+
+.numpadButton:active {
+  transform: scale(0.95);
 }

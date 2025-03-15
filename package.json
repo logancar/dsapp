@@ -10,21 +10,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-pdf-viewer/core": "^3.12.0",
     "framer-motion": "^12.4.7",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^2.16.105",
+    "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-pdf": "^9.2.1",
     "react-router-dom": "^6.30.0",
-    "react-signature-canvas": "^1.1.0-alpha.1"
+    "react-signature-canvas": "^1.1.0-alpha.1",
+    "trim-canvas": "^0.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "@types/react-pdf": "^6.2.0",
+    "@types/react-pdf": "^5.0.7",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",

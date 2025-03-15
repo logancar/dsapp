@@ -12,20 +12,20 @@ function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation() as any;
 
-  // The user’s name/email came from HomePage => Dashboard route
+  // The user's name/email came from HomePage => Dashboard route
   const estimatorName = location.state?.name || 'Unknown';
   const estimatorEmail = location.state?.email || 'unknown@somewhere.com';
 
   // Our 3 forms
   const forms = [
-    { id: 'Rental',   label: 'Rental Docs',  img: rentalImg  },
-    { id: 'DropOff',  label: 'Drop Off Docs',img: dropoffImg },
-    { id: 'PickUp',   label: 'Pick Up Docs', img: pickupImg  },
+    { id: 'rental',   label: 'Rental Docs',  img: rentalImg  },
+    { id: 'dropoff',  label: 'Drop Off Docs',img: dropoffImg },
+    { id: 'pickup',   label: 'Pick Up Docs', img: pickupImg  },
   ];
 
-  const handleClick = (pdfName: string) => {
-    // Pass the name/email so PDF page won't say "unknown"
-    navigate(`/pdf/${pdfName}`, {
+  const handleClick = (formType: string) => {
+    // Updated to use the new form routes
+    navigate(`/${formType}-form`, {
       state: {
         name: estimatorName,
         email: estimatorEmail,

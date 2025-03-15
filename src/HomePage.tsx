@@ -11,6 +11,7 @@ const validIDs: Record<string, { name: string; email: string }> = {
   '1111': { name: 'Logan', email: 'logan@dent-source.com' },
   '2222': { name: 'Miguel', email: 'miguel@dent-source.com' },
   '3333': { name: 'Zach', email: 'zach@dent-source.com' },
+  '9999': { name: 'Jerimiah', email: 'jerimiah@dent-source.com' },
   '4444': { name: 'Matthew', email: 'matt.n@dent-source.com' },
   '5555': { name: 'Kristina', email: 'kristina@dent-source.com' },
   '8310': { name: 'Anna', email: 'reception@dent-source.com' },

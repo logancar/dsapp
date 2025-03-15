@@ -1,0 +1,68 @@
+/* Consent Popup Overlay */
+.consent-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .consent-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Consent Modal */
+  .consent-content {
+    background-color: #1A1A1A;
+    color: #FFFFFF;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+  }
+  
+  .consent-overlay.show .consent-content {
+    transform: translateY(0);
+  }
+  
+  /* Buttons */
+  .consent-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  
+  .consent-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+  }
+  
+  .consent-button.accept {
+    background-color: #3BB554;
+    color: white;
+  }
+  
+  .consent-button.cancel {
+    background-color: transparent;
+    color: #3BB554;
+    border: 1px solid #3BB554;
+  }
+  
