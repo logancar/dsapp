@@ -1,46 +1,44 @@
-import React, { useState } from "react";
-import SignatureField from "../components/SignatureField";  // Ensure this is the correct path
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ConsentPopup from "../components/ConsentPopup";
+// Import any other components you need for the signature page
 
-const SignaturePage: React.FC = () => {
-  const [signature, setSignature] = useState<string | null>(null);
-
-  const handleSignatureSave = (dataURL: string) => {
-    setSignature(dataURL); // ✅ Save signature to state
+export default function SignaturePage() {
+  const navigate = useNavigate();
+  const [showConsent, setShowConsent] = useState(true);
+  
+  const handleAccept = () => {
+    setShowConsent(false);
+  };
+  
+  const handleDecline = () => {
+    navigate("/");
   };
 
   return (
-    <div className="signature-page">
-      <h1>Signature Page</h1>
+    <div className="signature-page-container">
+      {showConsent && (
+        <ConsentPopup
+          isOpen={showConsent}
+          onAccept={handleAccept}
+          onDecline={handleDecline}
+        />
+      )}
       
-      {/* Signature field */}
-      <SignatureField onSave={handleSignatureSave} />
-
-      {/* Display saved signature for confirmation */}
-      {signature && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Saved Signature:</h3>
-          <img src={signature} alt="User Signature" style={{ border: "1px solid #ccc", padding: "5px" }} />
+      {!showConsent && (
+        <div className="signature-content">
+          <h1>Signature Page</h1>
+          {/* Add your signature form or canvas component here */}
+          {/* Example: <SignatureCanvas /> */}
+          
+          <button 
+            className="submit-btn" 
+            onClick={() => navigate("/thankyou")}
+          >
+            Submit Signature
+          </button>
         </div>
       )}
-
-      {/* Submit button only enabled when signature exists */}
-      <button 
-        onClick={() => alert("Signature submitted!")} 
-        disabled={!signature} 
-        style={{
-          padding: "10px 20px",
-          backgroundColor: signature ? "#4CAF50" : "#ccc",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          marginTop: "20px",
-          cursor: signature ? "pointer" : "not-allowed",
-        }}
-      >
-        Submit Signature
-      </button>
     </div>
   );
-};
-
-export default SignaturePage;
+}

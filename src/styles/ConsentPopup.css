@@ -12,16 +12,16 @@
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
+    transition: opacity 0.3s ease;
+}
   
-  .consent-overlay.show {
+.consent-overlay.show {
     opacity: 1;
     visibility: visible;
-  }
+}
   
-  /* Consent Modal */
-  .consent-content {
+/* Consent Modal */
+.consent-content {
     background-color: #1A1A1A;
     color: #FFFFFF;
     padding: 2rem;
@@ -30,22 +30,21 @@
     max-width: 450px;
     text-align: left;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transform: translateY(-20px);
-    transition: transform 0.3s ease;
-  }
-  
-  .consent-overlay.show .consent-content {
-    transform: translateY(0);
-  }
-  
-  /* Buttons */
-  .consent-buttons {
+    position: relative;
+    z-index: 1001;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Buttons */
+.consent-buttons {
     display: flex;
     gap: 16px;
     margin-top: 24px;
-  }
+}
   
-  .consent-button {
+/* Ensure buttons don't cause layout shifts */
+.consent-button {
     padding: 12px 24px;
     border: none;
     border-radius: 10px;
@@ -53,16 +52,23 @@
     font-weight: 500;
     cursor: pointer;
     flex: 1;
-  }
+    user-select: none;
+    touch-action: manipulation;
+    transform: none !important;
+    transition: background-color 0.3s ease;
+}
   
-  .consent-button.accept {
+.consent-button.accept {
     background-color: #3BB554;
     color: white;
-  }
+}
   
-  .consent-button.cancel {
+.consent-button.cancel {
     background-color: transparent;
     color: #3BB554;
     border: 1px solid #3BB554;
-  }
+}
   
+.consent-button:hover {
+    opacity: 0.9;
+}

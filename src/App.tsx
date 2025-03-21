@@ -1,38 +1,55 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./HomePage";
-import DashboardPage from "./DashboardPage";
-import ThanksPage from "./ThanksPage";
-import RentalForm from "./forms/RentalForm";
-import PickupForm from "./forms/PickupForm";
-import DropoffForm from "./forms/DropoffForm";
-import SignaturePage from "./pages/SignaturePage";
-import "./styles/global.css"; 
+// src/App.tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Pages & Components
+import HomePage from './HomePage';                  // HomePage is directly in src/
+import DashboardPage from './pages/DashboardPage.tsx';
+import ThanksPage from './ThanksPage';             // ThanksPage is directly in src/
+import RentalForm from './forms/RentalForm';        // If RentalForm is in src/forms
+import PickupForm from './forms/PickupForm';        // NOTE: ./ NOT ../
+import DropoffForm from './forms/DropoffForm';
+import TestConsentPopup from './pages/TestConsentPopup';
+
+// Context Provider
+import { ConsentProvider } from './context/ConsentContext';
+
+// Global Styles
+import './styles/global.css';
 
 function App() {
   // Handle form submission
   const handleSubmit = (data: any) => {
-    console.log("Form submitted:", data);
-    localStorage.setItem("formData", JSON.stringify(data));
-
-    // Redirect to the signature page instead of cycling through forms
-    window.location.href = "/signature";
+    console.log('Form submitted:', data);
+    localStorage.setItem('formData', JSON.stringify(data));
+    window.location.href = '/thankyou'; // Direct to thank you page
   };
 
   return (
-    <div className="app-container">
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/rental-form" element={<RentalForm onSubmit={handleSubmit} />} />
-          <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
-          <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
-          <Route path="/signature" element={<SignaturePage />} />
-          <Route path="/thankyou" element={<ThanksPage />} />
-        </Routes>
-      </Router>
-    </div>
+    <ConsentProvider>
+      <div className="app-container">
+        <Router>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+
+            <Route path="/rental-form" element={<RentalForm onSubmit={handleSubmit} />} />
+            <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
+            <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
+
+            <Route path="/thankyou" element={<ThanksPage />} />
+            <Route path="/test-consent" element={<TestConsentPopup />} />
+          </Routes>
+        </Router>
+      </div>
+    </ConsentProvider>
   );
 }
 
 export default App;
+
+
+
+
+
+
+

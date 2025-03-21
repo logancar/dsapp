@@ -1,0 +1,278 @@
+.formContainer {
+  width: 80%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #1A1A1A;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.formNavigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.prevButton {
+  background: #dc3545;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: auto;
+}
+
+.nextButton {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.greenHeading {
+  color: #3BB554;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.cursiveFont {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 1.2rem;
+}
+
+.referralSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 2000px;
+  margin: 0 auto;
+}
+
+.referralOption {
+  background-color: #333;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: none;
+  width: 100%;
+}
+
+.referralOption.selected {
+  background-color: #3BB554;
+  color: white;
+}
+
+.conditionalInput {
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.authorizationSection {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.vinInput {
+  font-family: monospace;
+  letter-spacing: 0.2em;
+}
+
+.personalInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.acknowledgements {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.acknowledgementRow {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.acknowledgementRow input[type="checkbox"] {
+  width: auto !important;
+  margin-top: 0.25rem !important;
+}
+
+.signatureSection {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.signatureCanvas {
+  background-color: #000 !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  width: 100% !important;
+}
+
+.signatureActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.insuranceInfo {
+  width: 100% !important; /* Force override */
+  max-width: 2000px !important; /* Force override */
+  margin: 0 auto 2rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+}
+
+.insuranceTitle {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.insuranceInfo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.insuranceInfo label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.insuranceInfo input {
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+}
+
+/* Add full-width items */
+.insuranceInfo > div:nth-child(7),
+.insuranceInfo > div:nth-child(8),
+.insuranceInfo > div:nth-child(9) {
+  grid-column: 1 / -1;
+}
+
+.vehicleInfo, .insuranceInfo {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Override any conflicting styles */
+.vehicleInfo > *, .insuranceInfo > * {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.vehicleTitle {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.repairAuth {
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.repairAuth h3 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.authCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.authOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.authOption input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.25rem;
+}
+
+.authOption span {
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Center the "How did you hear about us?" heading */
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.centerHeading {
+  text-align: center;
+  color: white;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.submitButton.disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+

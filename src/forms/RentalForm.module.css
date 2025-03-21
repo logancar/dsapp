@@ -1,0 +1,221 @@
+.formContainer {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #1A1A1A;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.centerHeading {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--accent-primary);
+}
+
+.nameGroup {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #2A2A2A;
+  color: #fff;
+}
+
+.phoneInput {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.addressGroup {
+  margin-bottom: 1.5rem;
+}
+
+.addressDetails {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Card Details Section */
+.cardTypeSection {
+  width: 100%;
+  text-align: left !important;
+  margin-bottom: 2rem;
+}
+
+.cardOptions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 1.5rem !important;
+  margin-top: 1rem !important;
+  padding-left: 1rem !important;
+}
+
+.cardOption {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  width: auto !important;
+}
+
+.cardOption input[type="radio"] {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.chargesBox {
+  background: #2A2A2A;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+/* Agreement & Charges Section */
+.agreementBox {
+  background: #2A2A2A;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.agreementText {
+  margin-bottom: 1rem;
+}
+
+.acceptanceRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin-top: 1rem !important;
+  text-align: left !important;
+}
+
+.acceptanceRow input[type="checkbox"] {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+/* Acknowledgements Section */
+.acknowledgements {
+  text-align: left !important;
+  padding: 1rem !important;
+}
+
+.acknowledgementRow {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  margin-bottom: 1rem !important;
+  text-align: left !important;
+}
+
+.acknowledgementRow input[type="checkbox"] {
+  width: auto !important;
+  margin: 0 !important;
+  margin-top: 0.25rem !important;
+}
+
+.acknowledgementNotice {
+  color: #777;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  text-align: left !important;
+}
+
+.signatureSection {
+  margin-top: 2rem;
+}
+
+/* Signature Canvas */
+.signatureCanvas {
+  background-color: #000 !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+}
+
+.signatureActions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.formNavigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.prevButton {
+  background: #dc3545;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.nextButton, .submitButton {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.clearButton {
+  background: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveButton {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+
+
+
