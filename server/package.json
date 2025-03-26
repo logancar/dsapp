@@ -4,7 +4,7 @@
     "description": "Backend server for handling PDF generation and email sending",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js",
+        "start": "node --max-old-space-size=512 server.js",
         "build": "npm ci"
     },
     "dependencies": {
@@ -14,5 +14,8 @@
         "express": "^4.21.2",
         "nodemailer": "^6.10.0",
         "pdf-lib": "^1.17.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     }
 }

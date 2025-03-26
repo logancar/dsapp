@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 8080; // Changed to 8080 as Railway expects this port
+const PORT = process.env.PORT || 8080;
 
 // Enhanced error handling
 process.on('uncaughtException', (error) => {
@@ -18,32 +18,48 @@ process.on('unhandledRejection', (error) => {
     // Don't exit the process
 });
 
-// Middleware logging
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
+// Keep-alive configuration
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server starting...`);
+    console.log(`PORT: ${PORT}`);
+    console.log(`CORS_ORIGIN: ${process.env.CORS_ORIGIN}`);
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
+}).on('error', (error) => {
+    console.error('Server failed to start:', error);
+    console.error('Error details:', error.message);
 });
+
+// Add server timeout handling
+server.timeout = 120000; // 2 minutes
+server.keepAliveTimeout = 65000; // slightly higher than 60 seconds
+server.headersTimeout = 66000; // slightly higher than keepAliveTimeout
 
 // CORS configuration
 app.use(cors({
     origin: 'https://dentsourcekiosk.netlify.app',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Origin', 'Authorization'],
-    credentials: true, // Changed to true
+    credentials: true,
     optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
 
-// Handle favicon.ico request
-app.get('/favicon.ico', (req, res) => {
-    res.status(204).end();
+// Middleware logging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
 });
 
-// Add a health check endpoint
+// Health check endpoint
 app.get('/', (req, res) => {
     console.log('Health check endpoint hit');
     res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Handle favicon.ico request
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
 });
 
 // Error handling middleware
