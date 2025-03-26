@@ -26,10 +26,10 @@ app.use((req, res, next) => {
 
 // CORS configuration
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'https://dentsourcekiosk.netlify.app',
+    origin: 'https://dentsourcekiosk.netlify.app',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Origin', 'Authorization'],
-    credentials: false,
+    credentials: true, // Changed to true
     optionsSuccessStatus: 204
 }));
 

@@ -9,7 +9,7 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
         'Accept': 'application/json',
       },
       mode: 'cors',
-      credentials: 'include',
+      credentials: 'omit', // Changed from 'include' to 'omit'
       body: JSON.stringify({
         formData,
         pdfType,
@@ -28,6 +28,8 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
     throw error;
   }
 };
+
+
 
 
 
