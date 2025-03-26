@@ -48,47 +48,71 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    console.error('Global Error Handler:', err);
+    console.error('Error Stack:', err.stack);
     res.status(500).json({ 
         success: false, 
         message: 'Internal server error',
-        error: err.message 
+        error: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
 // Route to handle form submission
 app.post("/submit-form", async (req, res) => {
     try {
+        console.log('Received form submission request');
         const { formData, pdfType, estimatorEmail } = req.body;
+        
+        // Log the received data
+        console.log('Form Type:', pdfType);
+        console.log('Estimator Email:', estimatorEmail);
+        console.log('Form Data:', JSON.stringify(formData, null, 2));
+
         const outputFilePath = path.join(__dirname, "output", `${pdfType}_${Date.now()}.pdf`);
+
+        // Log the output path
+        console.log('Output file path:', outputFilePath);
 
         // Ensure output directory exists
         if (!fs.existsSync(path.join(__dirname, "output"))) {
+            console.log('Creating output directory');
             fs.mkdirSync(path.join(__dirname, "output"));
         }
 
         // Fill the PDF
+        console.log('Starting PDF generation');
         await fillPdf(pdfType, formData, outputFilePath);
+        console.log('PDF generated successfully');
 
         // Send emails concurrently
         const emailPromises = [];
         
+        console.log('Preparing to send emails');
         // Always send to estimator
         emailPromises.push(
             sendEmail(estimatorEmail, outputFilePath)
-                .catch(error => console.error("Error sending email to estimator:", error))
+                .catch(error => {
+                    console.error("Error sending email to estimator:", error);
+                    throw error; // Re-throw to be caught in the main catch block
+                })
         );
 
         // Send to customer if email is provided (not for pickup form)
         if (formData.email && pdfType !== 'pickup') {
             emailPromises.push(
                 sendEmail(formData.email, outputFilePath)
-                    .catch(error => console.error("Error sending email to customer:", error))
+                    .catch(error => {
+                        console.error("Error sending email to customer:", error);
+                        throw error; // Re-throw to be caught in the main catch block
+                    })
             );
         }
 
         // Wait for all emails to be sent
+        console.log('Waiting for emails to be sent');
         await Promise.all(emailPromises);
+        console.log('All emails sent successfully');
 
         res.json({ 
             success: true, 
@@ -97,10 +121,12 @@ app.post("/submit-form", async (req, res) => {
         });
     } catch (error) {
         console.error("Error processing form:", error);
+        console.error("Error stack:", error.stack);
         res.status(500).json({ 
             success: false, 
             message: "Error processing form",
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
