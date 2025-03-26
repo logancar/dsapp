@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.PROD
+  ? 'https://dskiosk.up.railway.app'  // Railway deployment URL
+  : 'http://localhost:5000';
 
 export const submitForm = async (formData: any, pdfType: string, estimatorEmail: string) => {
   try {
@@ -26,3 +28,7 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
     throw error;
   }
 };
+
+
+
+
