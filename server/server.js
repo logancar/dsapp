@@ -13,9 +13,10 @@ const PORT = process.env.PORT || 5000;
 
 // Configure CORS to accept requests from your frontend domain
 app.use(cors({
-    origin: '*', // In production, you should specify your frontend domain
+    origin: ['https://dentsourcekiosk.netlify.app', 'http://localhost:5173'], // Add your Netlify domain
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Accept'],
+    credentials: true
 }));
 
 app.use(bodyParser.json());
