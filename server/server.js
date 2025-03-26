@@ -1,12 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080; // Changed to 8080 as Railway expects this port
 
 // Enhanced error handling
 process.on('uncaughtException', (error) => {
@@ -114,6 +113,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${PORT}`);
 }).on('error', (error) => {
     console.error('Server failed to start:', error);
+    console.error('Error details:', error.message);
 });
 
 // Add server timeout handling
