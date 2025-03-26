@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import SignatureField from '../components/SignatureField';
 import { useLocation } from 'react-router-dom';
 import styles from './PickupForm.module.css';
-import { API_BASE_URL } from '../services/api';
+import { submitForm } from '../services/api';
 
 interface PickupFormData {
   customerName: string;
@@ -50,27 +50,7 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
   const onSubmitForm = async (data: PickupFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/submit-form`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://dentsourcekiosk.netlify.app'
-        },
-        mode: 'cors',
-        credentials: 'include',
-        body: JSON.stringify({
-          formData: data,
-          pdfType: 'pickup',
-          estimatorEmail
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await submitForm(data, 'pickup', estimatorEmail || 'unknown@somewhere.com');
       
       if (result.success) {
         console.log('Form submitted successfully');

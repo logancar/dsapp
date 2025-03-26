@@ -2,23 +2,21 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { fillPdf } = require("./fillPdf");
-const { sendEmail } = require("./emailService");
-const fs = require("fs");
-const path = require("path");
 
 const app = express();
-// Use process.env.PORT for Railway deployment
 const PORT = process.env.PORT || 5000;
 
-// Configure CORS to accept requests from your frontend domain
+// Updated CORS configuration
 app.use(cors({
-    origin: ['https://dentsourcekiosk.netlify.app', 'http://localhost:5173'], // Add your Netlify domain
-    methods: ['GET', 'POST', 'OPTIONS'],  // Added OPTIONS for preflight requests
-    allowedHeaders: ['Content-Type', 'Accept'],
-    credentials: true
+    origin: ['https://dentsourcekiosk.netlify.app', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'OPTIONS'],  // Make sure OPTIONS is included
+    allowedHeaders: ['Content-Type', 'Accept', 'Origin'],  // Added Origin to allowed headers
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 
+// Make sure this comes before your routes
 app.use(bodyParser.json());
 
 // Route to handle form submission
