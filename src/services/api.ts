@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dskiosk.up.railway.app';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dskiosk.up.railway.app';
 
 export const submitForm = async (formData: any, pdfType: string, estimatorEmail: string) => {
   try {
@@ -26,5 +26,6 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
     throw error;
   }
 };
+
 
 

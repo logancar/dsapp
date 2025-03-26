@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import SignatureField from '../components/SignatureField';
 import { useLocation } from 'react-router-dom';
 import styles from './PickupForm.module.css';
+import { API_BASE_URL } from '../services/api';
 
 interface PickupFormData {
   customerName: string;
@@ -49,7 +50,8 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
   const onSubmitForm = async (data: PickupFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:5000/submit-form', {
+      // Replace this hardcoded URL with API_BASE_URL
+      const response = await fetch(`${API_BASE_URL}/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
