@@ -50,6 +50,7 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
   const onSubmitForm = async (data: PickupFormData) => {
     setIsSubmitting(true);
     try {
+      // Using the Railway URL directly from API_BASE_URL
       const response = await fetch(`${API_BASE_URL}/submit-form`, {
         method: 'POST',
         headers: {
@@ -72,6 +73,8 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
       if (result.success) {
         console.log('Form submitted successfully');
         onSubmit(data);  // Call the parent's onSubmit after successful API call
+        // Optionally redirect to a thank you page
+        window.location.href = '/thankyou';
       } else {
         console.error('Form submission failed:', result.message);
         alert('Failed to submit form. Please try again.');

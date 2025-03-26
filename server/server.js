@@ -8,9 +8,16 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 5000; // Runs on port 5000
+// Use process.env.PORT for Railway deployment
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Configure CORS to accept requests from your frontend domain
+app.use(cors({
+    origin: '*', // In production, you should specify your frontend domain
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Accept'],
+}));
+
 app.use(bodyParser.json());
 
 // Route to handle form submission
@@ -62,4 +69,4 @@ app.post("/submit-form", async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
