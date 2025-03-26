@@ -7,7 +7,6 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Origin': 'https://dentsourcekiosk.netlify.app'
       },
       mode: 'cors',
       credentials: 'include',
@@ -18,18 +17,18 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
       }),
     });
 
-    const data = await response.json();
-    
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to submit form');
+      const errorData = await response.json().catch(() => ({ message: 'Network response was not ok' }));
+      throw new Error(errorData.message || 'Failed to submit form');
     }
 
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('API Error:', error);
     throw error;
   }
 };
+
 
 
 

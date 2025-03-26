@@ -9,12 +9,16 @@ const PORT = process.env.PORT || 5000;
 // Updated CORS configuration
 app.use(cors({
     origin: ['https://dentsourcekiosk.netlify.app', 'http://localhost:5173'],
-    methods: ['GET', 'POST', 'OPTIONS'],  // Make sure OPTIONS is included
-    allowedHeaders: ['Content-Type', 'Accept', 'Origin'],  // Added Origin to allowed headers
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Origin'],
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
+    exposedHeaders: ['Access-Control-Allow-Origin']
 }));
+
+// Add a preflight handler
+app.options('*', cors());
 
 // Make sure this comes before your routes
 app.use(bodyParser.json());
