@@ -8,13 +8,21 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Error handling
+// Enhanced error handling
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
+    // Don't exit the process
 });
 
 process.on('unhandledRejection', (error) => {
     console.error('Unhandled Rejection:', error);
+    // Don't exit the process
+});
+
+// Middleware logging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
 });
 
 // CORS configuration
@@ -28,9 +36,25 @@ app.use(cors({
 
 app.use(express.json());
 
+// Handle favicon.ico request
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
+});
+
 // Add a health check endpoint
 app.get('/', (req, res) => {
+    console.log('Health check endpoint hit');
     res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ 
+        success: false, 
+        message: 'Internal server error',
+        error: err.message 
+    });
 });
 
 // Route to handle form submission
@@ -83,7 +107,7 @@ app.post("/submit-form", async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server starting...`);
     console.log(`PORT: ${PORT}`);
     console.log(`CORS_ORIGIN: ${process.env.CORS_ORIGIN}`);
@@ -91,3 +115,7 @@ app.listen(PORT, '0.0.0.0', () => {
 }).on('error', (error) => {
     console.error('Server failed to start:', error);
 });
+
+// Add server timeout handling
+server.timeout = 120000; // 2 minutes
+server.keepAliveTimeout = 65000; // slightly higher than 60 seconds
