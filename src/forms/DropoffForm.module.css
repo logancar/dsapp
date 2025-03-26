@@ -1,38 +1,52 @@
 .formContainer {
-  width: 80%;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 90%;
+  max-width: 800px; /* Increased from previous value */
+  margin: 2rem auto;
   padding: 2rem;
-  background: #1A1A1A;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.wideForm {
+  width: 100%;
+  max-width: 700px; /* Increased for wider forms */
+  margin: 0 auto;
+}
+
+.formStep {
+  width: 100%;
+  padding: 1.5rem;
+}
+
+/* Update agreement section styling */
+.agreementSection {
+  margin: 2rem 0;
+}
+
+.agreementText {
+  color: #ffffff; /* Full opacity white */
+  margin-bottom: 1rem;
+}
+
+.checkbox {
+  accent-color: #3BB554; /* Green checkboxes */
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+/* Update navigation buttons */
 .formNavigation {
   display: flex;
   justify-content: space-between;
+  gap: 1rem; /* Add space between buttons */
   margin-top: 2rem;
-  width: 100%;
 }
 
-.prevButton {
-  background: #dc3545;
-  color: white;
+.prevButton,
+.nextButton,
+.submitButton {
   padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: auto;
-}
-
-.nextButton {
-  background: var(--accent-primary);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: auto;
+  min-width: 120px;
+  font-size: 1rem;
 }
 
 .greenHeading {
@@ -122,9 +136,16 @@
   margin-top: 0.25rem !important;
 }
 
+/* E-signature section */
 .signatureSection {
-  margin-top: 2rem;
   width: 100%;
+  margin: 2rem 0;
+}
+
+.signatureSection h3 {
+  font-family: inherit; /* Match app font */
+  color: #ffffff;
+  margin-bottom: 1rem;
 }
 
 .signatureCanvas {
@@ -274,5 +295,45 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
+
+.referralFields {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.referralInput {
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.insuranceQuestions {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.questionGroup {
+  margin-bottom: 1rem;
+}
+
+.questionGroup label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+
+.questionGroup input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #3BB554;
+}
+
+
+
 
 

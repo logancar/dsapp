@@ -1,8 +1,10 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import "../styles/global.css";
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import SignatureCanvas from 'react-signature-canvas';
 import styles from './DropoffForm.module.css';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 interface DropoffFormProps {
   onSubmit: (data: DropoffFormData) => void;  // Update to use DropoffFormData
@@ -15,12 +17,14 @@ interface DropoffFormData {
     waze: boolean;
     mailer: boolean;
     tvCommercial: boolean;
-    tvChannel?: string;
+    tvChannel?: string | null;
     radioCommercial: boolean;
     doorHanger: boolean;
     textMessage: boolean;
     referral: boolean;
-    referralName?: string;
+    referralName?: string | null;
+    referralAddress?: string | null;
+    referralPhone?: string | null;
     internet: boolean;
     facebook: boolean;
     instagram: boolean;
@@ -30,9 +34,9 @@ interface DropoffFormData {
     prime: boolean;
     pandora: boolean;
     billboard: boolean;
-    billboardLocation?: string;
+    billboardLocation?: string | null;
     outsideSales: boolean;
-    salesPersonName?: string;
+    salesPersonName?: string | null;
     yelp: boolean;
     insurance: boolean;
     repeat: boolean;
@@ -51,7 +55,7 @@ interface DropoffFormData {
   // Personal Information
   name: string;
   phone: string;
-  altPhone?: string;
+  altPhone?: string | null;
   address: string;
   city: string;
   state: string;
@@ -69,16 +73,16 @@ interface DropoffFormData {
   provider: string;
   deductible: number;
   hasEstimate: boolean;
-  hasEstimateCopy?: boolean;
+  hasEstimateCopy?: boolean | null;
   hasReceivedCheck: boolean;
-  hasCheckedCashed?: boolean;
-  adjusterName?: string;
-  adjusterPhone?: string;
+  hasCheckedCashed?: boolean | null;
+  adjusterName?: string | null;
+  adjusterPhone?: string | null;
 
   // Reference Information (optional)
-  referenceAddress?: string;
-  referencePhone?: string;
-  referenceEmail?: string;
+  referenceAddress?: string | null;
+  referencePhone?: string | null;
+  referenceEmail?: string | null;
 
   // Repair Authorization
   repairPermission: boolean;
@@ -89,18 +93,146 @@ interface DropoffFormData {
   reviews: boolean;
 }
 
+const InsuranceQuestions = () => {
+  const { register, watch } = useFormContext();
+  const hasEstimate = watch('hasEstimate');
+  const hasReceivedCheck = watch('hasReceivedCheck');
+
+  return (
+    <div className={styles.insuranceQuestions}>
+      <div className={styles.questionGroup}>
+        <label>
+          Have you had an estimate done on this vehicle?
+          <input
+            type="checkbox"
+            {...register('hasEstimate')}
+          />
+        </label>
+        
+        {hasEstimate && (
+          <label>
+            Do you have a copy of the estimate?
+            <input
+              type="checkbox"
+              {...register('hasEstimateCopy')}
+            />
+          </label>
+        )}
+      </div>
+
+      <div className={styles.questionGroup}>
+        <label>
+          Have you received a check for this claim?
+          <input
+            type="checkbox"
+            {...register('hasReceivedCheck')}
+          />
+        </label>
+        
+        {hasReceivedCheck && (
+          <label>
+            Has it been cashed?
+            <input
+              type="checkbox"
+              {...register('hasCheckedCashed')}
+            />
+          </label>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const schema = yup.object().shape({
+  insuranceCompany: yup.string().required('Insurance company is required'),
+  vin: yup
+    .string()
+    .required('VIN is required')
+    .matches(/^[A-HJ-NPR-Z0-9]{17}$/, 'Must be 17 alphanumeric characters')
+    .length(17, 'Must be exactly 17 characters'),
+  signature: yup.string().required('Signature is required'),
+  date: yup.string().required('Date is required'),
+  vehicleDescription: yup.string().required('Vehicle description is required'),
+  claimNumber: yup.string().required('Claim number is required'),
+  dateOfLoss: yup.string().required('Date of loss is required'),
+  name: yup.string().required('Name is required'),
+  phone: yup.string().required('Phone is required'),
+  altPhone: yup.string().nullable().optional(),
+  address: yup.string().required('Address is required'),
+  city: yup.string().required('City is required'),
+  state: yup.string().required('State is required'),
+  zip: yup.string().required('ZIP code is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  year: yup.string().required('Year is required'),
+  make: yup.string().required('Make is required'),
+  model: yup.string().required('Model is required'),
+  insuredName: yup.string().required('Insured name is required'),
+  insuredPhone: yup.string().required('Insured phone is required'),
+  provider: yup.string().required('Provider is required'),
+  deductible: yup.number().required('Deductible is required'),
+  hasEstimate: yup.boolean().required(),
+  hasEstimateCopy: yup.boolean().nullable().optional(),
+  hasReceivedCheck: yup.boolean().required(),
+  hasCheckedCashed: yup.boolean().nullable().optional(),
+  adjusterName: yup.string().nullable().optional(),
+  adjusterPhone: yup.string().nullable().optional(),
+  referenceAddress: yup.string().nullable().optional(),
+  referencePhone: yup.string().nullable().optional(),
+  referenceEmail: yup.string().email('Invalid email').nullable().optional(),
+  repairPermission: yup.boolean().required(),
+  additionalRepairs: yup.boolean().required(),
+  payment: yup.boolean().required(),
+  totalLoss: yup.boolean().required(),
+  failureToPay: yup.boolean().required(),
+  reviews: yup.boolean().required(),
+  referralSources: yup.object().shape({
+    google: yup.boolean().required(),
+    waze: yup.boolean().required(),
+    mailer: yup.boolean().required(),
+    tvCommercial: yup.boolean().required(),
+    tvChannel: yup.string().nullable().optional(),
+    radioCommercial: yup.boolean().required(),
+    doorHanger: yup.boolean().required(),
+    textMessage: yup.boolean().required(),
+    referral: yup.boolean().required(),
+    referralName: yup.string().nullable().optional(),
+    referralAddress: yup.string().nullable().optional(),
+    referralPhone: yup.string().nullable().optional(),
+    internet: yup.boolean().required(),
+    facebook: yup.boolean().required(),
+    instagram: yup.boolean().required(),
+    youtube: yup.boolean().required(),
+    hulu: yup.boolean().required(),
+    fireStick: yup.boolean().required(),
+    prime: yup.boolean().required(),
+    pandora: yup.boolean().required(),
+    billboard: yup.boolean().required(),
+    billboardLocation: yup.string().nullable().optional(),
+    outsideSales: yup.boolean().required(),
+    salesPersonName: yup.string().nullable().optional(),
+    yelp: yup.boolean().required(),
+    insurance: yup.boolean().required(),
+    repeat: yup.boolean().required(),
+    other: yup.boolean().required()
+  }).required()
+}).required();
+
 export default function DropoffForm({ onSubmit }: DropoffFormProps) {
-  const { register, handleSubmit, setValue, watch } = useForm<DropoffFormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<DropoffFormData>({
     defaultValues: {
       referralSources: {
         google: false,
         waze: false,
         mailer: false,
         tvCommercial: false,
+        tvChannel: null,
         radioCommercial: false,
         doorHanger: false,
         textMessage: false,
         referral: false,
+        referralName: null,
+        referralAddress: null,
+        referralPhone: null,
         internet: false,
         facebook: false,
         instagram: false,
@@ -110,44 +242,74 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
         prime: false,
         pandora: false,
         billboard: false,
+        billboardLocation: null,
         outsideSales: false,
+        salesPersonName: null,
         yelp: false,
         insurance: false,
         repeat: false,
         other: false
-      }
-    }
+      },
+      hasEstimateCopy: null,
+      hasCheckedCashed: null,
+      altPhone: null,
+      adjusterName: null,
+      adjusterPhone: null,
+      referenceAddress: null,
+      referencePhone: null,
+      referenceEmail: null
+    },
+    resolver: yupResolver(schema)
   });
   const [currentStep, setCurrentStep] = useState(1);
   const [signaturePad, setSignaturePad] = useState<SignatureCanvas | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
   const [signatureSaved, setSignatureSaved] = useState(false);
+  const signatureSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToSignature = useCallback(() => {
+    if (signatureSectionRef.current) {
+      const yOffset = -100;
+      const element = signatureSectionRef.current;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>How did you hear about us?</h2>
-            <div className={styles.referralSection}>
-              {Object.keys(watch('referralSources') || {}).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`${styles.referralOption} ${
-                    watch('referralSources') && 
-                    watch('referralSources')[key as keyof DropoffFormData['referralSources']] 
-                      ? styles.selected 
-                      : ''
-                  }`}
-                  onClick={() => {
-                    const path = `referralSources.${key}` as `referralSources.${keyof DropoffFormData['referralSources']}`;
-                    setValue(path, !watch(path));
-                  }}
-                >
-                  {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                </button>
-              ))}
+          <div className={`${styles.formStep} ${styles.wideForm}`}>
+            <div className={styles.inputGroup}>
+              <label>Your Insurance Company</label>
+              <input
+                type="text"
+                {...register('insuranceCompany')}
+                className={styles.input}
+                placeholder="Enter insurance company name"
+              />
+              {errors.insuranceCompany && (
+                <span className={styles.error}>{errors.insuranceCompany.message}</span>
+              )}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Vehicle VIN</label>
+              <input
+                type="text"
+                {...register('vin')}
+                className={styles.input}
+                placeholder="Must be 17 alphanumeric characters"
+                maxLength={17}
+              />
+              {errors.vin && (
+                <span className={styles.error}>{errors.vin.message}</span>
+              )}
             </div>
           </div>
         );
@@ -291,6 +453,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   placeholder="If you know it"
                 />
               </div>
+              <InsuranceQuestions />
             </div>
           </div>
         );
@@ -357,7 +520,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
         return (
           <div className="form-step">
             <h2 className={styles.centerHeading}>Authorization</h2>
-            <div className={styles.signatureSection}>
+            <div className={styles.signatureSection} ref={signatureSectionRef}>
               <label className={styles.cursiveFont}>E-signature:</label>
               <SignatureCanvas
                 ref={(ref) => setSignaturePad(ref)}
@@ -388,6 +551,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                     if (hasSignature && signaturePad) {
                       setValue('signature', signaturePad.toDataURL());
                       setSignatureSaved(true);
+                      setTimeout(scrollToSignature, 100);
                     }
                   }}
                   disabled={!hasSignature}

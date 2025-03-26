@@ -1,0 +1,35 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px;
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  .contentGrid {
+    @media only screen and (max-device-width: 428px) {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+}
+

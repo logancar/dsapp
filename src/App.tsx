@@ -28,17 +28,17 @@ function App() {
     <ConsentProvider>
       <div className="app-container">
         <Router>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-
-            <Route path="/rental-form" element={<RentalForm onSubmit={handleSubmit} />} />
-            <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
-            <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
-
-            <Route path="/thankyou" element={<ThanksPage />} />
-            <Route path="/test-consent" element={<TestConsentPopup />} />
-          </Routes>
+          <div className="page-container">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/rental-form" element={<RentalForm onSubmit={handleSubmit} />} />
+              <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
+              <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
+              <Route path="/thankyou" element={<ThanksPage />} />
+              <Route path="/test-consent" element={<TestConsentPopup />} />
+            </Routes>
+          </div>
         </Router>
       </div>
     </ConsentProvider>
@@ -46,6 +46,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

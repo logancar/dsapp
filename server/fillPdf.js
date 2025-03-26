@@ -2,6 +2,13 @@ const { PDFDocument } = require("pdf-lib");
 const fs = require("fs");
 const path = require("path");
 
+function getInitials(fullName) {
+    return fullName
+        .split(' ')
+        .map(name => name.charAt(0).toUpperCase())
+        .join('');
+}
+
 async function fillPdf(pdfType, formData, outputPath) {
     const pdfPaths = {
         rental: path.join(__dirname, "..", "public", "pdfs", "Rental.pdf"),
@@ -15,24 +22,130 @@ async function fillPdf(pdfType, formData, outputPath) {
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
     const form = pdfDoc.getForm();
+    
+    // Log all available form fields
+    const formFields = form.getFields();
+    console.log('Available PDF form fields:');
+    formFields.forEach(field => {
+        console.log(field.getName());
+    });
 
-    // Mapping fields to form fields
+    // Updated field mappings with actual PDF field names
     const fieldMappings = {
-        rental: { name: "Name", email: "Email", phone: "Phone", signature: "Signature" },
-        pickup: { customerName: "Customer Name", partsOwed: "Parts Owed", dentSourceRep: "Dent Source Rep", date: "Date", signature: "Signature" },
-        dropoff: { ownerName: "Owner Name", vin: "VIN", claimNumber: "Claim Number", insuranceProvider: "Insurance Provider", dateOfLoss: "Date of Loss", signature: "Signature" }
+        pickup: {
+            customerName: "Customer_Name",
+            rentalAcknowledgement: "Rental_Initials_es_:signer:initials",
+            reviewAcknowledgement: "Review_Initials_es_:signer:initials",
+            date: "Date"
+            // Remove signature field mapping since we're drawing it directly
+        },
+        rental: {
+            customerName: "Customer_Name",
+            date: "Date"
+        },
+        dropoff: {
+            customerName: "Customer_Name",
+            date: "Date"
+        }
     };
 
-    const fields = fieldMappings[pdfType];
+    const mappedFields = fieldMappings[pdfType];
 
+    // Add current date
+    const currentDate = new Date().toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+    });
+
+    // Add signature positions for each form type
+    const signaturePositions = {
+        pickup: {
+            x: 85,      // Keeping pickup position the same
+            y: 140,     // Keeping pickup position the same
+            width: 150, 
+            height: 40  
+        },
+        rental: {
+            x: 307,     // Increased from 302 to 307 (+5 pixels right)
+            y: 206,     // Increased from 204 to 206 (+2 pixels up)
+            width: 200, 
+            height: 50  
+        },
+        dropoff: {
+            x: 300,
+            y: 200,
+            width: 200,
+            height: 50
+        }
+    };
+
+    // Fill form fields
     for (const key in formData) {
-        if (form.getTextField(fields[key])) {
-            form.getTextField(fields[key]).setText(formData[key]);
+        if (key === 'signature') {
+            // Handle signature separately
+            console.log('Processing signature for form type:', pdfType);
+            const signatureImage = await handleSignatureImage(pdfDoc, formData[key]);
+            console.log('Signature image created');
+            await addSignatureToPdf(pdfDoc, signatureImage, signaturePositions[pdfType]);
+            console.log('Signature added to PDF at position:', signaturePositions[pdfType]);
+        } else if (mappedFields[key]) {
+            try {
+                const field = form.getTextField(mappedFields[key]);
+                if (field) {
+                    if (key.includes('Acknowledgement')) {
+                        // Handle initials
+                        if (formData[key] && formData.customerName) {
+                            field.setText(getInitials(formData.customerName));
+                        }
+                    } else {
+                        // Handle regular text fields
+                        field.setText(formData[key].toString());
+                    }
+                }
+            } catch (error) {
+                console.log(`Error filling field ${key}:`, error.message);
+                // Continue with other fields even if one fails
+            }
+        }
+    }
+
+    // Add date if the field exists
+    if (mappedFields.date) {
+        try {
+            const dateField = form.getTextField(mappedFields.date);
+            if (dateField) {
+                dateField.setText(currentDate);
+            }
+        } catch (error) {
+            console.log('Error filling date field:', error.message);
         }
     }
 
     const filledPdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, filledPdfBytes);
+}
+
+async function handleSignatureImage(pdfDoc, signatureDataUrl) {
+    // Convert data URL to image bytes
+    const signatureData = signatureDataUrl.split(',')[1];
+    const signatureBytes = Buffer.from(signatureData, 'base64');
+    
+    // Embed the image into the PDF
+    const signatureImage = await pdfDoc.embedPng(signatureBytes);
+    return signatureImage;
+}
+
+async function addSignatureToPdf(pdfDoc, signatureImage, position) {
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    
+    firstPage.drawImage(signatureImage, {
+        x: position.x,
+        y: position.y,
+        width: position.width,
+        height: position.height
+    });
 }
 
 module.exports = { fillPdf };

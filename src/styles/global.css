@@ -1,126 +1,129 @@
-/* --- GLOBAL FORM STYLES --- */
-body {
-    background-color: #0F0F0F; /* Dark mode for entire app */
-    color: #FFF; /* White text */
-    font-family: 'Inter', sans-serif;
-    /* 
-      Avoid forcing display flex/center for the entire app,
-      as HomePage uses .container for that.
-    */
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Only for your multi-step form containers (RentalForm, etc.) */
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 90%;
-    max-width: 600px;
-    padding: 25px;
-    border-radius: 16px;
-    background: #1A1A1A;  /* Match the dark theme */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s ease-in-out;
-    margin: 20px auto;
-  }
-  
-  .form-container:hover {
-    transform: translateY(-3px);
-  }
-  
-  /* --- Form Title, Inputs, Buttons, etc. --- */
-  .form-container h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  /* Input grouping for forms (RentalForm, PickupForm) */
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin-bottom: 15px;
-  }
-
-  /* Add new styles for card options that won't conflict */
-  .input-group.card-options {
-    align-items: flex-start; /* Allow left alignment */
-  }
-
-  /* Add specific styles for acknowledgments */
-  .input-group.acknowledgment {
-    align-items: flex-start;
-    text-align: left;
-  }
-  
-  .input-group label {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-    color: #fff;
-  }
-  
-  .input-group input {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #222;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .input-group input:focus {
-    outline: 2px solid #3BB554;
-  }
-  
-  /* Submit button for forms */
-  .submit-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    background-color: #3BB554;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 15px;
-  }
-  
-  .submit-btn:hover {
-    background-color: #2e9141;
-  }
-  
-  /* Responsive adjustments for forms */
-  @media screen and (max-width: 768px) {
-    .form-container {
-      width: 95%;
-    }
-    .consent-popup {
-      width: 95%;
-    }
-    .submit-btn {
-      font-size: 1rem;
-    }
-  }
-
-/* Add these overrides to prevent inheritance */
-.consent-overlay,
-.consent-content,
-.consent-button {
-    transform: none !important;
-    transition: opacity 0.3s ease !important;
+:root {
+  --background-color: #000000;
+  --text-color: #ffffff;
+  --input-background: #1a1a1a;
+  --accent-primary: #3BB554;
+  --accent-hover: #309144;
+  --border-color: #333333;
 }
 
-.consent-content:hover {
-    transform: none !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  color-scheme: dark;
+}
+
+/* Global page container */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Form containers across all pages */
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--input-background);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Input styles across all pages */
+input, 
+textarea, 
+select {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--input-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px; /* Prevent zoom on iOS */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Button styles across all pages */
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--accent-primary);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--accent-hover);
+}
+
+button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  .form-container {
+    /* iPad */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      max-width: 600px;
+      padding: 32px;
+    }
+
+    /* iPhone */
+    @media only screen and (max-device-width: 428px) {
+      max-width: 100%;
+      padding: 20px;
+    }
+  }
+}
+
+/* Device-specific media queries */
+@media only screen and (max-device-width: 428px) {
+  .page-container {
+    padding: 16px;
+  }
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+  .page-container {
+    padding: 24px;
+  }
 }
   

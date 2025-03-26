@@ -1,85 +1,58 @@
-import React, { useRef, useState } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import React, { useState, useRef } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
+import styles from './SignatureField.module.css';
 
 interface SignatureFieldProps {
-  onSave: (signatureData: string) => void;
-}
-
-// Extended type to fix the isEmpty() issue
-interface ExtendedSignatureCanvas extends SignatureCanvas {
-  isEmpty: () => boolean;
+  onSave: (signature: string) => void;
 }
 
 const SignatureField: React.FC<SignatureFieldProps> = ({ onSave }) => {
-  const sigCanvas = useRef<SignatureCanvas>(null);
-  const [isSigned, setIsSigned] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
+  const signaturePadRef = useRef<SignatureCanvas>(null);
 
-  const cleanSignature = () => {
-    if (sigCanvas.current) {
-      sigCanvas.current.clear();
-      setIsSigned(false);
+  const handleClear = () => {
+    if (signaturePadRef.current) {
+      signaturePadRef.current.clear();
+      setHasSignature(false);
     }
   };
 
-  const saveSignature = () => {
-    if (sigCanvas.current) {
-      const extendedCanvas = sigCanvas.current as unknown as ExtendedSignatureCanvas;
-      if (extendedCanvas && !extendedCanvas.isEmpty()) {
-        const dataURL = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-        setIsSigned(true);
-        onSave(dataURL);
+  const handleSave = () => {
+    if (signaturePadRef.current) {
+      const canvas = signaturePadRef.current as any;
+      if (!canvas.isEmpty()) {
+        // Use toDataURL directly instead of getTrimmedCanvas
+        const dataUrl = canvas.toDataURL('image/png');
+        onSave(dataUrl);
       }
     }
   };
 
   return (
-    <div style={{ width: "100%" }}>
-      <label style={{ display: "block", marginBottom: "8px", color: "#ABABAB" }}>
-        Sign here
-      </label>
-      <div
-        style={{
-          border: "1px solid #2A2A2A",
-          borderRadius: "12px",
-          backgroundColor: "#151515", // ✅ Moved background color here
-          overflow: "hidden",
-          marginBottom: "16px",
+    <div className={styles.signatureContainer}>
+      <SignatureCanvas
+        ref={signaturePadRef}
+        penColor="#3BB554"
+        canvasProps={{
+          className: styles.signatureCanvas,
+          width: 500,
+          height: 200
         }}
-      >
-        <SignatureCanvas
-          ref={sigCanvas}
-          penColor="#FFFFFF"
-          canvasProps={{
-            width: 500,
-            height: 200,
-            className: "signature-canvas",
-          }}
-        />
-      </div>
-      <div style={{ display: "flex", gap: "12px" }}>
-        <button
-          onClick={cleanSignature}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#333",
-            color: "#FFF",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
+        onEnd={() => setHasSignature(true)}
+      />
+      <div className={styles.buttonContainer}>
+        <button 
+          type="button"
+          className={styles.clearButton}
+          onClick={handleClear}
         >
           Clear
         </button>
-        <button
-          onClick={saveSignature}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: isSigned ? "#4A90E2" : "#777",
-            color: "#FFF",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
+        <button 
+          type="button"
+          className={styles.saveButton}
+          onClick={handleSave}
+          disabled={!hasSignature}
         >
           Save
         </button>

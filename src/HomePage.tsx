@@ -63,34 +63,35 @@ function HomePage() {
 
   return (
     <div className={styles.container}>
-      <motion.div
-        className={styles.kiosk}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7 }}
-      >
-        <h1 className={styles.title}>Dent Source Kiosk</h1>
-        <p className={styles.subtitle}>Enter Employee ID</p>
+      <div className={styles.kiosk}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className={styles.title}>Dent Source Kiosk</h1>
+          <p className={styles.subtitle}>Enter Employee ID</p>
 
-        <input
-          className={styles.input} /* or styles.inputDisplay if your CSS uses that name */
-          type="password"
-          value={employeeID}
-          placeholder="****"
-          readOnly
-        />
+          <input
+            className={styles.input} /* or styles.inputDisplay if your CSS uses that name */
+            type="password"
+            value={employeeID}
+            placeholder="****"
+            readOnly
+          />
 
-        <div className={styles.numpad}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-            <NumpadButton key={num} onClick={() => handleInput(num.toString())}>
-              {num}
-            </NumpadButton>
-          ))}
-          <NumpadButton onClick={handleBackspace}>⌫</NumpadButton>
-          <NumpadButton onClick={() => handleInput("0")}>0</NumpadButton>
-          <NumpadButton onClick={handleSubmit}>✓</NumpadButton>
-        </div>
-      </motion.div>
+          <div className={styles.numpad}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <NumpadButton key={num} onClick={() => handleInput(num.toString())}>
+                {num}
+              </NumpadButton>
+            ))}
+            <NumpadButton onClick={handleBackspace}>⌫</NumpadButton>
+            <NumpadButton onClick={() => handleInput("0")}>0</NumpadButton>
+            <NumpadButton onClick={handleSubmit}>✓</NumpadButton>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

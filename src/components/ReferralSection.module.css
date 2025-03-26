@@ -1,0 +1,36 @@
+.referralFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.addressFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cityStateZip {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.referralFields input {
+  padding: 0.75rem;
+  border: 1px solid #3BB554;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.referralFields input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.referralFields input:focus {
+  outline: none;
+  border-color: #4CD964;
+  box-shadow: 0 0 0 2px rgba(59, 181, 84, 0.2);
+}

@@ -1,10 +1,10 @@
 .formContainer {
-  max-width: 800px;
-  margin: 2rem auto;
   padding: 2rem;
-  background: #1A1A1A;
-  border-radius: 12px;
+  margin: 0 auto;
+  background: var(--background-secondary);
+  border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px; /* Larger for this specific form */
 }
 
 .centerHeading {
@@ -14,13 +14,13 @@
 }
 
 .nameGroup {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .inputGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 .inputGroup label {
@@ -216,6 +216,80 @@
   cursor: not-allowed;
 }
 
+.greenRadio {
+  accent-color: #3BB554;
+}
+
+.cardTypeOption input[type="radio"]:checked + span::before {
+  background-color: #3BB554;
+  border-color: #3BB554;
+}
+
+.agreementSection {
+  margin: 2rem 0;
+}
+
+.agreementText {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.chargesBreakdown {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Add styles for address autocomplete */
+.addressAutocomplete {
+  position: relative;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1A1A1A;
+  border: 1px solid #3BB554;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.suggestionItem {
+  padding: 0.75rem;
+  cursor: pointer;
+}
+
+.suggestionItem:hover {
+  background: rgba(59, 181, 84, 0.2);
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  .nameGroup {
+    @media only screen and (max-device-width: 428px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .addressDetails {
+    @media only screen and (max-device-width: 428px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
 
 
 

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import SignatureCanvas from 'react-signature-canvas';
+import { yupResolver } from '@hookform/resolvers/yup';
+import SignatureField from '../components/SignatureField';
 import styles from './RentalForm.module.css';
+import * as yup from 'yup';
 
 interface RentalFormData {
   customerFirstName: string;
@@ -40,15 +42,60 @@ interface RentalFormData {
   signature: string;
 }
 
+const schema = yup.object().shape({
+  customerFirstName: yup.string().required('First name is required'),
+  customerLastName: yup.string().required('Last name is required'),
+  customerPhone: yup
+    .string()
+    .required('Phone number is required')
+    .matches(/^\(\d{3}\)\d{3}-\d{4}$/, 'Phone format: (XXX)XXX-XXXX'),
+  customerEmail: yup.string().email('Invalid email').required('Email is required'),
+  customerStreet: yup.string().required('Street address is required'),
+  customerCity: yup.string().required('City is required'),
+  customerState: yup.string().required('State is required'),
+  customerZip: yup.string().required('ZIP code is required'),
+  
+  cardHolderName: yup.string().required('Full name on card is required'),
+  cardHolderStreet: yup.string().required('Billing address is required'),
+  cardHolderCity: yup.string().required('City is required'),
+  cardHolderState: yup.string().required('State is required'),
+  cardHolderZip: yup.string().required('ZIP code is required'),
+  cardHolderPhone: yup.string().required('Phone number is required'),
+  cardHolderEmail: yup.string().email('Invalid email').required('Email is required'),
+  
+  cardType: yup.string().required('Please select a card type'),
+  otherCardIssuer: yup.string().when('cardType', ([cardType], schema) => 
+    cardType === 'Other' ? schema.required('Please specify card issuer') : schema),
+  
+  agreementAccepted: yup.boolean().required().oneOf([true], 'You must agree to the terms to continue'),
+  
+  fuelAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  smokingAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  petAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  outOfStateAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  tollAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  paymentAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  
+  insuranceCompany: yup.string().required('Insurance company is required'),
+  claimNumber: yup.string().required('Claim number is required'),
+  dateOfLoss: yup.string().required('Date of loss is required'),
+  signature: yup.string().required('Signature is required')
+});
+
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [signaturePad, setSignaturePad] = useState<SignatureCanvas | null>(null);
-  const [hasSignature, setHasSignature] = useState(false);
   const [signatureSaved, setSignatureSaved] = useState(false);
-  
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RentalFormData>();
-  
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RentalFormData>({
+    resolver: yupResolver(schema),
+  });
+
   const cardType = watch('cardType');
+
+  const handleSignatureSave = (signatureDataUrl: string) => {
+    setValue('signature', signatureDataUrl);
+    setSignatureSaved(true);
+  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -309,42 +356,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
 
             <div className={styles.signatureSection}>
               <label>Signature</label>
-              <SignatureCanvas
-                ref={(ref) => setSignaturePad(ref)}
-                penColor="#3BB554"
-                canvasProps={{
-                  className: styles.signatureCanvas,
-                  width: 500,
-                  height: 200
-                }}
-                onEnd={() => setHasSignature(true)}
-              />
-              <div className={styles.signatureActions}>
-                <button 
-                  type="button"
-                  className={styles.clearButton}
-                  onClick={() => {
-                    signaturePad?.clear();
-                    setHasSignature(false);
-                    setSignatureSaved(false);
-                  }}
-                >
-                  Clear
-                </button>
-                <button 
-                  type="button"
-                  className={styles.saveButton}
-                  onClick={() => {
-                    if (hasSignature && signaturePad) {
-                      setValue('signature', signaturePad.toDataURL());
-                      setSignatureSaved(true);
-                    }
-                  }}
-                  disabled={!hasSignature}
-                >
-                  Save
-                </button>
-              </div>
+              <SignatureField onSave={handleSignatureSave} />
             </div>
           </div>
         );

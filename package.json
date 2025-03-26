@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^4.1.3",
     "framer-motion": "^12.4.7",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^2.16.105",
@@ -20,7 +21,8 @@
     "react-pdf": "^9.2.1",
     "react-router-dom": "^6.30.0",
     "react-signature-canvas": "^1.1.0-alpha.1",
-    "trim-canvas": "^0.1.2"
+    "trim-canvas": "^0.1.2",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

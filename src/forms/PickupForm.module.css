@@ -1,0 +1,239 @@
+/* Base container styles */
+.formContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 4rem; /* Add padding at the bottom for better visibility */
+}
+
+.centerHeading {
+  text-align: center;
+  color: var(--accent-primary);
+  margin-bottom: 2rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+}
+
+.sectionHeading {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.completionText {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.inlineInput {
+  width: 200px;
+  padding: 0.5rem;
+  margin: 0 0.5rem;
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+}
+
+.acknowledgementRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.acknowledgementRow input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.25rem;
+}
+
+.partsOwedBox {
+  width: 100%;
+  height: 100px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder {
+  color: #777;
+  font-style: italic;
+}
+
+/* Signature section styles */
+.signatureSection {
+  margin: 20px 0;
+  scroll-margin-top: 100px; /* Provides space when scrolling to signature */
+}
+
+.signatureCanvasWrapper {
+  width: 500px;
+  height: 200px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: #000;
+  margin: 0 auto;
+  position: relative;
+}
+
+.signatureCanvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none; /* Prevents touch events from interfering with drawing */
+}
+
+/* Make sure the page itself is scrollable */
+:global(html), :global(body) {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+:global(#root) {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .signatureCanvasWrapper {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+/* Button styles */
+.signatureActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.clearButton, .saveButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clearButton {
+  background: #dc3545;
+  color: white;
+}
+
+.saveButton {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submitButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3BB554;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingOverlay p {
+  color: white;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Ensure the form is scrollable on mobile */
+@media (max-width: 768px) {
+  .formContainer {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Ensure the body and html are scrollable */
+:global(html), :global(body) {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

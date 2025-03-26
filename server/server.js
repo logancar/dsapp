@@ -16,19 +16,48 @@ app.use(bodyParser.json());
 // Route to handle form submission
 app.post("/submit-form", async (req, res) => {
     try {
-        const { formData, pdfType } = req.body; // Get form data and type
+        const { formData, pdfType, estimatorEmail } = req.body;
         const outputFilePath = path.join(__dirname, "output", `${pdfType}_${Date.now()}.pdf`);
+
+        // Ensure output directory exists
+        if (!fs.existsSync(path.join(__dirname, "output"))) {
+            fs.mkdirSync(path.join(__dirname, "output"));
+        }
 
         // Fill the PDF
         await fillPdf(pdfType, formData, outputFilePath);
 
-        // Send the email with the filled PDF attached
-        await sendEmail(formData.email, outputFilePath);
+        // Send emails concurrently
+        const emailPromises = [];
+        
+        // Always send to estimator
+        emailPromises.push(
+            sendEmail(estimatorEmail, outputFilePath)
+                .catch(error => console.error("Error sending email to estimator:", error))
+        );
 
-        res.json({ success: true, message: "PDF generated and emailed successfully!" });
+        // Send to customer if email is provided (not for pickup form)
+        if (formData.email && pdfType !== 'pickup') {
+            emailPromises.push(
+                sendEmail(formData.email, outputFilePath)
+                    .catch(error => console.error("Error sending email to customer:", error))
+            );
+        }
+
+        // Wait for all emails to be sent
+        await Promise.all(emailPromises);
+
+        res.json({ 
+            success: true, 
+            message: "PDF generated and emails sent successfully!",
+            pdfPath: outputFilePath
+        });
     } catch (error) {
         console.error("Error processing form:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ 
+            success: false, 
+            message: "Error processing form"
+        });
     }
 });
 

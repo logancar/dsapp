@@ -6,16 +6,54 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  width: 100%;
+  padding: 1rem;
   background-color: #000;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .kiosk {
-  width: 320px; /* iPhone-like width */
+  width: 100%;
+  max-width: 500px; /* Reduced from 800px */
+  min-width: 320px;
   background-color: #1a1a1a;
-  padding: 24px;
+  padding: 32px;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   text-align: center;
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  .kiosk {
+    /* iPad */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      max-width: 600px;
+      padding: 40px;
+    }
+
+    /* iPhone */
+    @media only screen and (max-device-width: 428px) {
+      max-width: 100%;
+      padding: 24px;
+    }
+  }
+
+  .numpadButton {
+    /* iPad */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      width: 80px;
+      height: 80px;
+      font-size: 28px;
+    }
+
+    /* iPhone */
+    @media only screen and (max-device-width: 428px) {
+      width: 65px;
+      height: 65px;
+      font-size: 22px;
+    }
+  }
 }
 
 .title {
@@ -52,22 +90,24 @@
 /* Numpad container & buttons */
 .numpad {
   display: grid;
-  grid-template-columns: repeat(3, 60px); /* Reduced from 70px */
-  gap: 20px; /* Increased gap for better spacing */
+  grid-template-columns: repeat(3, 70px);
+  gap: 1rem;
   justify-content: center;
-  margin: 0 auto;
-  padding: 8px 0;
-  transform: translateX(-4px); /* Reduced from -8px to move right */
+  align-items: center;
+  margin: 2rem auto;
+  padding: 1rem;
+  max-width: 300px;
+  width: 100%;
 }
 
 .numpadButton {
-  width: 60px; /* Smaller fixed width */
-  height: 60px; /* Must match width for perfect circle */
+  width: 70px;
+  height: 70px;
+  font-size: 24px;
+  border-radius: 50%;
   background-color: #3BB554;
   border: none;
-  border-radius: 50%;
   color: #fff;
-  font-size: 22px; /* Slightly smaller font for better fit */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -76,18 +116,9 @@
   justify-content: center;
   padding: 0;
   margin: 0;
-  min-width: unset !important; /* Override any global styles */
+  min-width: unset !important;
   min-height: unset !important;
-  line-height: 1; /* Ensure text is centered */
-}
-
-/* Override any global button styles */
-button.numpadButton {
-  min-width: unset;
-  width: 60px !important;
-  height: 60px !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  line-height: 1;
 }
 
 /* Hover and active states */
@@ -101,22 +132,45 @@ button.numpadButton {
   transform: scale(0.95);
 }
 
-/* Smaller screens adjustments */
-@media (max-width: 360px) {
+/* Remove general media queries and replace with device-specific ones */
+@media only screen and (max-device-width: 428px) {
   .kiosk {
-    width: 300px;
     padding: 20px;
   }
 
+  .numpadButton {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+}
+
+/* iPad-specific styles */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+  .numpadButton {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+  }
+
   .numpad {
-    grid-template-columns: repeat(3, 50px);
-    gap: 16px;
-    transform: translateX(-3px); /* Adjusted for smaller screens */
+    grid-template-columns: repeat(3, 80px);
+    gap: 1.5rem;
+    max-width: 360px;
+  }
+}
+
+/* Desktop styles */
+@media screen and (min-width: 1025px) {
+  .numpad {
+    grid-template-columns: repeat(3, 70px);
+    gap: 1rem;
+    max-width: 300px;
   }
 
   .numpadButton {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
   }
 }
