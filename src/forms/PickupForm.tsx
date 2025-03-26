@@ -50,11 +50,11 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
   const onSubmitForm = async (data: PickupFormData) => {
     setIsSubmitting(true);
     try {
-      // Replace this hardcoded URL with API_BASE_URL
       const response = await fetch(`${API_BASE_URL}/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           formData: data,
@@ -62,6 +62,10 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
           estimatorEmail
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       
