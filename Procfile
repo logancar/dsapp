@@ -1,1 +1,1 @@
-web: cd server && npm install && node server.js
+web: cd server && npm install && NODE_ENV=production node server.js

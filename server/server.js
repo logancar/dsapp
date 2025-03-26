@@ -2,11 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Add this near the top of the file
+// Error handling
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
 });
@@ -15,16 +17,21 @@ process.on('unhandledRejection', (error) => {
     console.error('Unhandled Rejection:', error);
 });
 
-// Updated CORS configuration
+// CORS configuration
 app.use(cors({
     origin: process.env.CORS_ORIGIN || 'https://dentsourcekiosk.netlify.app',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Origin', 'Authorization'],
-    credentials: false, // Changed to false since we don't need credentials
+    credentials: false,
     optionsSuccessStatus: 204
 }));
 
-app.use(bodyParser.json()); // Remove this line as it's redundant
+app.use(express.json());
+
+// Add a health check endpoint
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running' });
+});
 
 // Route to handle form submission
 app.post("/submit-form", async (req, res) => {
@@ -69,7 +76,8 @@ app.post("/submit-form", async (req, res) => {
         console.error("Error processing form:", error);
         res.status(500).json({ 
             success: false, 
-            message: "Error processing form"
+            message: "Error processing form",
+            error: error.message
         });
     }
 });
