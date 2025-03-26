@@ -6,7 +6,11 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://dentsourcekiosk.netlify.app'
       },
+      mode: 'cors',
+      credentials: 'include',
       body: JSON.stringify({
         formData,
         pdfType,
@@ -26,5 +30,6 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
     throw error;
   }
 };
+
 
 
