@@ -4,6 +4,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import SignatureField from '../components/SignatureField';
 import styles from './RentalForm.module.css';
 import * as yup from 'yup';
+import { submitForm } from '../services/api';
+import { useLocation } from 'react-router-dom';
+
+interface LocationState {
+  email?: string;
+}
 
 interface RentalFormData {
   customerFirstName: string;
@@ -101,6 +107,9 @@ const schema = yup.object().shape({
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [signatureSaved, setSignatureSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
+  const { email: estimatorEmail } = location.state as LocationState;
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RentalFormData>({
     resolver: yupResolver(schema),
@@ -382,14 +391,34 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
     }
   };
 
-  const onFormSubmit = (data: RentalFormData) => {
+  const onFormSubmit = async (data: RentalFormData) => {
     if (currentStep === 6 && !signatureSaved) {
       alert("Please save your signature before submitting");
       return;
     }
-    onSubmit(data);
-    // Redirect to thank you page
-    window.location.href = '/thankyou';
+
+    setIsSubmitting(true);
+    try {
+      const result = await submitForm(
+        data, 
+        'rental',
+        estimatorEmail || 'unknown@somewhere.com'
+      );
+      
+      if (result.success) {
+        console.log('Form submitted successfully');
+        onSubmit(data);
+        window.location.href = '/thankyou';
+      } else {
+        console.error('Form submission failed:', result.message);
+        alert('Failed to submit form. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -402,6 +431,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               type="button" 
               className={styles.prevButton}
               onClick={() => setCurrentStep(currentStep - 1)}
+              disabled={isSubmitting}
             >
               Previous
             </button>
@@ -411,20 +441,28 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               type="button" 
               className={styles.nextButton}
               onClick={() => setCurrentStep(currentStep + 1)}
+              disabled={isSubmitting}
             >
               Next
             </button>
           ) : (
             <button 
               type="submit" 
-              className={styles.submitButton}
-              disabled={!signatureSaved}
+              className={`${styles.submitButton} ${!signatureSaved ? styles.disabled : ''}`}
+              disabled={!signatureSaved || isSubmitting}
             >
-              Submit
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
           )}
         </div>
       </form>
+
+      {isSubmitting && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Submitting documents, please wait...</p>
+        </div>
+      )}
     </div>
   );
 }

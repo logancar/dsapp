@@ -41,7 +41,25 @@ async function fillPdf(pdfType, formData, outputPath) {
         },
         rental: {
             customerName: "Customer_Name",
-            date: "Date"
+            customerPhone: "Customer_Phone",
+            customerEmail: "Customer_Email",
+            customerAddress: "Customer_Address",
+            customerCity: "Customer_City",
+            customerState: "Customer_State",
+            customerZip: "Customer_Zip",
+            cardHolderName: "Cardholder_Name",
+            cardType: "Card_Type",
+            cardHolderAddress: "Billing_Address",
+            cardHolderCity: "Billing_City",
+            cardHolderState: "Billing_State",
+            cardHolderZip: "Billing_Zip",
+            insuranceCompany: "Insurance_Company",
+            claimNumber: "Claim_Number",
+            dateOfLoss: "Date_of_Loss",
+            vehicleDescription: "Vehicle_Description",
+            vin: "VIN",
+            date: "Date",
+            // Add any additional PDF field mappings here
         },
         dropoff: {
             customerName: "Customer_Name",
