@@ -60,23 +60,26 @@ async function fillPdf(pdfType, formData, outputPath) {
 
     // Add signature positions for each form type
     const signaturePositions = {
-        pickup: {
-            x: 85,      // Keeping pickup position the same
-            y: 140,     // Keeping pickup position the same
-            width: 150, 
-            height: 40  
-        },
-        rental: {
-            x: 307,     // Increased from 302 to 307 (+5 pixels right)
-            y: 206,     // Increased from 204 to 206 (+2 pixels up)
-            width: 200, 
-            height: 50  
-        },
-        dropoff: {
+        signature1: {
             x: 300,
             y: 200,
             width: 200,
-            height: 50
+            height: 50,
+            page: 0  // First page
+        },
+        signature2: {
+            x: 300,
+            y: 200,
+            width: 200,
+            height: 50,
+            page: 1  // Second page
+        },
+        signature3: {
+            x: 300,
+            y: 200,
+            width: 200,
+            height: 50,
+            page: 2  // Third page
         }
     };
 
@@ -138,9 +141,9 @@ async function handleSignatureImage(pdfDoc, signatureDataUrl) {
 
 async function addSignatureToPdf(pdfDoc, signatureImage, position) {
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+    const targetPage = pages[position.page];
     
-    firstPage.drawImage(signatureImage, {
+    targetPage.drawImage(signatureImage, {
         x: position.x,
         y: position.y,
         width: position.width,

@@ -26,6 +26,12 @@ interface RentalFormData {
   cardType: string;
   otherCardIssuer?: string;
   
+  cvc: string;
+  expirationDate: string;
+  vehicleDescription: string;
+  vin: string;
+  vehicleOwnerName: string;
+  
   agreementAccepted: boolean;
   
   // Acknowledgements
@@ -40,6 +46,8 @@ interface RentalFormData {
   claimNumber: string;
   dateOfLoss: string;
   signature: string;
+  signaturePage2: string;
+  signaturePage3: string;
 }
 
 const schema = yup.object().shape({
@@ -67,6 +75,12 @@ const schema = yup.object().shape({
   otherCardIssuer: yup.string().when('cardType', ([cardType], schema) => 
     cardType === 'Other' ? schema.required('Please specify card issuer') : schema),
   
+  cvc: yup.string().required('CVC is required'),
+  expirationDate: yup.string().required('Expiration date is required'),
+  vehicleDescription: yup.string().required('Vehicle description is required'),
+  vin: yup.string().required('VIN is required'),
+  vehicleOwnerName: yup.string().required('Vehicle owner name is required'),
+  
   agreementAccepted: yup.boolean().required().oneOf([true], 'You must agree to the terms to continue'),
   
   fuelAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
@@ -79,7 +93,9 @@ const schema = yup.object().shape({
   insuranceCompany: yup.string().required('Insurance company is required'),
   claimNumber: yup.string().required('Claim number is required'),
   dateOfLoss: yup.string().required('Date of loss is required'),
-  signature: yup.string().required('Signature is required')
+  signature: yup.string().required('Signature is required'),
+  signaturePage2: yup.string().required('Signature on page 2 is required'),
+  signaturePage3: yup.string().required('Signature on page 3 is required')
 });
 
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
