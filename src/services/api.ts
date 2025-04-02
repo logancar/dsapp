@@ -1,7 +1,39 @@
 export const API_BASE_URL = 'https://dskiosk.up.railway.app';
 
-export const submitForm = async (formData: any, pdfType: string, estimatorEmail: string) => {
+type PdfType = 'rental' | 'pickup' | 'dropoff';
+
+interface FormSubmissionResponse {
+  success: boolean;
+  message: string;
+  error?: string;
+}
+
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+export const submitForm = async (
+  formData: Record<string, unknown>, 
+  pdfType: PdfType, 
+  estimatorEmail: string
+): Promise<FormSubmissionResponse> => {
+  // Input validation
+  if (!formData) {
+    throw new Error('Form data is required');
+  }
+
+  if (!isValidEmail(estimatorEmail)) {
+    throw new Error('Invalid estimator email format');
+  }
+
   try {
+    console.log('Submitting form data:', {
+      formData,
+      pdfType,
+      estimatorEmail,
+      url: `${API_BASE_URL}/submit-form`
+    });
+
     const response = await fetch(`${API_BASE_URL}/submit-form`, {
       method: 'POST',
       headers: {
@@ -9,7 +41,7 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
         'Accept': 'application/json',
       },
       mode: 'cors',
-      credentials: 'omit', // Changed from 'include' to 'omit'
+      credentials: 'omit',
       body: JSON.stringify({
         formData,
         pdfType,
@@ -17,20 +49,22 @@ export const submitForm = async (formData: any, pdfType: string, estimatorEmail:
       }),
     });
 
+    const responseData = await response.json();
+    
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Network response was not ok' }));
-      throw new Error(errorData.message || 'Failed to submit form');
+      console.error('Server Error Response:', responseData);
+      throw new Error(responseData.message || responseData.error || 'Failed to submit form');
     }
 
-    return await response.json();
+    return responseData as FormSubmissionResponse;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error Details:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'Unknown error'
+    });
     throw error;
   }
 };
-
-
-
-
 
 

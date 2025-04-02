@@ -32,6 +32,10 @@ interface RentalFormData {
   cardType: string;
   otherCardIssuer?: string;
   
+  Card_Number: string;
+  Expiration_Date: string;
+  CVC: string;
+  
   cvc: string;
   expirationDate: string;
   vehicleDescription: string;
@@ -101,7 +105,19 @@ const schema = yup.object().shape({
   dateOfLoss: yup.string().required('Date of loss is required'),
   signature: yup.string().required('Signature is required'),
   signaturePage2: yup.string().required('Signature on page 2 is required'),
-  signaturePage3: yup.string().required('Signature on page 3 is required')
+  signaturePage3: yup.string().required('Signature on page 3 is required'),
+  Card_Number: yup
+    .string()
+    .required('Card number is required')
+    .matches(/^[0-9]{16}$/, 'Please enter a valid 16-digit card number'),
+  Expiration_Date: yup
+    .string()
+    .required('Expiration date is required')
+    .matches(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, 'Please enter date in MM/YY format'),
+  CVC: yup
+    .string()
+    .required('CVC is required')
+    .matches(/^[0-9]{3,4}$/, 'Please enter a valid CVC'),
 });
 
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
@@ -400,7 +416,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
     setIsSubmitting(true);
     try {
       const result = await submitForm(
-        data, 
+        data as unknown as Record<string, unknown>,
         'rental',
         estimatorEmail || 'unknown@somewhere.com'
       );

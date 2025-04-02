@@ -78,38 +78,45 @@ async function fillPdf(pdfType, formData, outputPath) {
 
     // Add signature positions for each form type
     const signaturePositions = {
-        signature1: {
+        pickup: {
             x: 300,
             y: 200,
             width: 200,
             height: 50,
             page: 0  // First page
         },
-        signature2: {
+        rental: {
             x: 300,
             y: 200,
             width: 200,
             height: 50,
-            page: 1  // Second page
+            page: 0  // First page
         },
-        signature3: {
+        dropoff: {
             x: 300,
             y: 200,
             width: 200,
             height: 50,
-            page: 2  // Third page
+            page: 0  // First page
         }
     };
 
     // Fill form fields
     for (const key in formData) {
         if (key === 'signature') {
-            // Handle signature separately
             console.log('Processing signature for form type:', pdfType);
             const signatureImage = await handleSignatureImage(pdfDoc, formData[key]);
             console.log('Signature image created');
-            await addSignatureToPdf(pdfDoc, signatureImage, signaturePositions[pdfType]);
-            console.log('Signature added to PDF at position:', signaturePositions[pdfType]);
+            
+            // Get the correct position for this form type
+            const position = signaturePositions[pdfType];
+            if (!position) {
+                console.error('No signature position defined for form type:', pdfType);
+                throw new Error(`Signature position not defined for form type: ${pdfType}`);
+            }
+            
+            await addSignatureToPdf(pdfDoc, signatureImage, position);
+            console.log('Signature added to PDF at position:', position);
         } else if (mappedFields[key]) {
             try {
                 const field = form.getTextField(mappedFields[key]);
@@ -158,7 +165,17 @@ async function handleSignatureImage(pdfDoc, signatureDataUrl) {
 }
 
 async function addSignatureToPdf(pdfDoc, signatureImage, position) {
+    if (!position || typeof position.page !== 'number') {
+        console.error('Invalid position object:', position);
+        throw new Error('Invalid signature position configuration');
+    }
+
     const pages = pdfDoc.getPages();
+    if (position.page >= pages.length) {
+        console.error(`Page ${position.page} does not exist in PDF`);
+        throw new Error(`Invalid page number: ${position.page}`);
+    }
+
     const targetPage = pages[position.page];
     
     targetPage.drawImage(signatureImage, {

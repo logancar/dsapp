@@ -1,10 +1,9 @@
 .formContainer {
   padding: 2rem;
   margin: 0 auto;
-  background: var(--background-secondary);
+  background: transparent; /* Changed from var(--background-secondary) to transparent */
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 800px; /* Larger for this specific form */
+  max-width: 800px;
 }
 
 .centerHeading {
@@ -324,4 +323,6 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
 
