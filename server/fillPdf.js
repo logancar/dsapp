@@ -101,6 +101,10 @@ async function fillPdf(pdfType, formData, outputPath) {
         }
     };
 
+    // Add debug logging
+    console.log('PDF Type:', pdfType);
+    console.log('Signature Position:', signaturePositions[pdfType]);
+
     // Fill form fields
     for (const key in formData) {
         if (key === 'signature') {
@@ -115,8 +119,9 @@ async function fillPdf(pdfType, formData, outputPath) {
                 throw new Error(`Signature position not defined for form type: ${pdfType}`);
             }
             
+            console.log('Using position:', JSON.stringify(position));
             await addSignatureToPdf(pdfDoc, signatureImage, position);
-            console.log('Signature added to PDF at position:', position);
+            console.log('Signature added to PDF');
         } else if (mappedFields[key]) {
             try {
                 const field = form.getTextField(mappedFields[key]);
