@@ -19,17 +19,25 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendEmail(to, pdfPath, isCustomer = false) {
+async function sendEmail(to, pdfPath, formType, isCustomer = false) {
+    const subjectLines = {
+        rental: "Rental Agreement",
+        pickup: "Pickup Acknowledgement",
+        dropoff: "Dropoff Form"
+    };
+
     const mailOptions = {
         from: process.env.SMTP_USER,
         to: to,
-        subject: isCustomer ? "Your Rental Agreement" : "New Rental Agreement Submission",
+        subject: isCustomer 
+            ? `Your ${subjectLines[formType]}` 
+            : `New ${subjectLines[formType]} Submission`,
         text: isCustomer 
-            ? "Thank you for completing the rental agreement. Please find your copy attached."
-            : "A new rental agreement has been submitted. Please find the document attached.",
+            ? `Thank you for completing the ${subjectLines[formType].toLowerCase()}. Please find your copy attached.`
+            : `A new ${subjectLines[formType].toLowerCase()} has been submitted. Please find the document attached.`,
         attachments: [
             {
-                filename: 'rental-agreement.pdf',
+                filename: `${formType}-form.pdf`,
                 path: pdfPath
             }
         ]

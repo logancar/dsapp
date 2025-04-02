@@ -95,7 +95,7 @@ app.post("/submit-form", async (req, res) => {
         
         // Send to estimator
         emailPromises.push(
-            sendEmail(estimatorEmail, outputFilePath)
+            sendEmail(estimatorEmail, outputFilePath, pdfType)
                 .catch(error => {
                     console.error("Error sending email to estimator:", error);
                     throw new Error(`Failed to send email to estimator: ${error.message}`);
@@ -105,7 +105,7 @@ app.post("/submit-form", async (req, res) => {
         // Send to customer if email provided and not pickup form
         if (formData.email && pdfType !== 'pickup') {
             emailPromises.push(
-                sendEmail(formData.email, outputFilePath, true)
+                sendEmail(formData.email, outputFilePath, pdfType, true)
                     .catch(error => {
                         console.error("Error sending email to customer:", error);
                         throw new Error(`Failed to send email to customer: ${error.message}`);

@@ -79,25 +79,25 @@ async function fillPdf(pdfType, formData, outputPath) {
     // Add signature positions for each form type
     const signaturePositions = {
         pickup: {
-            x: 300,
-            y: 200,
+            x: 100,        // Changed from 300 to move it left
+            y: 150,        // Changed from 200 to move it down
             width: 200,
             height: 50,
-            page: 0  // First page
+            page: 0
         },
         rental: {
             x: 300,
             y: 200,
             width: 200,
             height: 50,
-            page: 0  // First page
+            page: 0
         },
         dropoff: {
             x: 300,
             y: 200,
             width: 200,
             height: 50,
-            page: 0  // First page
+            page: 0
         }
     };
 
