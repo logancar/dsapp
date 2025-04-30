@@ -24,7 +24,16 @@ function HomePage() {
   // Insert digit if we have <4
   const handleInput = (digit: string) => {
     if (employeeID.length < 4) {
-      setEmployeeID((prev) => prev + digit);
+      const newID = employeeID + digit;
+      setEmployeeID(newID);
+
+      // Auto-submit when we reach 4 digits
+      if (newID.length === 4) {
+        const userInfo = validIDs[newID];
+        if (userInfo) {
+          handleSubmit(newID);
+        }
+      }
     }
   };
 
@@ -35,12 +44,30 @@ function HomePage() {
     }
   };
 
+  // Handle keyboard input
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.preventDefault(); // Prevent default behavior
+
+    // Handle numeric keys (0-9)
+    if (/^[0-9]$/.test(e.key)) {
+      handleInput(e.key);
+    }
+    // Handle backspace
+    else if (e.key === 'Backspace') {
+      handleBackspace();
+    }
+    // Handle Enter key
+    else if (e.key === 'Enter') {
+      handleSubmit(employeeID);
+    }
+  };
+
   // Submit once we have 4 digits and it's valid
-  const handleSubmit = () => {
+  const handleSubmit = (id: string = employeeID) => {
     // Check if employeeID is in validIDs map
-    const userInfo = validIDs[employeeID];
-    if (employeeID.length === 4 && userInfo) {
-      console.log(`ID: ${employeeID} => Name: ${userInfo.name}, Email: ${userInfo.email}`);
+    const userInfo = validIDs[id];
+    if (id.length === 4 && userInfo) {
+      console.log(`ID: ${id} => Name: ${userInfo.name}, Email: ${userInfo.email}`);
       // Pass name & email in route state for the second page
       navigate("/dashboard", { state: { name: userInfo.name, email: userInfo.email } });
     } else {
@@ -77,7 +104,8 @@ function HomePage() {
             type="password"
             value={employeeID}
             placeholder="****"
-            readOnly
+            onKeyDown={handleKeyDown}
+            autoFocus
           />
 
           <div className={styles.numpad}>

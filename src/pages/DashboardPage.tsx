@@ -28,8 +28,8 @@ function DashboardPage() {
   const estimatorEmail = locationState?.email || 'unknown@somewhere.com';
 
   const forms = [
-    { id: 'rental', label: 'Rental Docs', img: rentalImg },
     { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg },
+    { id: 'rental', label: 'Rental Docs', img: rentalImg },
     { id: 'pickup', label: 'Pick Up Docs', img: pickupImg },
   ];
 

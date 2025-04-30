@@ -11,6 +11,7 @@ interface PickupFormData {
   rentalAcknowledgement: boolean;
   reviewAcknowledgement: boolean;
   signature: string;
+  [key: string]: unknown;
 }
 
 interface LocationState {
@@ -31,7 +32,7 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
       const yOffset = -100;
       const element = signatureSectionRef.current;
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      
+
       window.scrollTo({
         top: y,
         behavior: 'smooth'
@@ -51,7 +52,7 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
     setIsSubmitting(true);
     try {
       const result = await submitForm(data, 'pickup', estimatorEmail || 'unknown@somewhere.com');
-      
+
       if (result.success) {
         console.log('Form submitted successfully');
         onSubmit(data);
@@ -71,7 +72,7 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className={styles.formContainer}>
       <h1 className={styles.centerHeading}>Pick Up Acknowledgements</h1>
-        
+
       <div className={styles.section}>
         <h2 className={styles.sectionHeading}>Completion</h2>
         <p className={styles.completionText}>
@@ -116,8 +117,8 @@ export default function PickupForm({ onSubmit }: { onSubmit: (data: PickupFormDa
         <SignatureField onSave={handleSignatureSave} />
       </div>
 
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         className={`${styles.submitButton} ${!signatureSaved ? styles.disabled : ''}`}
         disabled={!signatureSaved || isSubmitting}
       >

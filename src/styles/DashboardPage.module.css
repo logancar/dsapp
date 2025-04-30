@@ -38,33 +38,51 @@
 
 .thumbnailCard {
   background-color: var(--background-secondary);
-  border-radius: 0.5rem;
-  padding: 1rem;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
   cursor: pointer;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.thumbnailCard:hover {
+  box-shadow: 0 6px 15px rgba(0,0,0,0.6);
 }
 
 .thumbnailImage {
-  width: 150px;
-  height: 150px;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
-  margin-bottom: 0.5rem;
-  border-radius: 0.25rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.5rem;
 }
 
 .thumbnailText {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-primary);
+  font-weight: 500;
+  margin-top: 0.5rem;
 }
 
 @media (max-width: 768px) {
+  .thumbnails {
+    gap: 1.5rem;
+  }
+
+  .thumbnailImage {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
   .thumbnails {
     gap: 1rem;
   }
 
   .thumbnailImage {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
   }
 }

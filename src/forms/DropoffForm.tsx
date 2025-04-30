@@ -1,4 +1,4 @@
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import "../styles/global.css";
 import { useState, useCallback, useRef, useEffect } from "react";
 import SignatureCanvas from 'react-signature-canvas';
@@ -93,56 +93,6 @@ interface DropoffFormData {
   failureToPay: boolean;
   reviews: boolean;
 }
-
-const InsuranceQuestions = () => {
-  const { register, watch } = useFormContext();
-  const hasEstimate = watch('hasEstimate');
-  const hasReceivedCheck = watch('hasReceivedCheck');
-
-  return (
-    <div className={styles.insuranceQuestions}>
-      <div className={styles.questionGroup}>
-        <label>
-          Have you had an estimate done on this vehicle?
-          <input
-            type="checkbox"
-            {...register('hasEstimate')}
-          />
-        </label>
-
-        {hasEstimate && (
-          <label>
-            Do you have a copy of the estimate?
-            <input
-              type="checkbox"
-              {...register('hasEstimateCopy')}
-            />
-          </label>
-        )}
-      </div>
-
-      <div className={styles.questionGroup}>
-        <label>
-          Have you received a check for this claim?
-          <input
-            type="checkbox"
-            {...register('hasReceivedCheck')}
-          />
-        </label>
-
-        {hasReceivedCheck && (
-          <label>
-            Has it been cashed?
-            <input
-              type="checkbox"
-              {...register('hasCheckedCashed')}
-            />
-          </label>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const schema = yup.object().shape({
   insuranceCompany: yup.string().required('Insurance company is required'),
@@ -800,7 +750,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   </div>
                 </div>
 
-                {watch('hasEstimate') === 'true' && (
+                {watch('hasEstimate') === true && (
                   <div className={styles.questionGroup}>
                     <p className={styles.questionLabel}>Do you have a copy of the estimate?</p>
                     <div className={styles.radioGroup}>
@@ -846,7 +796,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   </div>
                 </div>
 
-                {watch('hasReceivedCheck') === 'true' && (
+                {watch('hasReceivedCheck') === true && (
                   <div className={styles.questionGroup}>
                     <p className={styles.questionLabel}>Has it been cashed?</p>
                     <div className={styles.radioGroup}>
@@ -892,7 +842,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   </div>
                 </div>
 
-                {watch('referralSources.referral') === 'true' && (
+                {watch('referralSources.referral') === true && (
                   <div className={styles.referralInfoSection}>
                     <p className={styles.referralInfoNote}>
                       Please provide as much information as possible about who referred you so we will be able to successfully contact this person
