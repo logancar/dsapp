@@ -19,8 +19,25 @@ process.on('unhandledRejection', (error) => {
 });
 
 // CORS configuration
+const allowedOrigins = [
+    'https://dentsourcekiosk.netlify.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+];
+
 app.use(cors({
-    origin: 'https://dentsourcekiosk.netlify.app',
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl, etc)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            console.log(`CORS blocked for origin: ${origin}`);
+            return callback(null, false);
+        }
+
+        console.log(`CORS allowed for origin: ${origin}`);
+        return callback(null, true);
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Origin', 'Authorization'],
     credentials: true,
@@ -51,7 +68,7 @@ app.post("/submit-form", async (req, res) => {
     try {
         console.log('Received form submission request');
         const { formData, pdfType, estimatorEmail } = req.body;
-        
+
         // Validate required fields
         if (!formData || !pdfType || !estimatorEmail) {
             console.error('Missing required fields:', { formData, pdfType, estimatorEmail });
@@ -92,7 +109,7 @@ app.post("/submit-form", async (req, res) => {
 
         const emailPromises = [];
         console.log('Preparing to send emails');
-        
+
         // Send to estimator
         emailPromises.push(
             sendEmail(estimatorEmail, outputFilePath, pdfType)
@@ -126,15 +143,15 @@ app.post("/submit-form", async (req, res) => {
             // Don't throw error for cleanup failures
         }
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: "PDF generated and emails sent successfully!"
         });
     } catch (error) {
         console.error("Error processing form:", error);
         console.error("Error stack:", error.stack);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: "Error processing form",
             error: error.message,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -156,8 +173,8 @@ app.get("/test", (req, res) => {
 app.use((err, req, res, next) => {
     console.error('Global Error Handler:', err);
     console.error('Error Stack:', err.stack);
-    res.status(500).json({ 
-        success: false, 
+    res.status(500).json({
+        success: false,
         message: 'Internal server error',
         error: err.message,
         stack: process.env.NODE_ENV === 'development' ? err.stack : undefined

@@ -1,4 +1,8 @@
-export const API_BASE_URL = 'https://dskiosk.up.railway.app';
+// Determine the API base URL based on the environment
+const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+export const API_BASE_URL = isDevelopment
+  ? 'http://localhost:8080'
+  : 'https://dskiosk.up.railway.app';
 
 type PdfType = 'rental' | 'pickup' | 'dropoff';
 
@@ -13,8 +17,8 @@ const isValidEmail = (email: string): boolean => {
 };
 
 export const submitForm = async (
-  formData: Record<string, unknown>, 
-  pdfType: PdfType, 
+  formData: Record<string, unknown>,
+  pdfType: PdfType,
   estimatorEmail: string
 ): Promise<FormSubmissionResponse> => {
   // Input validation
@@ -50,7 +54,7 @@ export const submitForm = async (
     });
 
     const responseData = await response.json();
-    
+
     if (!response.ok) {
       console.error('Server Error Response:', responseData);
       throw new Error(responseData.message || responseData.error || 'Failed to submit form');

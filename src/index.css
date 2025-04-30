@@ -49,12 +49,9 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow-y: auto !important; /* Force enable scrolling */
-  position: fixed; /* Prevent bouncing on iOS */
   width: 100%;
-  height: 100%;
   background-color: #000000 !important;
   color: #ffffff;
-  min-height: 100vh;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -298,12 +295,12 @@ button.numpadButton {
     margin: 16px;
     border-radius: 12px;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 0;
   }
-  
+
   button {
     width: 100%;
   }
@@ -319,7 +316,7 @@ button.numpadButton {
     --text-secondary: #505050;
     --border-color: #DADADA;
   }
-  
+
   button {
     background-color: var(--accent-primary);
     color: white;

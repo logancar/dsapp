@@ -1,6 +1,6 @@
 import { useForm, useFormContext } from "react-hook-form";
 import "../styles/global.css";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import SignatureCanvas from 'react-signature-canvas';
 import styles from './DropoffForm.module.css';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -66,6 +66,7 @@ interface DropoffFormData {
   year: string;
   make: string;
   model: string;
+  licensePlate?: string;
 
   // Insurance Information
   insuredName: string;
@@ -108,7 +109,7 @@ const InsuranceQuestions = () => {
             {...register('hasEstimate')}
           />
         </label>
-        
+
         {hasEstimate && (
           <label>
             Do you have a copy of the estimate?
@@ -128,7 +129,7 @@ const InsuranceQuestions = () => {
             {...register('hasReceivedCheck')}
           />
         </label>
-        
+
         {hasReceivedCheck && (
           <label>
             Has it been cashed?
@@ -166,6 +167,7 @@ const schema = yup.object().shape({
   year: yup.string().required('Year is required'),
   make: yup.string().required('Make is required'),
   model: yup.string().required('Model is required'),
+  licensePlate: yup.string().optional(),
   insuredName: yup.string().required('Insured name is required'),
   insuredPhone: yup.string().required('Insured phone is required'),
   provider: yup.string().required('Provider is required'),
@@ -218,7 +220,11 @@ const schema = yup.object().shape({
 }).required();
 
 export default function DropoffForm({ onSubmit }: DropoffFormProps) {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<DropoffFormData>({
+  // Generate random field names to prevent autofill
+  const randomAddressField = `address_${Math.random().toString(36).substring(2, 15)}`;
+  const randomEmailField = `email_${Math.random().toString(36).substring(2, 15)}`;
+
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<DropoffFormData>({
     defaultValues: {
       referralSources: {
         google: false,
@@ -266,13 +272,33 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
   const [hasSignature, setHasSignature] = useState(false);
   const [signatureSaved, setSignatureSaved] = useState(false);
   const signatureSectionRef = useRef<HTMLDivElement | null>(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Handle window resize for responsive elements
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Clear form fields on component mount to prevent autofill
+  useEffect(() => {
+    // Reset address and email fields
+    setValue('address', '');
+    setValue('email', '');
+  }, []);
 
   const scrollToSignature = useCallback(() => {
     if (signatureSectionRef.current) {
       const yOffset = -100;
       const element = signatureSectionRef.current;
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      
+
       window.scrollTo({
         top: y,
         behavior: 'smooth'
@@ -285,91 +311,192 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
       case 1:
         return (
           <div className={`${styles.formStep} ${styles.wideForm}`}>
-            <div className={styles.inputGroup}>
-              <label>Your Insurance Company</label>
-              <input
-                type="text"
-                {...register('insuranceCompany')}
-                className={styles.input}
-                placeholder="Enter insurance company name"
-              />
-              {errors.insuranceCompany && (
-                <span className={styles.error}>{errors.insuranceCompany.message}</span>
-              )}
-            </div>
+            <h2 className={styles.centerHeading}>How did you hear about Dent Source?</h2>
+            <p className={styles.subtitle}>Please select all that apply</p>
 
-            <div className={styles.inputGroup}>
-              <label>Vehicle VIN</label>
-              <input
-                type="text"
-                {...register('vin')}
-                className={styles.input}
-                placeholder="Must be 17 alphanumeric characters"
-                maxLength={17}
-              />
-              {errors.vin && (
-                <span className={styles.error}>{errors.vin.message}</span>
-              )}
+            <div className={styles.referralGrid}>
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.google')} />
+                <span>Google</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.waze')} />
+                <span>Waze</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.mailer')} />
+                <span>Mailer</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.tvCommercial')} />
+                <span>TV Commercial</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.radioCommercial')} />
+                <span>Radio</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.doorHanger')} />
+                <span>Door Hanger</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.textMessage')} />
+                <span>Text Message</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.referral')} />
+                <span>Referral</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.internet')} />
+                <span>Internet</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.facebook')} />
+                <span>Facebook</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.instagram')} />
+                <span>Instagram</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.youtube')} />
+                <span>Youtube</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.hulu')} />
+                <span>Hulu</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.fireStick')} />
+                <span>Fire Stick</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.prime')} />
+                <span>Prime</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.pandora')} />
+                <span>Pandora</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.billboard')} />
+                <span>Billboard</span>
+              </label>
+
+              <label className={styles.referralCheckbox}>
+                <input type="checkbox" {...register('referralSources.outsideSales')} />
+                <span>Outside Sales</span>
+              </label>
             </div>
           </div>
         );
 
       case 2:
         return (
-          <div className="form-step">
+          <div className={styles.formStep}>
             <h2 className={styles.centerHeading}>Dent Source LLC Authorization and Direction of Pay</h2>
             <div className={styles.authorizationSection}>
               <p className={styles.authText}>
-                I authorize DENT SOURCE LLC to repair my vehicle. I authorize{' '}
+                I authorize DENT SOURCE LLC to repair my vehicle.
+              </p>
+              <p className={styles.authText}>
+                I authorize{' '}
                 <input
                   type="text"
                   {...register('insuranceCompany')}
                   className={styles.inlineInput}
+                  placeholder="your insurance company"
                 />{' '}
-                to pay DENT SOURCE directly for the repairs performed on my vehicle.
+                to pay DENT SOURCE LLC directly for the repairs performed on my vehicle.
               </p>
 
-              <div className={styles.authFields}>
-                <div className={styles.fieldGroup}>
-                  <label>Name:</label>
-                  <input type="text" {...register('name')} />
+              <div className={styles.signatureRow}>
+                <div className={styles.signatureField}>
+                  <label>Signature:</label>
+                  <div className={styles.signaturePlaceholder}>
+                    {/* Signature will be captured on the last page */}
+                    <span className={styles.signatureNote}>Signature will be captured at the end of the form</span>
+                  </div>
                 </div>
 
-                <div className={styles.fieldGroup}>
+                <div className={styles.dateField}>
                   <label>Date:</label>
-                  <input type="date" {...register('date')} />
-                </div>
-
-                <div className={styles.fieldGroup}>
-                  <label>Vehicle Description (Year/Make/Model):</label>
-                  <input 
-                    type="text" 
-                    {...register('vehicleDescription')} 
-                    placeholder="e.g., 2020 Honda Civic"
+                  <input
+                    type="date"
+                    {...register('date')}
+                    defaultValue={new Date().toISOString().split('T')[0]}
                   />
+                  {errors.date && (
+                    <span className={styles.error}>{errors.date.message}</span>
+                  )}
                 </div>
+              </div>
 
-                <div className={styles.fieldGroup}>
-                  <label>VIN:</label>
-                  <input 
-                    type="text" 
-                    {...register('vin')} 
-                    className={styles.vinInput}
-                    maxLength={17}
-                    minLength={17}
-                    placeholder="17 character VIN number"
-                  />
-                </div>
+              <div className={styles.fieldGroup}>
+                <label>Vehicle Description:</label>
+                <input
+                  type="text"
+                  {...register('vehicleDescription')}
+                  placeholder="year/make/model"
+                  autoComplete="off"
+                />
+                {errors.vehicleDescription && (
+                  <span className={styles.error}>{errors.vehicleDescription.message}</span>
+                )}
+              </div>
 
-                <div className={styles.fieldGroup}>
-                  <label>Claim Number:</label>
-                  <input type="text" {...register('claimNumber')} />
-                </div>
+              <div className={styles.fieldGroup}>
+                <label>V.I.N.:</label>
+                <input
+                  type="text"
+                  {...register('vin')}
+                  className={styles.vinInput}
+                  maxLength={17}
+                  placeholder="must be 17 alphanumeric characters"
+                />
+                {errors.vin && (
+                  <span className={styles.error}>{errors.vin.message}</span>
+                )}
+              </div>
 
-                <div className={styles.fieldGroup}>
-                  <label>Date of Loss:</label>
-                  <input type="date" {...register('dateOfLoss')} />
-                </div>
+              <div className={styles.fieldGroup}>
+                <label>Claim Number:</label>
+                <input
+                  type="text"
+                  {...register('claimNumber')}
+                  autoComplete="off"
+                />
+                {errors.claimNumber && (
+                  <span className={styles.error}>{errors.claimNumber.message}</span>
+                )}
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Date of Loss:</label>
+                <input
+                  type="date"
+                  {...register('dateOfLoss')}
+                />
+                {errors.dateOfLoss && (
+                  <span className={styles.error}>{errors.dateOfLoss.message}</span>
+                )}
               </div>
             </div>
           </div>
@@ -377,28 +504,142 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
 
       case 3:
         return (
-          <div className="form-step">
-            <h2 className={styles.vehicleTitle}>Vehicle Information</h2>
-            <div className={styles.vehicleInfo}>
-              <div>
-                <label>Year</label>
-                <input {...register('year')} />
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Personal Information</h2>
+            <div className={styles.personalInfoSection}>
+              <div className={styles.fieldGroup}>
+                <label>Name:</label>
+                <input
+                  type="text"
+                  {...register('name')}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+                {errors.name && (
+                  <span className={styles.error}>{errors.name.message}</span>
+                )}
               </div>
-              <div>
-                <label>Make</label>
-                <input {...register('make')} />
+
+              <div className={styles.fieldGroup}>
+                <label>Phone:</label>
+                <input
+                  type="tel"
+                  {...register('phone')}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
+                {errors.phone && (
+                  <span className={styles.error}>{errors.phone.message}</span>
+                )}
               </div>
-              <div>
-                <label>Model</label>
-                <input {...register('model')} />
+
+              <div className={styles.fieldGroup}>
+                <label>Alt Phone: (optional)</label>
+                <input
+                  type="tel"
+                  {...register('altPhone')}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
               </div>
-              <div>
-                <label>VIN</label>
-                <input {...register('vin')} className={styles.vinInput} />
+
+              <div className={styles.fieldGroup}>
+                <label>Address:</label>
+                <div className={styles.autofillPrevention}>
+                  {/* Hidden inputs to confuse autofill */}
+                  <input type="text" style={{ display: 'none' }} />
+                  <input type="text" style={{ display: 'none' }} />
+                  <input
+                    type="text"
+                    {...register('address')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
+                    name={randomAddressField}
+                  />
+                </div>
+                {errors.address && (
+                  <span className={styles.error}>{errors.address.message}</span>
+                )}
               </div>
-              <div>
-                <label>Vehicle Description</label>
-                <input {...register('vehicleDescription')} />
+
+              <div className={styles.addressRow}>
+                <div className={styles.fieldGroup}>
+                  <label>City:</label>
+                  <input
+                    type="text"
+                    {...register('city')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                  />
+                  {errors.city && (
+                    <span className={styles.error}>{errors.city.message}</span>
+                  )}
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label>State:</label>
+                  <input
+                    type="text"
+                    {...register('state')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                  />
+                  {errors.state && (
+                    <span className={styles.error}>{errors.state.message}</span>
+                  )}
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label>ZIP:</label>
+                  <input
+                    type="text"
+                    {...register('zip')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                  />
+                  {errors.zip && (
+                    <span className={styles.error}>{errors.zip.message}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Email:</label>
+                <div className={styles.autofillPrevention}>
+                  {/* Hidden inputs to confuse autofill */}
+                  <input type="email" style={{ display: 'none' }} />
+                  <input type="email" style={{ display: 'none' }} />
+                  <input
+                    type="email"
+                    {...register('email')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
+                    name={randomEmailField}
+                  />
+                </div>
+                {errors.email && (
+                  <span className={styles.error}>{errors.email.message}</span>
+                )}
               </div>
             </div>
           </div>
@@ -406,111 +647,282 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
 
       case 4:
         return (
-          <div className="form-step">
-            <h2 className={styles.insuranceTitle}>Insurance Information</h2>
-            <div className={styles.insuranceInfo}>
-              <div>
-                <label>Insurance Company</label>
-                <input {...register('insuranceCompany')} />
-              </div>
-              <div>
-                <label>Claim Number</label>
-                <input {...register('claimNumber')} />
-              </div>
-              <div>
-                <label>Date of Loss</label>
-                <input {...register('dateOfLoss')} type="date" />
-              </div>
-              <div>
-                <label>Insured Name</label>
-                <input {...register('insuredName')} />
-              </div>
-              <div>
-                <label>Insured Phone</label>
-                <input {...register('insuredPhone')} type="tel" />
-              </div>
-              <div>
-                <label>Provider</label>
-                <input {...register('provider')} />
-              </div>
-              <div>
-                <label>Deductible</label>
-                <input {...register('deductible')} type="number" />
-              </div>
-              <div>
-                <label>Adjuster Name</label>
-                <input 
-                  type="text" 
-                  {...register('adjusterName')}
-                  placeholder="If you know it"
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Vehicle Information</h2>
+            <div className={styles.vehicleInfoSection}>
+              <p className={styles.infoText}>
+                This information was already provided in the authorization section.
+              </p>
+
+              <div className={styles.fieldGroup}>
+                <label>Year/Make/Model:</label>
+                <input
+                  type="text"
+                  {...register('vehicleDescription')}
+                  disabled
                 />
               </div>
-              <div>
-                <label>Adjuster Phone</label>
-                <input 
-                  type="tel" 
-                  {...register('adjusterPhone')}
-                  placeholder="If you know it"
+
+              <div className={styles.fieldGroup}>
+                <label>VIN:</label>
+                <input
+                  type="text"
+                  {...register('vin')}
+                  className={styles.vinInput}
+                  disabled
                 />
               </div>
-              <InsuranceQuestions />
             </div>
           </div>
         );
 
       case 5:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Repair Authorization</h2>
-            <div className={styles.repairAuth}>
-              <div className={styles.authCheckboxes}>
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('repairPermission', { required: true })}
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Insurance Information</h2>
+            <div className={styles.insuranceInfoSection}>
+              <div className={styles.fieldGroup}>
+                <label>Name of Insured:</label>
+                <div className={styles.autofillPrevention}>
+                  <input
+                    type="text"
+                    {...register('insuredName')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
-                  <span>Permission to Repair & Release - I authorize the repair of my vehicle and grand permission to DENT SOURCE to operate the vehicle for the purpose of testing and/or inspection. I authorize DENT SOURCE to conduct repairs in any way that deems necessary. I authorize DENT SOURCE to perform mechanical repairs. I agree that DENT SOURCE is not responsible for the loss of damage to this vehicle and/or articles left in the vehicle due to fire, theft or any other cause beyond it's control.</span>
-                </label>
+                </div>
+                {errors.insuredName && (
+                  <span className={styles.error}>{errors.insuredName.message}</span>
+                )}
+              </div>
 
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('additionalRepairs', { required: true })}
+              <div className={styles.fieldGroup}>
+                <label>Phone:</label>
+                <div className={styles.autofillPrevention}>
+                  <input
+                    type="tel"
+                    {...register('insuredPhone')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
-                  <span>Additional Repairs & Prior Damage - I acknowledge that if closer analysis reveals additional repairs are necessary, either I or my insurance company will be contacted for authroization of any additional repair charges. If new parts listed in the attached repair order are not available, I authorize DENT SOURCE to repair such damage or worn parts when possible. Old parts will be thrown away unless otherwise instructed. I authorize DENT SOURCE to manufacture access to dent that may not be accessible due to their location on this vehicle. DENT SOURCE is not responsible for prior damage listed in the Comments/Parts section on this estimate.</span>
-                </label>
+                </div>
+                {errors.insuredPhone && (
+                  <span className={styles.error}>{errors.insuredPhone.message}</span>
+                )}
+              </div>
 
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('payment', { required: true })}
+              <div className={styles.fieldGroup}>
+                <label>Provider:</label>
+                <div className={styles.autofillPrevention}>
+                  <input
+                    type="text"
+                    {...register('provider')}
+                    defaultValue={watch('insuranceCompany')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
-                  <span>Payment - I agree to pay for all repair changes not previously paid to DENT SOURCE by my insurance company, and further understand that the total amount of the repair charges must be paid before the attached vehicle can be released for delivery. If insurance coverage pays either a portion of or the total amount due, I acknowledge that the insurance companies check/draft must be obtained by me or sent in advance by the insurance company to DENT SOURCE and received by DENT SOURCE. I also acknowledge that I must make arrangements with any lien holder or other payees to endorse the insurance check/draft prior to the release of the repaired vehicle. I authorize any and all supplements payable directly to DENT SOURCE for the consideration of repairs made to the vehicle. I hereby authorize DENT SOURCE to act as Power of Attorney to sign for or endorse any checks and/or drafts make payable to me and any release there to, as settlement for my claim for damage to this vehicle.</span>
-                </label>
+                </div>
+                {errors.provider && (
+                  <span className={styles.error}>{errors.provider.message}</span>
+                )}
+              </div>
 
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('totalLoss', { required: true })}
+              <div className={styles.fieldGroup}>
+                <label>Claim Number:</label>
+                <div className={styles.autofillPrevention}>
+                  <input
+                    type="text"
+                    {...register('claimNumber')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
-                  <span>Total Loss - Vehicles deemed a total loss by insurance provider will be charged an administration fee, storage fee, from date of drop and any repairs or parts installed.</span>
-                </label>
+                </div>
+                {errors.claimNumber && (
+                  <span className={styles.error}>{errors.claimNumber.message}</span>
+                )}
+              </div>
 
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('failureToPay', { required: true })}
+              <div className={styles.fieldGroup}>
+                <label>What is your deductible?</label>
+                <div className={styles.autofillPrevention}>
+                  <input
+                    type="number"
+                    {...register('deductible')}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
-                  <span>Failure to Pay - In the event that I fail to pay pursuant to the paragraph above, I acknowledge an expressed mechanics lien on the vehicle to secure payment in the amount of the repairs, and further agree to pay responsible attorney's fees and court costs in the event that legal action becomes necessary to enforce this contract. This agreement is governed by and shall be construed in accordance with the law of Oklahoma and the parties submit all their disputes arising out of or in connection with this agreement to the exclusive jurisdiction of the courts of Oklahoma County, OK.</span>
-                </label>
+                </div>
+                {errors.deductible && (
+                  <span className={styles.error}>{errors.deductible.message}</span>
+                )}
+              </div>
 
-                <label className={styles.authOption}>
-                  <input 
-                    type="checkbox" 
-                    {...register('reviews', { required: true })}
-                  />
-                  <span>Reviews - Leaving a negative review on social media, internet, or any other media outlet, will result in forfeiture of all promotional discounts, including but not limited to deductible coupon, rental car fee and/or cash back offer. Failure to reimburse in a timely manner will result in legal action. Customer shall pay all legal fees incurred by DENT SOURCE enforcing the terms of this contract.</span>
-                </label>
+              <div className={styles.questionSection}>
+                <div className={styles.questionGroup}>
+                  <p className={styles.questionLabel}>Have you had an estimate done on this vehicle?</p>
+                  <div className={styles.radioGroup}>
+                    <label>
+                      <input
+                        type="radio"
+                        value="true"
+                        {...register('hasEstimate')}
+                      />
+                      Yes
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="false"
+                        {...register('hasEstimate')}
+                      />
+                      No
+                    </label>
+                  </div>
+                </div>
+
+                {watch('hasEstimate') === 'true' && (
+                  <div className={styles.questionGroup}>
+                    <p className={styles.questionLabel}>Do you have a copy of the estimate?</p>
+                    <div className={styles.radioGroup}>
+                      <label>
+                        <input
+                          type="radio"
+                          value="true"
+                          {...register('hasEstimateCopy')}
+                        />
+                        Yes
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          value="false"
+                          {...register('hasEstimateCopy')}
+                        />
+                        No
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.questionGroup}>
+                  <p className={styles.questionLabel}>Have you received a check for this claim?</p>
+                  <div className={styles.radioGroup}>
+                    <label>
+                      <input
+                        type="radio"
+                        value="true"
+                        {...register('hasReceivedCheck')}
+                      />
+                      Yes
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="false"
+                        {...register('hasReceivedCheck')}
+                      />
+                      No
+                    </label>
+                  </div>
+                </div>
+
+                {watch('hasReceivedCheck') === 'true' && (
+                  <div className={styles.questionGroup}>
+                    <p className={styles.questionLabel}>Has it been cashed?</p>
+                    <div className={styles.radioGroup}>
+                      <label>
+                        <input
+                          type="radio"
+                          value="true"
+                          {...register('hasCheckedCashed')}
+                        />
+                        Yes
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          value="false"
+                          {...register('hasCheckedCashed')}
+                        />
+                        No
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.questionGroup}>
+                  <p className={styles.questionLabel}>Were you referred here by someone you know?</p>
+                  <div className={styles.radioGroup}>
+                    <label>
+                      <input
+                        type="radio"
+                        value="true"
+                        {...register('referralSources.referral')}
+                      />
+                      Yes
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="false"
+                        {...register('referralSources.referral')}
+                      />
+                      No
+                    </label>
+                  </div>
+                </div>
+
+                {watch('referralSources.referral') === 'true' && (
+                  <div className={styles.referralInfoSection}>
+                    <p className={styles.referralInfoNote}>
+                      Please provide as much information as possible about who referred you so we will be able to successfully contact this person
+                    </p>
+
+                    <div className={styles.fieldGroup}>
+                      <label>Name of referrer:</label>
+                      <input
+                        type="text"
+                        {...register('referralSources.referralName')}
+                      />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                      <label>Address:</label>
+                      <input
+                        type="text"
+                        {...register('referralSources.referralAddress')}
+                      />
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                      <label>Phone:</label>
+                      <input
+                        type="tel"
+                        {...register('referralSources.referralPhone')}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -518,46 +930,158 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
 
       case 6:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Authorization</h2>
-            <div className={styles.signatureSection} ref={signatureSectionRef}>
-              <label className={styles.cursiveFont}>E-signature:</label>
-              <SignatureCanvas
-                ref={(ref) => setSignaturePad(ref)}
-                penColor="#3BB554"
-                canvasProps={{
-                  className: styles.signatureCanvas,
-                  width: 500,
-                  height: 200
-                }}
-                onEnd={() => setHasSignature(true)}
-              />
-              <div className={styles.signatureActions}>
-                <button 
-                  type="button"
-                  className={styles.clearButton}
-                  onClick={() => {
-                    signaturePad?.clear();
-                    setHasSignature(false);
-                    setSignatureSaved(false);
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Disclaimers</h2>
+            <div className={styles.disclaimersSection}>
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('repairPermission', { required: true })}
+                  />
+                  <div>
+                    <h3>Permission to Repair & Release</h3>
+                    <p>I authorize the repair of my vehicle and grand permission to DENT SOURCE to operate the vehicle for the purpose of testing and/or inspection. I authorize DENT SOURCE to conduct repairs in any way that deems necessary. I authorize DENT SOURCE to perform mechanical repairs. I agree that DENT SOURCE is not responsible for the loss of damage to this vehicle and/or articles left in the vehicle due to fire, theft or any other cause beyond its control.</p>
+                  </div>
+                </label>
+                {errors.repairPermission && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('additionalRepairs', { required: true })}
+                  />
+                  <div>
+                    <h3>Additional Repairs & Prior Damage</h3>
+                    <p>I acknowledge that if closer analysis reveals additional repairs are necessary, either I or my insurance company will be contacted for authorization of any additional repair charges. If new parts listed in the attached repair order are not available, I authorize DENT SOURCE to repair such damage or worn parts when possible. Old parts will be thrown away unless otherwise instructed. I authorize DENT SOURCE to manufacture access to dent that may not be accessible due to their location on this vehicle. DENT SOURCE is not responsible for prior damage listed in the Comments/Parts section on this estimate.</p>
+                  </div>
+                </label>
+                {errors.additionalRepairs && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('payment', { required: true })}
+                  />
+                  <div>
+                    <h3>Payment</h3>
+                    <p>I agree to pay for all repair changes not previously paid to DENT SOURCE by my insurance company, and further understand that the total amount of the repair charges must be paid before the attached vehicle can be released for delivery. If insurance coverage pays either a portion of or the total amount due, I acknowledge that the insurance companies check/draft must be obtained by me or sent in advance by the insurance company to DENT SOURCE and received by DENT SOURCE. I also acknowledge that I must make arrangements with any lien holder or other payees to endorse the insurance check/draft prior to the release of the repaired vehicle. I authorize any and all supplements payable directly to DENT SOURCE for the consideration of repairs made to this vehicle.</p>
+                  </div>
+                </label>
+                {errors.payment && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('totalLoss', { required: true })}
+                  />
+                  <div>
+                    <h3>Total Loss</h3>
+                    <p>Vehicles deemed a total loss by insurance provider will be charged an administration fee, storage fee, from date of drop and any repairs or parts installed.</p>
+                  </div>
+                </label>
+                {errors.totalLoss && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('failureToPay', { required: true })}
+                  />
+                  <div>
+                    <h3>Failure to Pay</h3>
+                    <p>In the event that I fail to pay pursuant to the paragraph above, I acknowledge an expressed mechanics lien on the vehicle to secure payment in the amount of the repairs, and further agree to pay responsible attorney's fees and court costs in the event that legal action becomes necessary to enforce this contract. This agreement is governed by and shall be construed in accordance with the law of Oklahoma and the parties submit all their disputes arising out of or in connection with this agreement to the exclusive jurisdiction of the courts of Oklahoma County, OK.</p>
+                  </div>
+                </label>
+                {errors.failureToPay && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.disclaimerItem}>
+                <label className={styles.disclaimerLabel}>
+                  <input
+                    type="checkbox"
+                    {...register('reviews', { required: true })}
+                  />
+                  <div>
+                    <h3>Reviews</h3>
+                    <p>Leaving a negative review on social media, internet, or any other media outlet, will result in forfeiture of all promotional discounts, including but not limited to deductible coupon, rental car fee and/or cash back offer. Failure to reimburse in a timely manner will result in legal action. Customer shall pay all legal fees incurred by DENT SOURCE enforcing the terms of this contract.</p>
+                  </div>
+                </label>
+                {errors.reviews && (
+                  <span className={styles.error}>This acknowledgment is required</span>
+                )}
+              </div>
+
+              <div className={styles.signatureSection} ref={signatureSectionRef}>
+                <h3>Signature</h3>
+                <SignatureCanvas
+                  ref={(ref) => setSignaturePad(ref)}
+                  penColor="#3BB554"
+                  canvasProps={{
+                    className: styles.signatureCanvas,
+                    width: windowWidth > 768 ? 500 : windowWidth - 60,
+                    height: 200
                   }}
-                >
-                  Clear
-                </button>
-                <button 
-                  type="button"
-                  className={styles.saveButton}
-                  onClick={() => {
-                    if (hasSignature && signaturePad) {
-                      setValue('signature', signaturePad.toDataURL());
-                      setSignatureSaved(true);
-                      setTimeout(scrollToSignature, 100);
-                    }
-                  }}
-                  disabled={!hasSignature}
-                >
-                  Save
-                </button>
+                  onEnd={() => setHasSignature(true)}
+                />
+                <div className={styles.signatureActions}>
+                  <button
+                    type="button"
+                    className={styles.clearButton}
+                    onClick={() => {
+                      signaturePad?.clear();
+                      setHasSignature(false);
+                      setSignatureSaved(false);
+                    }}
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.saveButton}
+                    onClick={() => {
+                      if (hasSignature && signaturePad) {
+                        setValue('signature', signaturePad.toDataURL());
+                        setSignatureSaved(true);
+                        setTimeout(scrollToSignature, 100);
+                      }
+                    }}
+                    disabled={!hasSignature}
+                  >
+                    Save
+                  </button>
+                  {signatureSaved && (
+                    <div className={styles.signatureSavedIndicator}>
+                      <span className={styles.checkmark}>✓</span> Signature Saved
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.dateField}>
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    {...register('date')}
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -565,37 +1089,61 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
     }
   };
 
+  // Check if all required checkboxes are checked on the last page
+  const allRequiredChecked = currentStep === 6 &&
+    watch('repairPermission') &&
+    watch('additionalRepairs') &&
+    watch('payment') &&
+    watch('totalLoss') &&
+    watch('failureToPay') &&
+    watch('reviews') &&
+    signatureSaved;
+
   return (
     <div className={styles.formContainer}>
       <h1 className={styles.greenHeading}>Drop Off Form</h1>
-      
-      <form onSubmit={handleSubmit(onSubmit)}>
+
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        {/* Hidden fields to catch autofill */}
+        <div style={{ display: 'none' }}>
+          <input type="text" name="address" autoComplete="street-address" />
+          <input type="email" name="email" autoComplete="email" />
+        </div>
         {renderStep()}
         <div className={styles.formNavigation}>
           {currentStep > 1 && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={styles.prevButton}
-              onClick={() => setCurrentStep(currentStep - 1)}
+              onClick={() => {
+                setCurrentStep(currentStep - 1);
+                // Scroll to top of the page when changing steps
+                window.scrollTo(0, 0);
+              }}
             >
               Previous
             </button>
           )}
           {currentStep < 6 ? (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={styles.nextButton}
-              onClick={() => setCurrentStep(currentStep + 1)}
+              onClick={() => {
+                // Ensure we can navigate to the next step
+                setCurrentStep(currentStep + 1);
+                // Scroll to top of the page when changing steps
+                window.scrollTo(0, 0);
+              }}
             >
               Next
             </button>
           ) : (
-            <button 
-              type="submit" 
-              className={`${styles.submitButton} ${!signatureSaved ? styles.disabled : ''}`}
-              disabled={!signatureSaved}
+            <button
+              type="submit"
+              className={`${styles.submitButton} ${!allRequiredChecked ? styles.disabled : ''}`}
+              disabled={!allRequiredChecked}
             >
-              Submit
+              Submit Document
             </button>
           )}
         </div>

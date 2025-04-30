@@ -1,40 +1,61 @@
 .formContainer {
-  padding: 2rem;
-  margin: 0 auto;
-  background: transparent; /* Changed from var(--background-secondary) to transparent */
-  border-radius: 8px;
+  width: 95%;
   max-width: 800px;
+  margin: 1.5rem auto;
+  padding: clamp(1rem, 5vw, 2rem);
+  background-color: #0D0D0D;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
 }
 
 .centerHeading {
   text-align: center;
-  margin-bottom: 2rem;
   color: var(--accent-primary);
+  margin-bottom: clamp(1.5rem, 5vw, 2rem);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.formStep {
+  width: 100%;
+  padding: clamp(1rem, 4vw, 1.5rem);
+  background-color: #0D0D0D;
+  border-radius: 8px;
 }
 
 .nameGroup {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: clamp(0.75rem, 2vw, 1rem);
 }
 
 .inputGroup {
-  margin-bottom: 20px;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
 }
 
 .inputGroup label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
   color: #fff;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 500;
 }
 
 .inputGroup input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background: #2A2A2A;
-  color: #fff;
+  padding: clamp(0.6rem, 2vw, 0.75rem);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2) !important;
+  color: white;
+  font-size: 1rem;
+  min-height: 44px; /* Better touch target */
+  transition: border-color 0.2s ease;
+}
+
+.inputGroup input:focus {
+  border-color: var(--accent-primary);
+  outline: none;
 }
 
 .phoneInput {
@@ -43,88 +64,178 @@
 }
 
 .addressGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
 }
 
 .addressDetails {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: clamp(0.75rem, 2vw, 1rem);
+  margin-top: clamp(0.75rem, 2vw, 1rem);
 }
 
 /* Card Details Section */
 .cardTypeSection {
   width: 100%;
-  text-align: left !important;
-  margin-bottom: 2rem;
+  text-align: left;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cardTypeSection h3 {
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  color: var(--accent-primary);
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
 }
 
 .cardOptions {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 1.5rem !important;
-  margin-top: 1rem !important;
-  padding-left: 1rem !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.75rem, 2vw, 1rem);
+  margin-top: clamp(0.75rem, 2vw, 1rem);
+  padding-left: clamp(0.5rem, 2vw, 1rem);
 }
 
 .cardOption {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1rem !important;
-  width: auto !important;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  width: auto;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.cardOption:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .cardOption input[type="radio"] {
-  width: auto !important;
-  margin: 0 !important;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
 }
 
 .chargesBox {
-  background: #2A2A2A;
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: clamp(1rem, 3vw, 1.5rem);
   border-radius: 8px;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chargesBox h3 {
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  color: var(--accent-primary);
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
+}
+
+.chargesBox ul {
+  list-style-type: none;
+  padding-left: clamp(1rem, 3vw, 1.5rem);
+}
+
+.chargesBox li {
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+  position: relative;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chargesBox li:before {
+  content: "•";
+  position: absolute;
+  left: -1rem;
+  color: var(--accent-primary);
 }
 
 /* Agreement & Charges Section */
 .agreementBox {
-  background: #2A2A2A;
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: clamp(1rem, 3vw, 1.5rem);
   border-radius: 8px;
   text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .agreementText {
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .acceptanceRow {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  margin-top: 1rem !important;
-  text-align: left !important;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  margin-top: clamp(0.75rem, 2vw, 1rem);
+  text-align: left;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.acceptanceRow:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .acceptanceRow input[type="checkbox"] {
-  width: auto !important;
-  margin: 0 !important;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
 }
 
 /* Acknowledgements Section */
 .acknowledgements {
-  text-align: left !important;
-  padding: 1rem !important;
+  text-align: left;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
 }
 
 .acknowledgementRow {
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 0.5rem !important;
-  margin-bottom: 1rem !important;
-  text-align: left !important;
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  text-align: left;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.acknowledgementRow:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.acknowledgementRow input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin-top: 0.25rem;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.acknowledgementRow span {
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .acknowledgementRow input[type="checkbox"] {
@@ -134,85 +245,173 @@
 }
 
 .acknowledgementNotice {
-  color: #777;
-  margin-bottom: 1rem;
-  padding-left: 1rem;
-  text-align: left !important;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  padding-left: clamp(0.75rem, 2vw, 1rem);
+  text-align: left;
+  font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+  font-style: italic;
 }
 
+/* Signature Section */
 .signatureSection {
-  margin-top: 2rem;
+  margin: clamp(1.5rem, 4vw, 2rem) 0;
+  text-align: center;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.signatureSection h3 {
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
+  color: var(--text-primary);
 }
 
 /* Signature Canvas */
 .signatureCanvas {
   background-color: #000 !important;
   border: 1px solid var(--border-color) !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  height: 200px !important;
+  margin: 0 auto !important;
+  touch-action: none !important;
 }
 
 .signatureActions {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: clamp(0.75rem, 2vw, 1rem);
+  justify-content: center;
+  margin: clamp(0.75rem, 2vw, 1rem) auto clamp(1.5rem, 4vw, 2rem);
+  flex-wrap: wrap;
 }
 
 .formNavigation {
   display: flex;
   justify-content: space-between;
-  margin-top: 2rem;
+  margin-top: clamp(1.5rem, 4vw, 2rem);
+  gap: clamp(0.75rem, 2vw, 1rem);
+  flex-wrap: wrap;
 }
 
 .prevButton {
-  background: #dc3545;
+  background: rgba(220, 53, 69, 0.9);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: clamp(0.6rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  min-height: 48px; /* Better touch target */
+  flex: 1;
+  min-width: 120px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.prevButton:hover {
+  background: #dc3545;
+  transform: translateY(-2px);
+}
+
+.prevButton:active {
+  transform: translateY(1px);
 }
 
 .nextButton, .submitButton {
   background: var(--accent-primary);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: clamp(0.6rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  min-height: 48px; /* Better touch target */
+  flex: 1;
+  min-width: 120px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nextButton:hover, .submitButton:hover {
+  background: #309144;
+  transform: translateY(-2px);
+}
+
+.nextButton:active, .submitButton:active {
+  transform: translateY(1px);
 }
 
 .submitButton:disabled {
-  background: #6c757d;
+  background: rgba(108, 117, 125, 0.7);
   cursor: not-allowed;
+  transform: none;
 }
 
 .error {
   color: #dc3545;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .clearButton {
-  background: #6c757d;
+  background: rgba(108, 117, 125, 0.8);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  min-height: 44px; /* Better touch target */
+  min-width: 120px;
+  flex: 1;
+  max-width: 200px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  background: #6c757d;
+  transform: translateY(-2px);
+}
+
+.clearButton:active {
+  transform: translateY(1px);
 }
 
 .saveButton {
   background: var(--accent-primary);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  min-height: 44px; /* Better touch target */
+  min-width: 120px;
+  flex: 1;
+  max-width: 200px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+  background: #309144;
+  transform: translateY(-2px);
+}
+
+.saveButton:active {
+  transform: translateY(1px);
 }
 
 .saveButton:disabled {
-  background: #6c757d;
+  background: rgba(108, 117, 125, 0.7);
   cursor: not-allowed;
+  transform: none;
 }
 
 .greenRadio {
@@ -225,27 +424,35 @@
 }
 
 .agreementSection {
-  margin: 2rem 0;
+  margin: clamp(1.5rem, 4vw, 2rem) 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .agreementText {
-  color: #ffffff;
-  opacity: 1;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  line-height: 1.5;
 }
 
 .chargesBreakdown {
-  opacity: 0.8;
   background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
+  padding: clamp(0.75rem, 2vw, 1rem);
   border-radius: 8px;
-  margin: 1rem 0;
+  margin: clamp(0.75rem, 2vw, 1rem) 0;
+  font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+  line-height: 1.5;
 }
 
 .navigationButtons {
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  margin-top: clamp(1.5rem, 4vw, 2rem);
+  flex-wrap: wrap;
 }
 
 /* Add styles for address autocomplete */
@@ -259,20 +466,64 @@
   left: 0;
   right: 0;
   background: #1A1A1A;
-  border: 1px solid #3BB554;
-  border-radius: 4px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .suggestionItem {
-  padding: 0.75rem;
+  padding: clamp(0.6rem, 2vw, 0.75rem);
   cursor: pointer;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: background-color 0.2s ease;
 }
 
 .suggestionItem:hover {
   background: rgba(59, 181, 84, 0.2);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .formContainer {
+    width: 100%;
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+
+  .nameGroup, .addressDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .signatureActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .clearButton, .saveButton {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .formNavigation {
+    flex-direction: column;
+  }
+
+  .prevButton, .nextButton, .submitButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardOptions {
+    padding-left: 0;
+  }
+
+  .cardOption {
+    width: 100%;
+  }
 }
 
 /* iOS-specific adjustments */
@@ -296,27 +547,32 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .loadingSpinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3BB554;
+  border: 4px solid rgba(243, 243, 243, 0.3);
+  border-top: 4px solid var(--accent-primary);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
   animation: spin 1s linear infinite;
+  box-shadow: 0 0 15px rgba(59, 181, 84, 0.3);
 }
 
 .loadingOverlay p {
   color: white;
-  margin-top: 20px;
-  font-size: 1.2em;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.4;
 }
 
 @keyframes spin {

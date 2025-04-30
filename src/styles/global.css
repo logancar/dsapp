@@ -33,8 +33,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   min-height: -webkit-fill-available;
-  overflow: hidden;
-  position: fixed;
   width: 100%;
   color-scheme: dark;
 }
@@ -62,8 +60,8 @@ body {
 }
 
 /* Input styles across all pages */
-input, 
-textarea, 
+input,
+textarea,
 select {
   width: 100%;
   padding: 12px;
@@ -126,4 +124,4 @@ button:disabled {
     padding: 24px;
   }
 }
-  
+

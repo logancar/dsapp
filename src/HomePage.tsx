@@ -73,7 +73,7 @@ function HomePage() {
           <p className={styles.subtitle}>Enter Employee ID</p>
 
           <input
-            className={styles.input} /* or styles.inputDisplay if your CSS uses that name */
+            className={styles.input}
             type="password"
             value={employeeID}
             placeholder="****"

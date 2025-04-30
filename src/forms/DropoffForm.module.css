@@ -1,19 +1,25 @@
 .formContainer {
-  width: 90%;
-  max-width: 800px; /* Increased from previous value */
-  margin: 2rem auto;
-  padding: 2rem;
+  width: 95%;
+  max-width: 800px;
+  margin: 1.5rem auto;
+  padding: clamp(1rem, 5vw, 2rem);
+  background-color: #0D0D0D;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
 }
 
 .wideForm {
   width: 100%;
-  max-width: 700px; /* Increased for wider forms */
+  max-width: 700px;
   margin: 0 auto;
 }
 
 .formStep {
   width: 100%;
-  padding: 1.5rem;
+  padding: clamp(1rem, 4vw, 1.5rem);
+  background-color: #0D0D0D;
+  border-radius: 8px;
 }
 
 /* Update agreement section styling */
@@ -37,8 +43,9 @@
 .formNavigation {
   display: flex;
   justify-content: space-between;
-  gap: 1rem; /* Add space between buttons */
+  gap: 1rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
 .prevButton,
@@ -47,17 +54,34 @@
   padding: 0.75rem 1.5rem;
   min-width: 120px;
   font-size: 1rem;
+  flex: 1;
+  min-height: 48px; /* Better touch target */
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.prevButton:hover,
+.nextButton:hover,
+.submitButton:hover {
+  transform: translateY(-2px);
+}
+
+.prevButton:active,
+.nextButton:active,
+.submitButton:active {
+  transform: translateY(1px);
 }
 
 .greenHeading {
   color: #3BB554;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 5vw, 2rem);
+  font-size: clamp(1.5rem, 5vw, 2rem);
 }
 
 .formGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
@@ -66,31 +90,51 @@
   font-size: 1.2rem;
 }
 
-.referralSection {
+.referralGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: clamp(0.5rem, 2vw, 1rem);
+  padding: clamp(0.75rem, 3vw, 1.5rem);
   width: 100%;
-  max-width: 2000px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.referralOption {
-  background-color: #333;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 1rem;
-  border-radius: 4px;
+.referralCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
   cursor: pointer;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: none;
-  width: 100%;
+  transition: all 0.2s ease;
+  min-height: 44px; /* Better touch target */
 }
 
-.referralOption.selected {
-  background-color: #3BB554;
+.referralCheckbox:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.referralCheckbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #3BB554;
+  margin: 0;
+  cursor: pointer;
+}
+
+.referralCheckbox span {
   color: white;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.subtitle {
+  text-align: center;
+  color: #ABABAB;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
 }
 
 .conditionalInput {
@@ -100,7 +144,127 @@
 
 .authorizationSection {
   text-align: left;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.authText {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.inlineInput {
+  display: inline-block;
+  width: auto;
+  min-width: min(200px, 80%);
+  margin: 0 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid #3BB554;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  background-color: transparent !important;
+  color: #3BB554 !important;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.signatureRow {
+  display: flex;
+  flex-direction: row;
+  gap: clamp(1rem, 4vw, 2rem);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.signatureField {
+  flex: 2;
+  min-width: 250px;
+}
+
+.dateField {
+  flex: 1;
+  min-width: 200px;
+}
+
+.signaturePlaceholder {
+  height: 60px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signatureNote {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.fieldGroup {
+  margin-bottom: clamp(1rem, 4vw, 1.5rem);
+}
+
+.fieldGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: clamp(0.9rem, 3vw, 1rem);
+}
+
+.fieldGroup input {
+  width: 100%;
+  padding: clamp(0.6rem, 2vw, 0.75rem);
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  min-height: 44px; /* Better touch target */
+  transition: border-color 0.2s ease;
+}
+
+.fieldGroup input:focus {
+  border-color: #3BB554;
+  outline: none;
+}
+
+/* Prevent autofill styling */
+.fieldGroup input:-webkit-autofill,
+.fieldGroup input:-webkit-autofill:hover,
+.fieldGroup input:-webkit-autofill:focus,
+.fieldGroup input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.2) inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.autofillPrevention {
+  position: relative;
+  width: 100%;
+}
+
+.autofillPrevention input {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.error {
+  color: #ff5252;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  margin-top: 0.25rem;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(255, 82, 82, 0.1);
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .vinInput {
@@ -108,15 +272,101 @@
   letter-spacing: 0.2em;
 }
 
-.personalInfo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 2rem;
+.personalInfoSection,
+.vehicleInfoSection,
+.insuranceInfoSection,
+.disclaimersSection {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.fullWidth {
-  grid-column: 1 / -1;
+.addressRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .addressRow {
+    grid-template-columns: 1fr;
+  }
+
+  .formContainer {
+    width: 100%;
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+
+  .formStep {
+    padding: 1rem;
+  }
+
+  .signatureRow {
+    flex-direction: column;
+  }
+
+  .inlineInput {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .authText {
+    font-size: 0.95rem;
+  }
+
+  .questionGroup {
+    padding: 0.75rem;
+  }
+
+  .radioGroup {
+    gap: 0.5rem;
+  }
+
+  .radioGroup label {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .formNavigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .referralGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    padding: 0.75rem;
+  }
+
+  .disclaimerLabel {
+    gap: 0.5rem;
+  }
+
+  .disclaimerLabel input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+  }
+
+  .signatureCanvas {
+    min-height: 120px !important;
+  }
+
+  .signatureActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .clearButton, .saveButton {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .acknowledgements {
@@ -139,26 +389,96 @@
 /* E-signature section */
 .signatureSection {
   width: 100%;
-  margin: 2rem 0;
+  margin: clamp(1.5rem, 4vw, 2rem) 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .signatureSection h3 {
-  font-family: inherit; /* Match app font */
+  font-family: inherit;
   color: #ffffff;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  text-align: center;
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
 }
 
 .signatureCanvas {
   background-color: #000 !important;
   border: 1px solid var(--border-color) !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 150px !important;
+  margin: 0 auto !important;
+  display: block !important;
+  touch-action: none !important;
 }
 
 .signatureActions {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin: 1rem auto;
+  justify-content: center;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.clearButton, .saveButton {
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  min-width: 120px;
+  min-height: 44px; /* Better touch target */
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 200px;
+}
+
+.clearButton {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.clearButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.saveButton {
+  background-color: #3BB554;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #309144;
+}
+
+.saveButton:disabled {
+  background-color: rgba(59, 181, 84, 0.3);
+  cursor: not-allowed;
+}
+
+.signatureSavedIndicator {
+  display: flex;
+  align-items: center;
+  color: #3BB554;
+  font-weight: 500;
+  margin-left: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(59, 181, 84, 0.1);
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.checkmark {
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+  color: #3BB554;
+  font-weight: bold;
 }
 
 .insuranceInfo {
@@ -206,73 +526,133 @@
   grid-column: 1 / -1;
 }
 
-.vehicleInfo, .insuranceInfo {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 auto;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-/* Override any conflicting styles */
-.vehicleInfo > *, .insuranceInfo > * {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-.vehicleTitle {
+.infoText {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  color: var(--text-primary);
-  width: 100%;
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
 }
 
-.repairAuth {
-  width: 100%;
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.questionSection {
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
 }
 
-.repairAuth h3 {
+.questionGroup {
   margin-bottom: 1.5rem;
-  text-align: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
 }
 
-.authCheckboxes {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.questionLabel {
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: white;
 }
 
-.authOption {
+.radioGroup {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
+  gap: clamp(1rem, 4vw, 2rem);
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.radioGroup label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  min-width: 100px;
+  transition: background-color 0.2s ease;
+}
+
+.radioGroup label:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.radioGroup input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #3BB554;
+  margin: 0;
   cursor: pointer;
 }
 
-.authOption input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-top: 0.25rem;
+.referralInfoSection {
+  margin-top: clamp(0.75rem, 2vw, 1rem);
+  padding: clamp(0.75rem, 2vw, 1rem);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.authOption span {
-  font-size: 1rem;
+.referralInfoNote {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  padding: 0.75rem;
+  background-color: rgba(59, 181, 84, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #3BB554;
+  line-height: 1.4;
+}
+
+/* Styling for disclaimers section is now combined with other sections above */
+
+.disclaimerItem {
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  padding-bottom: clamp(1rem, 3vw, 1.5rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.disclaimerItem:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.disclaimerItem:last-child {
+  border-bottom: none;
+}
+
+.disclaimerLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.disclaimerLabel input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin-top: 0.5rem;
+  accent-color: #3BB554;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.disclaimerLabel h3 {
+  font-size: clamp(1rem, 3vw, 1.1rem);
+  margin-bottom: 0.5rem;
+  color: #3BB554;
+}
+
+.disclaimerLabel p {
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
   line-height: 1.5;
-  text-align: left;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Center the "How did you hear about us?" heading */
@@ -286,8 +666,9 @@
 .centerHeading {
   text-align: center;
   color: white;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.25rem, 4vw, 2rem);
   width: 100%;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
 }
 
 .submitButton.disabled {
@@ -317,20 +698,34 @@
 }
 
 .questionGroup {
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.75rem, 3vw, 1.25rem);
+  padding: clamp(0.75rem, 3vw, 1.25rem);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.questionGroup:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .questionGroup label {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vw, 1rem);
   color: white;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
 }
 
-.questionGroup input[type="checkbox"] {
+.questionGroup input[type="checkbox"],
+.questionGroup input[type="radio"] {
   width: 20px;
   height: 20px;
   accent-color: #3BB554;
+  cursor: pointer;
+  margin: 0;
 }
 
 

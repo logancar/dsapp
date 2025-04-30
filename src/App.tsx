@@ -1,12 +1,16 @@
 // src/App.tsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from 'react-router-dom';
 
 // Pages & Components
-import HomePage from './HomePage';                  // HomePage is directly in src/
-import DashboardPage from './pages/DashboardPage.tsx';
-import ThanksPage from './ThanksPage';             // ThanksPage is directly in src/
-import RentalForm from './forms/RentalForm';        // If RentalForm is in src/forms
-import PickupForm from './forms/PickupForm';        // NOTE: ./ NOT ../
+import HomePage from './HomePage';
+import DashboardPage from './pages/DashboardPage';
+import ThanksPage from './ThanksPage';
+import RentalForm from './forms/RentalForm';
+import PickupForm from './forms/PickupForm';
 import DropoffForm from './forms/DropoffForm';
 import TestConsentPopup from './pages/TestConsentPopup';
 
@@ -46,10 +50,6 @@ function App() {
 }
 
 export default App;
-
-
-
-
 
 
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import SignatureField from '../components/SignatureField';
@@ -12,164 +12,179 @@ interface LocationState {
 }
 
 interface RentalFormData {
-  customerFirstName: string;
-  customerLastName: string;
+  // Page 1: Credit Card Authorization Form
+  customerName: string;
   customerPhone: string;
   customerEmail: string;
-  customerStreet: string;
-  customerCity: string;
-  customerState: string;
-  customerZip: string;
-  
+
   cardHolderName: string;
-  cardHolderStreet: string;
-  cardHolderCity: string;
-  cardHolderState: string;
-  cardHolderZip: string;
+  cardHolderAddress: string;
   cardHolderPhone: string;
   cardHolderEmail: string;
-  
+
   cardType: string;
-  otherCardIssuer?: string;
-  
-  Card_Number: string;
-  Expiration_Date: string;
-  CVC: string;
-  
-  cvc: string;
+  otherCardType?: string;
+  cardNumber: string;
   expirationDate: string;
-  vehicleDescription: string;
-  vin: string;
-  vehicleOwnerName: string;
-  
+  cvc: string;
+
   agreementAccepted: boolean;
-  
-  // Acknowledgements
-  fuelAcknowledgement: boolean;
-  smokingAcknowledgement: boolean;
-  petAcknowledgement: boolean;
-  outOfStateAcknowledgement: boolean;
-  tollAcknowledgement: boolean;
-  paymentAcknowledgement: boolean;
-  
+  signaturePage1: string;
+
+  // Page 2: Car Rental Acknowledgments
+  acknowledgement1: boolean; // Promissory to return...increments, upon return
+  acknowledgement2: boolean; // Dent Source prohibits...the rented vehicle
+  acknowledgement3: boolean; // Pets are prohibited...up to $450
+  acknowledgement4: boolean; // I understand that...Dent Source LLC
+  acknowledgement5: boolean; // I understand that...tolls and parking
+  acknowledgement6: boolean; // I understand that...Oklahoma County, OK
+  signaturePage2: string;
+
+  // Page 3: Authorization and Direction of Pay
   insuranceCompany: string;
   claimNumber: string;
   dateOfLoss: string;
-  signature: string;
-  signaturePage2: string;
   signaturePage3: string;
 }
 
 const schema = yup.object().shape({
-  customerFirstName: yup.string().required('First name is required'),
-  customerLastName: yup.string().required('Last name is required'),
-  customerPhone: yup
-    .string()
-    .required('Phone number is required')
-    .matches(/^\(\d{3}\)\d{3}-\d{4}$/, 'Phone format: (XXX)XXX-XXXX'),
+  // Page 1: Credit Card Authorization Form
+  customerName: yup.string().required('Customer name is required'),
+  customerPhone: yup.string().required('Phone number is required'),
   customerEmail: yup.string().email('Invalid email').required('Email is required'),
-  customerStreet: yup.string().required('Street address is required'),
-  customerCity: yup.string().required('City is required'),
-  customerState: yup.string().required('State is required'),
-  customerZip: yup.string().required('ZIP code is required'),
-  
-  cardHolderName: yup.string().required('Full name on card is required'),
-  cardHolderStreet: yup.string().required('Billing address is required'),
-  cardHolderCity: yup.string().required('City is required'),
-  cardHolderState: yup.string().required('State is required'),
-  cardHolderZip: yup.string().required('ZIP code is required'),
+
+  cardHolderName: yup.string().required('Name of card holder is required'),
+  cardHolderAddress: yup.string().required('Billing address is required'),
   cardHolderPhone: yup.string().required('Phone number is required'),
   cardHolderEmail: yup.string().email('Invalid email').required('Email is required'),
-  
+
   cardType: yup.string().required('Please select a card type'),
-  otherCardIssuer: yup.string().when('cardType', ([cardType], schema) => 
-    cardType === 'Other' ? schema.required('Please specify card issuer') : schema),
-  
-  cvc: yup.string().required('CVC is required'),
-  expirationDate: yup.string().required('Expiration date is required'),
-  vehicleDescription: yup.string().required('Vehicle description is required'),
-  vin: yup.string().required('VIN is required'),
-  vehicleOwnerName: yup.string().required('Vehicle owner name is required'),
-  
-  agreementAccepted: yup.boolean().required().oneOf([true], 'You must agree to the terms to continue'),
-  
-  fuelAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  smokingAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  petAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  outOfStateAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  tollAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  paymentAcknowledgement: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  
-  insuranceCompany: yup.string().required('Insurance company is required'),
-  claimNumber: yup.string().required('Claim number is required'),
-  dateOfLoss: yup.string().required('Date of loss is required'),
-  signature: yup.string().required('Signature is required'),
-  signaturePage2: yup.string().required('Signature on page 2 is required'),
-  signaturePage3: yup.string().required('Signature on page 3 is required'),
-  Card_Number: yup
+  otherCardType: yup.string().when('cardType', ([cardType], schema) =>
+    cardType === 'Other' ? schema.required('Please specify card type') : schema),
+
+  cardNumber: yup
     .string()
     .required('Card number is required')
-    .matches(/^[0-9]{16}$/, 'Please enter a valid 16-digit card number'),
-  Expiration_Date: yup
+    .matches(/^[0-9]{13,19}$/, 'Please enter a valid card number'),
+
+  expirationDate: yup
     .string()
     .required('Expiration date is required')
     .matches(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, 'Please enter date in MM/YY format'),
-  CVC: yup
+
+  cvc: yup
     .string()
     .required('CVC is required')
     .matches(/^[0-9]{3,4}$/, 'Please enter a valid CVC'),
+
+  agreementAccepted: yup.boolean().required().oneOf([true], 'You must agree to the terms to continue'),
+  signaturePage1: yup.string().required('Signature is required'),
+
+  // Page 2: Car Rental Acknowledgments
+  acknowledgement1: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  acknowledgement2: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  acknowledgement3: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  acknowledgement4: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  acknowledgement5: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  acknowledgement6: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  signaturePage2: yup.string().required('Signature is required'),
+
+  // Page 3: Authorization and Direction of Pay
+  insuranceCompany: yup.string().required('Insurance company is required'),
+  claimNumber: yup.string().required('Claim number is required'),
+  dateOfLoss: yup.string().required('Date of loss is required'),
+  signaturePage3: yup.string().required('Signature is required'),
 });
 
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [signatureSaved, setSignatureSaved] = useState(false);
+  const [signaturePage1Saved, setSignaturePage1Saved] = useState(false);
+  const [signaturePage2Saved, setSignaturePage2Saved] = useState(false);
+  const [signaturePage3Saved, setSignaturePage3Saved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
   const { email: estimatorEmail } = location.state as LocationState;
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RentalFormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<RentalFormData>({
     resolver: yupResolver(schema),
+    mode: 'onChange'
   });
 
   const cardType = watch('cardType');
 
-  const handleSignatureSave = (signatureDataUrl: string) => {
-    setValue('signature', signatureDataUrl);
-    setSignatureSaved(true);
+  // Handle signature saves for each page
+  const handleSignaturePage1Save = (signatureDataUrl: string) => {
+    setValue('signaturePage1', signatureDataUrl);
+    setSignaturePage1Saved(true);
+  };
+
+  const handleSignaturePage2Save = (signatureDataUrl: string) => {
+    setValue('signaturePage2', signatureDataUrl);
+    setSignaturePage2Saved(true);
+  };
+
+  const handleSignaturePage3Save = (signatureDataUrl: string) => {
+    setValue('signaturePage3', signatureDataUrl);
+    setSignaturePage3Saved(true);
+  };
+
+  // Function to validate current step before proceeding
+  const validateStep = async () => {
+    let fieldsToValidate: (keyof RentalFormData)[] = [];
+
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = [
+          'customerName', 'customerPhone', 'customerEmail',
+          'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
+          'cardType', 'cardNumber', 'expirationDate', 'cvc', 'agreementAccepted', 'signaturePage1'
+        ];
+        if (cardType === 'Other') {
+          fieldsToValidate.push('otherCardType');
+        }
+        break;
+      case 2:
+        fieldsToValidate = [
+          'acknowledgement1', 'acknowledgement2', 'acknowledgement3',
+          'acknowledgement4', 'acknowledgement5', 'acknowledgement6',
+          'signaturePage2'
+        ];
+        break;
+      case 3:
+        fieldsToValidate = ['insuranceCompany', 'claimNumber', 'dateOfLoss', 'signaturePage3'];
+        break;
+    }
+
+    const result = await trigger(fieldsToValidate);
+    return result;
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Customer Information</h2>
-            <div className={styles.nameGroup}>
-              <div className={styles.inputGroup}>
-                <label>First Name</label>
-                <input 
-                  {...register("customerFirstName", { required: "First name is required" })}
-                  placeholder="First name"
-                />
-                {errors.customerFirstName && <span className={styles.error}>{errors.customerFirstName.message}</span>}
-              </div>
-              <div className={styles.inputGroup}>
-                <label>Last Name</label>
-                <input 
-                  {...register("customerLastName", { required: "Last name is required" })}
-                  placeholder="Last name"
-                />
-                {errors.customerLastName && <span className={styles.error}>{errors.customerLastName.message}</span>}
-              </div>
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Credit Card Authorization Form</h2>
+
+            <p className={styles.agreementText}>
+              Please fill out the information below to authorize Dent Source LLC and/or DS Rentals LLC to charge the below credit/debit card for the rental related charges accrued during the duration of your time in the rental. This form will be kept on file for the specified charges to be billed for the time period the customer in the rental listed below. This credit/debit card is to be used for charges for:
+            </p>
+
+            <div className={styles.inputGroup}>
+              <label>Customer Name</label>
+              <input
+                {...register("customerName")}
+                placeholder="Full name"
+              />
+              {errors.customerName && <span className={styles.error}>{errors.customerName.message}</span>}
             </div>
 
             <div className={styles.inputGroup}>
               <label>Phone Number</label>
-              <input 
+              <input
                 type="tel"
                 inputMode="numeric"
-                pattern="[0-9]*"
-                {...register("customerPhone", { required: "Phone number is required" })}
+                {...register("customerPhone")}
                 className={styles.phoneInput}
               />
               {errors.customerPhone && <span className={styles.error}>{errors.customerPhone.message}</span>}
@@ -177,227 +192,251 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
 
             <div className={styles.inputGroup}>
               <label>Email</label>
-              <input 
+              <input
                 type="email"
-                {...register("customerEmail", { required: "Email is required" })}
+                {...register("customerEmail")}
               />
               {errors.customerEmail && <span className={styles.error}>{errors.customerEmail.message}</span>}
             </div>
 
-            <div className={styles.addressGroup}>
+            <div className={styles.agreementText}>
+              <p>By signing in the space below and providing a copy of my Driver's License; and, the credit/debit card back & front with my name clearly visible, I hereby authorize Dent Source LLC, and/or DS Rentals LLC to charge the credit card listed below for the following charges:</p>
+            </div>
+
+            <div className={styles.chargesBox}>
+              <ul>
+                <li>Fuel -$25 per quarter tank to refuel for failure to return on a full tank.</li>
+                <li>Smoking - $450 cleaning fee assessed for smoking in the rental</li>
+                <li>Pets - $450 cleaning fee assessed for pet damage in the rental</li>
+                <li>Tolls and Parking fees - Charged at the rate of toll/bill/invoice</li>
+                <li>4% credit card processing fee</li>
+              </ul>
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Name of Card Holder</label>
+              <input {...register("cardHolderName")} />
+              {errors.cardHolderName && <span className={styles.error}>{errors.cardHolderName.message}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Billing Address of Card Holder</label>
+              <input {...register("cardHolderAddress")} />
+              {errors.cardHolderAddress && <span className={styles.error}>{errors.cardHolderAddress.message}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Phone Number of Card Holder</label>
+              <input
+                type="tel"
+                inputMode="numeric"
+                {...register("cardHolderPhone")}
+                className={styles.phoneInput}
+              />
+              {errors.cardHolderPhone && <span className={styles.error}>{errors.cardHolderPhone.message}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Email Address of Card Holder</label>
+              <input
+                type="email"
+                {...register("cardHolderEmail")}
+              />
+              {errors.cardHolderEmail && <span className={styles.error}>{errors.cardHolderEmail.message}</span>}
+            </div>
+
+            <div className={styles.cardTypeSection}>
+              <h3>Type of Credit/Debit Card</h3>
+              <div className={styles.cardOptions}>
+                {['Visa', 'American Express', 'Master Card', 'Discover Card', 'Other'].map((type) => (
+                  <label key={type} className={styles.cardOption}>
+                    <input
+                      type="radio"
+                      {...register("cardType")}
+                      value={type}
+                      className={styles.greenRadio}
+                    />
+                    <span>{type}</span>
+                  </label>
+                ))}
+              </div>
+
+              {cardType === 'Other' && (
+                <div className={styles.inputGroup}>
+                  <input
+                    {...register("otherCardType")}
+                    placeholder="Enter Card Type"
+                  />
+                  {errors.otherCardType && <span className={styles.error}>{errors.otherCardType.message}</span>}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label>Card Number</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                {...register("cardNumber")}
+                placeholder="XXXX XXXX XXXX XXXX"
+              />
+              {errors.cardNumber && <span className={styles.error}>{errors.cardNumber.message}</span>}
+            </div>
+
+            <div className={styles.nameGroup}>
               <div className={styles.inputGroup}>
-                <label>Street Address</label>
-                <input {...register("customerStreet", { required: "Street address is required" })} />
+                <label>Expiration Date</label>
+                <input
+                  type="text"
+                  {...register("expirationDate")}
+                  placeholder="MM/YY"
+                />
+                {errors.expirationDate && <span className={styles.error}>{errors.expirationDate.message}</span>}
               </div>
-              <div className={styles.addressDetails}>
-                <div className={styles.inputGroup}>
-                  <label>City</label>
-                  <input {...register("customerCity", { required: "City is required" })} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>State</label>
-                  <input {...register("customerState", { required: "State is required" })} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>ZIP Code</label>
-                  <input {...register("customerZip", { required: "ZIP code is required" })} />
-                </div>
+
+              <div className={styles.inputGroup}>
+                <label>CVC</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  {...register("cvc")}
+                  placeholder="XXX"
+                />
+                {errors.cvc && <span className={styles.error}>{errors.cvc.message}</span>}
               </div>
+            </div>
+
+            <div className={styles.agreementBox}>
+              <p className={styles.agreementText}>
+                I agree to be responsible for all charges as noted above for myself, any of my guests for the duration of the time that I was in the rented vehicle. I CERTIFY THAT I am an authorized user of this credit card and that I will not dispute this payment: as long as the transaction corresponds to the terms indicated in this form.
+              </p>
+              <div className={styles.acceptanceRow}>
+                <input
+                  type="checkbox"
+                  {...register("agreementAccepted")}
+                />
+                <span>I agree to the terms</span>
+              </div>
+              {errors.agreementAccepted && <span className={styles.error}>{errors.agreementAccepted.message}</span>}
+            </div>
+
+            <div className={styles.signatureSection}>
+              <h3>Signature</h3>
+              <SignatureField onSave={handleSignaturePage1Save} />
+              {errors.signaturePage1 && <span className={styles.error}>{errors.signaturePage1.message}</span>}
             </div>
           </div>
         );
 
       case 2:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Card Holder Information</h2>
-            <div className={styles.inputGroup}>
-              <label>Name of Card Holder</label>
-              <input {...register("cardHolderName", { required: "Card holder name is required" })} />
-            </div>
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>Dent Source LLC - Car Rental Acknowledgments</h2>
 
-            <div className={styles.addressGroup}>
-              <div className={styles.inputGroup}>
-                <label>Billing Address</label>
-                <input {...register("cardHolderStreet", { required: "Billing address is required" })} />
+            <div className={styles.acknowledgements}>
+              <p className={styles.acknowledgementNotice}>Please check each acknowledgment below:</p>
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement1")}
+                />
+                <span>Promissory to return... increments, upon return</span>
               </div>
-              <div className={styles.addressDetails}>
-                <div className={styles.inputGroup}>
-                  <label>City</label>
-                  <input {...register("cardHolderCity", { required: "City is required" })} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>State</label>
-                  <input {...register("cardHolderState", { required: "State is required" })} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>ZIP Code</label>
-                  <input {...register("cardHolderZip", { required: "ZIP code is required" })} />
-                </div>
+              {errors.acknowledgement1 && <span className={styles.error}>{errors.acknowledgement1.message}</span>}
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement2")}
+                />
+                <span>Dent Source prohibits... the rented vehicle</span>
               </div>
+              {errors.acknowledgement2 && <span className={styles.error}>{errors.acknowledgement2.message}</span>}
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement3")}
+                />
+                <span>Pets are prohibited... up to $450</span>
+              </div>
+              {errors.acknowledgement3 && <span className={styles.error}>{errors.acknowledgement3.message}</span>}
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement4")}
+                />
+                <span>I understand that... Dent Source LLC</span>
+              </div>
+              {errors.acknowledgement4 && <span className={styles.error}>{errors.acknowledgement4.message}</span>}
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement5")}
+                />
+                <span>I understand that... tolls and parking</span>
+              </div>
+              {errors.acknowledgement5 && <span className={styles.error}>{errors.acknowledgement5.message}</span>}
+
+              <div className={styles.acknowledgementRow}>
+                <input
+                  type="checkbox"
+                  {...register("acknowledgement6")}
+                />
+                <span>I understand that... Oklahoma County, OK</span>
+              </div>
+              {errors.acknowledgement6 && <span className={styles.error}>{errors.acknowledgement6.message}</span>}
             </div>
 
-            <div className={styles.inputGroup}>
-              <label>Phone #</label>
-              <input 
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                {...register("cardHolderPhone", { required: "Phone number is required" })}
-                className={styles.phoneInput}
-              />
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label>Email</label>
-              <input 
-                type="email"
-                {...register("cardHolderEmail", { required: "Email is required" })}
-              />
+            <div className={styles.signatureSection}>
+              <h3>Signature</h3>
+              <SignatureField onSave={handleSignaturePage2Save} />
+              {errors.signaturePage2 && <span className={styles.error}>{errors.signaturePage2.message}</span>}
             </div>
           </div>
         );
 
       case 3:
         return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Card Details</h2>
-            <div className={styles.cardTypeSection}>
-              <h3>Type of Credit/Debit Card</h3>
-              <div className={styles.cardOptions}>
-                {['Visa', 'Mastercard', 'American Express', 'Discover', 'Other'].map((type) => (
-                  <label key={type} className={styles.cardOption}>
-                    <input
-                      type="radio"
-                      {...register("cardType", { required: "Please select a card type" })}
-                      value={type}
-                    />
-                    <span>{type}</span>
-                  </label>
-                ))}
-              </div>
-              
-              {cardType === 'Other' && (
-                <div className={styles.inputGroup}>
-                  <input
-                    {...register("otherCardIssuer", { 
-                      required: cardType === 'Other' ? "Please specify card issuer" : false 
-                    })}
-                    placeholder="Enter Card Issuer Name"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        );
+          <div className={styles.formStep}>
+            <h2 className={styles.centerHeading}>DS Rentals LLC - Authorization and Direction of Pay</h2>
 
-      case 4:
-        return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Agreement & Charges</h2>
-            <div className={styles.chargesBox}>
-              <h3>Charges Breakdown:</h3>
-              <ul>
-                <li>Fuel – ($24 per quarter tank to refuel for the failure to return on a full tank)</li>
-                <li>Smoking – ($450 cleaning fee assessed for smoking in the rental)</li>
-                <li>Pets – ($450 cleaning fee assessed for pets in rental)</li>
-                <li>Tolls and Parking Fees – (Charged at the rate of toll/bill/invoice)</li>
-                <li>4% Credit Card Processing Fee</li>
-              </ul>
-            </div>
-
-            <div className={styles.agreementBox}>
+            <div className={styles.agreementSection}>
               <p className={styles.agreementText}>
-                I agree to be responsible for all charges notated above for myself, any of my guests 
-                for the duration of time that I was in the rented vehicle. I certify that I am an 
-                authorized user of this credit card and that I will not dispute this payment, as long 
-                as the transaction corresponds to the terms indicated in this form.
+                I am choosing DS Rentals LLC as my rental company of choice while my vehicle is being repaired.
+                I authorize <input
+                  {...register("insuranceCompany")}
+                  className={styles.inlineInput}
+                  placeholder="your insurance company"
+                /> to pay DS Rentals LLC directly upon completion and return of my personal automobile. I understand that should my insurer send the payment directly to me or any other policy holder on my insurance policy, I will forward the payment directly to DS Rentals LLC at the address provided. Should I choose to keep the rental payment, I understand that DS Rentals LLC will take any and all policy holders on this policy and the insurer to a court of law within the legal jurisdiction of DS Rentals LLC headquarters in Oklahoma County, OK.
               </p>
-              <div className={styles.acceptanceRow}>
-                <span>Accept:</span>
-                <input 
-                  type="checkbox" 
-                  {...register("agreementAccepted", { 
-                    required: "You must agree to the terms to continue" 
-                  })}
-                />
-              </div>
-              {errors.agreementAccepted && <span className={styles.error}>{errors.agreementAccepted.message}</span>}
+              {errors.insuranceCompany && <span className={styles.error}>{errors.insuranceCompany.message}</span>}
             </div>
-          </div>
-        );
 
-      case 5:
-        return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Car Rental Acknowledgements</h2>
-            <div className={styles.acknowledgements}>
-              <p className={styles.notice}>(All acknowledgements must be checked)</p>
-              {[
-                {
-                  key: "fuelAcknowledgement",
-                  text: "I promise to return the rental car with a full tank; if I fail to do so, I will be charged $25 per quarter tank."
-                },
-                {
-                  key: "smokingAcknowledgement",
-                  text: "I understand that Dent Source prohibits all types of smoking (including vaping) in its cars; if a car returns smelling of smoke, I will be charged up to $450 for cleaning."
-                },
-                {
-                  key: "petAcknowledgement",
-                  text: "I understand that pets are prohibited; if the car returns with pet hair or stains, I will be charged up to $450 for cleaning."
-                },
-                {
-                  key: "outOfStateAcknowledgement",
-                  text: "I understand that I must not take the rental out of state without written consent from an authorized representative of Dent Source LLC."
-                },
-                {
-                  key: "tollAcknowledgement",
-                  text: "I understand that I am responsible for any tolls and parking fees incurred during my rental."
-                },
-                {
-                  key: "paymentAcknowledgement",
-                  text: "I understand that the vehicle is provided at no charge to me, and D.S. Rentals LLC will bill my insurance company directly. If I receive a payment for my rental, I am aware I must forward the payment to Dent Source immediately. Failure to do so may result in legal action in Oklahoma County, OK."
-                }
-              ].map(({ key, text }) => (
-                <div key={key} className={styles.acknowledgementRow}>
-                  <input 
-                    type="checkbox" 
-                    {...register(key as keyof RentalFormData, { 
-                      required: "All acknowledgements must be checked" 
-                    })}
-                  />
-                  <span>{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 6:
-        return (
-          <div className="form-step">
-            <h2 className={styles.centerHeading}>Insurance & Signature</h2>
-            <div className={styles.insuranceSection}>
-              <div className={styles.inputGroup}>
-                <label>Insurance Company</label>
-                <input {...register("insuranceCompany", { required: "Insurance company is required" })} />
-              </div>
+            <div className={styles.nameGroup}>
               <div className={styles.inputGroup}>
                 <label>Claim Number</label>
-                <input {...register("claimNumber", { required: "Claim number is required" })} />
+                <input {...register("claimNumber")} />
+                {errors.claimNumber && <span className={styles.error}>{errors.claimNumber.message}</span>}
               </div>
+
               <div className={styles.inputGroup}>
                 <label>Date of Loss</label>
-                <input 
+                <input
                   type="date"
-                  {...register("dateOfLoss", { required: "Date of loss is required" })}
+                  {...register("dateOfLoss")}
                 />
+                {errors.dateOfLoss && <span className={styles.error}>{errors.dateOfLoss.message}</span>}
               </div>
             </div>
 
             <div className={styles.signatureSection}>
-              <label>Signature</label>
-              <SignatureField onSave={handleSignatureSave} />
+              <h3>Signature</h3>
+              <SignatureField onSave={handleSignaturePage3Save} />
+              {errors.signaturePage3 && <span className={styles.error}>{errors.signaturePage3.message}</span>}
             </div>
           </div>
         );
@@ -408,32 +447,58 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
   };
 
   const onFormSubmit = async (data: RentalFormData) => {
-    if (currentStep === 6 && !signatureSaved) {
-      alert("Please save your signature before submitting");
+    // Check if the current step's signature is saved
+    if (
+      (currentStep === 1 && !signaturePage1Saved) ||
+      (currentStep === 2 && !signaturePage2Saved) ||
+      (currentStep === 3 && !signaturePage3Saved)
+    ) {
+      alert("Please save your signature before proceeding");
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const result = await submitForm(
-        data as unknown as Record<string, unknown>,
-        'rental',
-        estimatorEmail || 'unknown@somewhere.com'
-      );
-      
-      if (result.success) {
-        console.log('Form submitted successfully');
-        onSubmit(data);
-        window.location.href = '/thankyou';
-      } else {
-        console.error('Form submission failed:', result.message);
-        alert('Failed to submit form. Please try again.');
+    // If we're on the final step, submit the form
+    if (currentStep === 3) {
+      setIsSubmitting(true);
+      try {
+        const result = await submitForm(
+          data as unknown as Record<string, unknown>,
+          'rental',
+          estimatorEmail || 'unknown@somewhere.com'
+        );
+
+        if (result.success) {
+          console.log('Form submitted successfully');
+          onSubmit(data);
+          window.location.href = '/thankyou';
+        } else {
+          console.error('Form submission failed:', result.message);
+          alert('Failed to submit form. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Error submitting form. Please try again.');
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error submitting form. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Otherwise, validate and move to the next step
+      const isValid = await validateStep();
+      if (isValid) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        alert("Please fill in all required fields and save your signature before proceeding");
+      }
+    }
+  };
+
+  // Handle next button click
+  const handleNext = async () => {
+    const isValid = await validateStep();
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      alert("Please fill in all required fields and save your signature before proceeding");
     }
   };
 
@@ -443,8 +508,8 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
         {renderStep()}
         <div className={styles.formNavigation}>
           {currentStep > 1 && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={styles.prevButton}
               onClick={() => setCurrentStep(currentStep - 1)}
               disabled={isSubmitting}
@@ -452,20 +517,20 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               Previous
             </button>
           )}
-          {currentStep < 6 ? (
-            <button 
-              type="button" 
+          {currentStep < 3 ? (
+            <button
+              type="button"
               className={styles.nextButton}
-              onClick={() => setCurrentStep(currentStep + 1)}
+              onClick={handleNext}
               disabled={isSubmitting}
             >
               Next
             </button>
           ) : (
-            <button 
-              type="submit" 
-              className={`${styles.submitButton} ${!signatureSaved ? styles.disabled : ''}`}
-              disabled={!signatureSaved || isSubmitting}
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isSubmitting || !signaturePage3Saved}
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
