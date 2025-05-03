@@ -5,9 +5,16 @@ import SignatureCanvas from 'react-signature-canvas';
 import styles from './DropoffForm.module.css';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useLocation } from 'react-router-dom';
+import { submitForm } from '../services/api';
 
 interface DropoffFormProps {
   onSubmit: (data: DropoffFormData) => void;  // Update to use DropoffFormData
+}
+
+interface LocationState {
+  name?: string;
+  email?: string;
 }
 
 interface DropoffFormData {
@@ -174,7 +181,16 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
   const randomAddressField = `address_${Math.random().toString(36).substring(2, 15)}`;
   const randomEmailField = `email_${Math.random().toString(36).substring(2, 15)}`;
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<DropoffFormData>({
+  // Get estimator email from location state
+  const location = useLocation();
+  const locationState = location.state as LocationState;
+  const estimatorEmail = locationState?.email || 'unknown@somewhere.com';
+  const estimatorName = locationState?.name || 'Unknown';
+
+  // Add loading state - explicitly set to false initially
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const { register, handleSubmit, setValue, watch, getValues, formState: { errors } } = useForm<DropoffFormData>({
     defaultValues: {
       referralSources: {
         google: false,
@@ -236,12 +252,21 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
     };
   }, []);
 
-  // Clear form fields on component mount to prevent autofill
+  // Clear form fields and reset loading state on component mount
   useEffect(() => {
     // Reset address and email fields
     setValue('address', '');
     setValue('email', '');
+
+    // Ensure loading state is false when component mounts
+    console.log('Component mounted, setting isSubmitting to false');
+    setIsSubmitting(false);
   }, []);
+
+  // Debug loading state changes
+  useEffect(() => {
+    console.log('isSubmitting state changed:', isSubmitting);
+  }, [isSubmitting]);
 
   const scrollToSignature = useCallback(() => {
     if (signatureSectionRef.current) {
@@ -255,6 +280,9 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
       });
     }
   }, []);
+
+  // We're now handling form submission directly in the button click handler
+  // This comment is kept to maintain the structure of the file
 
   const renderStep = () => {
     switch (currentStep) {
@@ -1053,7 +1081,14 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
     <div className={styles.formContainer}>
       <h1 className={styles.greenHeading}>Drop Off Form</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+      <form
+        onSubmit={(e) => {
+          // Prevent default form submission - we're handling it with the button click
+          e.preventDefault();
+          console.log('Form submit event triggered, but we are handling submission with the button click');
+        }}
+        autoComplete="off"
+      >
         {/* Hidden fields to catch autofill */}
         <div style={{ display: 'none' }}>
           <input type="text" name="address" autoComplete="street-address" />
@@ -1089,15 +1124,110 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button" // Changed from submit to button to handle manually
               className={`${styles.submitButton} ${!allRequiredChecked ? styles.disabled : ''}`}
-              disabled={!allRequiredChecked}
+              disabled={!allRequiredChecked || isSubmitting}
+              onClick={(e) => {
+                e.preventDefault();
+                console.log('Submit button clicked directly');
+
+                if (!allRequiredChecked) {
+                  console.log('Not all required fields are checked');
+                  return;
+                }
+
+                // Set loading state
+                setIsSubmitting(true);
+
+                // Create a manual loading overlay
+                const overlay = document.createElement('div');
+                overlay.id = 'manual-loading-overlay';
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.zIndex = '9999';
+
+                const spinner = document.createElement('div');
+                spinner.style.width = '70px';
+                spinner.style.height = '70px';
+                spinner.style.border = '6px solid rgba(255, 255, 255, 0.3)';
+                spinner.style.borderRadius = '50%';
+                spinner.style.borderTopColor = '#3BB554';
+                spinner.style.animation = 'spin 1s ease-in-out infinite';
+
+                const text = document.createElement('p');
+                text.textContent = 'Submitting documents...';
+                text.style.color = 'white';
+                text.style.marginTop = '20px';
+                text.style.fontSize = '1.2rem';
+
+                overlay.appendChild(spinner);
+                overlay.appendChild(text);
+
+                // Add keyframes for spinner animation
+                const style = document.createElement('style');
+                style.id = 'spinner-style';
+                style.textContent = `
+                  @keyframes spin {
+                    to { transform: rotate(360deg); }
+                  }
+                `;
+
+                document.head.appendChild(style);
+                document.body.appendChild(overlay);
+
+                // Get form data
+                const data = getValues();
+
+                // Submit form
+                setTimeout(async () => {
+                  try {
+                    console.log('Submitting form data:', data);
+                    const result = await submitForm(data, 'dropoff', estimatorEmail);
+
+                    if (result.success) {
+                      console.log('Form submitted successfully');
+                      onSubmit(data);
+
+                      // Redirect after a delay
+                      setTimeout(() => {
+                        window.location.href = '/thankyou';
+                      }, 1000);
+                    } else {
+                      console.error('Form submission failed:', result.message);
+                      alert('Failed to submit form. Please try again.');
+
+                      // Remove overlay
+                      document.body.removeChild(overlay);
+                      document.head.removeChild(style);
+                      setIsSubmitting(false);
+                    }
+                  } catch (error) {
+                    console.error('Error submitting form:', error);
+                    alert('Error submitting form. Please try again.');
+
+                    // Remove overlay
+                    document.body.removeChild(overlay);
+                    document.head.removeChild(style);
+                    setIsSubmitting(false);
+                  }
+                }, 500);
+              }}
             >
-              Submit Document
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
           )}
         </div>
       </form>
+
+      {/* We're now using a direct DOM approach for the loading overlay */}
     </div>
   );
 }

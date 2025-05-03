@@ -728,7 +728,63 @@
   margin: 0;
 }
 
+/* Loading overlay */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: white;
+  animation: fadeIn 0.3s ease-in-out;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  pointer-events: all;
+}
 
+.loadingOverlay p {
+  margin-top: 20px;
+  max-width: 80%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+}
 
+.loadingSpinner {
+  width: 70px;
+  height: 70px;
+  border: 6px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #3BB554;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 1.5rem;
+}
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
 

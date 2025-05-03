@@ -1,7 +1,7 @@
 // Determine the API base URL based on the environment
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 export const API_BASE_URL = isDevelopment
-  ? 'http://localhost:8080'
+  ? 'http://localhost:8081' // Changed to 8081 to match server port
   : 'https://dskiosk.up.railway.app';
 
 type PdfType = 'rental' | 'pickup' | 'dropoff';
@@ -66,19 +66,29 @@ export const submitForm = async (
     console.log('Estimator Email:', estimatorEmail);
 
     // Check if we have a signature
-    if (formData.signature1) {
+    const hasSignature = formData.signature || formData.signature1 || formData.signature2;
+    if (hasSignature) {
       console.log('Signature is present in the form data');
     } else {
       console.warn('No signature found in form data!');
     }
 
+    // Add a timestamp to the form data
+    const formDataWithTimestamp = {
+      ...formData,
+      submittedAt: new Date().toISOString()
+    };
+
     const requestBody = JSON.stringify({
-      formData,
+      formData: formDataWithTimestamp,
       pdfType,
       estimatorEmail
     });
 
     console.log('Request body size:', requestBody.length, 'bytes');
+
+    // Add a small delay to simulate network latency and ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     console.log('Sending fetch request...');
     const response = await fetch(url, {
@@ -103,6 +113,9 @@ export const submitForm = async (
       throw new Error(responseData.message || responseData.error || 'Failed to submit form');
     }
 
+    // Add a small delay to ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     console.log('Form submission successful');
     return responseData as FormSubmissionResponse;
   } catch (error) {
@@ -116,6 +129,9 @@ export const submitForm = async (
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       console.error('Network error - server might be down or unreachable');
     }
+
+    // Add a small delay before throwing the error to ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     throw error;
   }

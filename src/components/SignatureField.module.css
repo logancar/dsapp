@@ -9,12 +9,13 @@
 
 .signatureCanvas {
   width: 100% !important;
-  height: 200px !important;
+  height: 150px !important;
   background-color: #000 !important;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   touch-action: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
 }
 
 .buttonContainer {

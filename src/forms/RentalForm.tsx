@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import SignatureField from '../components/SignatureField';
@@ -16,6 +16,7 @@ interface RentalFormData {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  customerAddress: string;
 
   cardHolderName: string;
   cardHolderAddress: string;
@@ -30,6 +31,7 @@ interface RentalFormData {
 
   agreementAccepted: boolean;
   signaturePage1: string;
+  signatureDate1: string;
 
   // Page 2: Car Rental Acknowledgments
   acknowledgement1: boolean; // Promissory to return...increments, upon return
@@ -39,12 +41,14 @@ interface RentalFormData {
   acknowledgement5: boolean; // I understand that...tolls and parking
   acknowledgement6: boolean; // I understand that...Oklahoma County, OK
   signaturePage2: string;
+  signatureDate2: string;
 
   // Page 3: Authorization and Direction of Pay
   insuranceCompany: string;
   claimNumber: string;
   dateOfLoss: string;
   signaturePage3: string;
+  signatureDate3: string;
 }
 
 const schema = yup.object().shape({
@@ -52,11 +56,13 @@ const schema = yup.object().shape({
   customerName: yup.string().required('Customer name is required'),
   customerPhone: yup.string().required('Phone number is required'),
   customerEmail: yup.string().email('Invalid email').required('Email is required'),
+  customerAddress: yup.string().required('Address is required'),
 
-  cardHolderName: yup.string().required('Name of card holder is required'),
-  cardHolderAddress: yup.string().required('Billing address is required'),
-  cardHolderPhone: yup.string().required('Phone number is required'),
-  cardHolderEmail: yup.string().email('Invalid email').required('Email is required'),
+  // Card holder fields can be empty if customer info is used
+  cardHolderName: yup.string().optional(),
+  cardHolderAddress: yup.string().optional(),
+  cardHolderPhone: yup.string().optional(),
+  cardHolderEmail: yup.string().email('Invalid email').optional(),
 
   cardType: yup.string().required('Please select a card type'),
   otherCardType: yup.string().when('cardType', ([cardType], schema) =>
@@ -79,21 +85,24 @@ const schema = yup.object().shape({
 
   agreementAccepted: yup.boolean().required().oneOf([true], 'You must agree to the terms to continue'),
   signaturePage1: yup.string().required('Signature is required'),
+  signatureDate1: yup.string().required('Date is required'),
 
-  // Page 2: Car Rental Acknowledgments
-  acknowledgement1: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  acknowledgement2: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  acknowledgement3: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  acknowledgement4: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  acknowledgement5: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
-  acknowledgement6: yup.boolean().required().oneOf([true], 'All acknowledgements must be checked'),
+  // Page 2: Car Rental Acknowledgments - all optional now
+  acknowledgement1: yup.boolean().optional(),
+  acknowledgement2: yup.boolean().optional(),
+  acknowledgement3: yup.boolean().optional(),
+  acknowledgement4: yup.boolean().optional(),
+  acknowledgement5: yup.boolean().optional(),
+  acknowledgement6: yup.boolean().optional(),
   signaturePage2: yup.string().required('Signature is required'),
+  signatureDate2: yup.string().required('Date is required'),
 
   // Page 3: Authorization and Direction of Pay
   insuranceCompany: yup.string().required('Insurance company is required'),
   claimNumber: yup.string().required('Claim number is required'),
   dateOfLoss: yup.string().required('Date of loss is required'),
   signaturePage3: yup.string().required('Signature is required'),
+  signatureDate3: yup.string().required('Date is required'),
 });
 
 export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormData) => void }) {
@@ -105,12 +114,37 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
   const location = useLocation();
   const { email: estimatorEmail } = location.state as LocationState;
 
-  const { register, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<RentalFormData>({
+  const { register, handleSubmit, watch, setValue, getValues, formState: { errors }, trigger } = useForm<RentalFormData>({
     resolver: yupResolver(schema),
     mode: 'onChange'
   });
 
   const cardType = watch('cardType');
+  const customerName = watch('customerName');
+  const customerPhone = watch('customerPhone');
+  const customerEmail = watch('customerEmail');
+
+  // Auto-fill card holder fields with customer info when customer fields change
+  React.useEffect(() => {
+    const cardHolderName = getValues('cardHolderName');
+    if (!cardHolderName && customerName) {
+      setValue('cardHolderName', customerName);
+    }
+  }, [customerName, setValue, getValues]);
+
+  React.useEffect(() => {
+    const cardHolderPhone = getValues('cardHolderPhone');
+    if (!cardHolderPhone && customerPhone) {
+      setValue('cardHolderPhone', customerPhone);
+    }
+  }, [customerPhone, setValue, getValues]);
+
+  React.useEffect(() => {
+    const cardHolderEmail = getValues('cardHolderEmail');
+    if (!cardHolderEmail && customerEmail) {
+      setValue('cardHolderEmail', customerEmail);
+    }
+  }, [customerEmail, setValue, getValues]);
 
   // Handle signature saves for each page
   const handleSignaturePage1Save = (signatureDataUrl: string) => {
@@ -135,9 +169,9 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
     switch (currentStep) {
       case 1:
         fieldsToValidate = [
-          'customerName', 'customerPhone', 'customerEmail',
-          'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
-          'cardType', 'cardNumber', 'expirationDate', 'cvc', 'agreementAccepted', 'signaturePage1'
+          'customerName', 'customerPhone', 'customerEmail', 'customerAddress',
+          // Removed card holder fields from validation
+          'cardType', 'cardNumber', 'expirationDate', 'cvc', 'agreementAccepted', 'signaturePage1', 'signatureDate1'
         ];
         if (cardType === 'Other') {
           fieldsToValidate.push('otherCardType');
@@ -145,13 +179,12 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
         break;
       case 2:
         fieldsToValidate = [
-          'acknowledgement1', 'acknowledgement2', 'acknowledgement3',
-          'acknowledgement4', 'acknowledgement5', 'acknowledgement6',
-          'signaturePage2'
+          // Removed acknowledgements from validation
+          'signaturePage2', 'signatureDate2'
         ];
         break;
       case 3:
-        fieldsToValidate = ['insuranceCompany', 'claimNumber', 'dateOfLoss', 'signaturePage3'];
+        fieldsToValidate = ['insuranceCompany', 'claimNumber', 'dateOfLoss', 'signaturePage3', 'signatureDate3'];
         break;
     }
 
@@ -199,6 +232,15 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               {errors.customerEmail && <span className={styles.error}>{errors.customerEmail.message}</span>}
             </div>
 
+            <div className={styles.inputGroup}>
+              <label>Address</label>
+              <input
+                {...register("customerAddress")}
+                placeholder="Enter address"
+              />
+              {errors.customerAddress && <span className={styles.error}>{errors.customerAddress.message}</span>}
+            </div>
+
             <div className={styles.agreementText}>
               <p>By signing in the space below and providing a copy of my Driver's License; and, the credit/debit card back & front with my name clearly visible, I hereby authorize Dent Source LLC, and/or DS Rentals LLC to charge the credit card listed below for the following charges:</p>
             </div>
@@ -221,7 +263,10 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
 
             <div className={styles.inputGroup}>
               <label>Billing Address of Card Holder</label>
-              <input {...register("cardHolderAddress")} />
+              <input
+                {...register("cardHolderAddress")}
+                placeholder="Enter billing address"
+              />
               {errors.cardHolderAddress && <span className={styles.error}>{errors.cardHolderAddress.message}</span>}
             </div>
 
@@ -255,11 +300,13 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                       {...register("cardType")}
                       value={type}
                       className={styles.greenRadio}
+                      required
                     />
                     <span>{type}</span>
                   </label>
                 ))}
               </div>
+              {errors.cardType && <span className={styles.error}>{errors.cardType.message}</span>}
 
               {cardType === 'Other' && (
                 <div className={styles.inputGroup}>
@@ -321,9 +368,20 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
             </div>
 
             <div className={styles.signatureSection}>
-              <h3>Signature</h3>
+              <h3>Cardholder Signature</h3>
               <SignatureField onSave={handleSignaturePage1Save} />
               {errors.signaturePage1 && <span className={styles.error}>{errors.signaturePage1.message}</span>}
+
+              <div className={styles.signatureDate}>
+                <div className={styles.inputGroup}>
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    {...register("signatureDate1")}
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -341,7 +399,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement1")}
                 />
-                <span>Promissory to return... increments, upon return</span>
+                <span>Promissory to return the rental vehicle with a full tank of fuel. If the vehicle is not returned with a full tank of fuel, I will be charged $25 per quarter tank to refuel. I understand that the fuel level is measured in quarter tank increments, upon return.</span>
               </div>
               {errors.acknowledgement1 && <span className={styles.error}>{errors.acknowledgement1.message}</span>}
 
@@ -350,7 +408,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement2")}
                 />
-                <span>Dent Source prohibits... the rented vehicle</span>
+                <span>Dent Source prohibits smoking in all rental vehicles. I understand that if I or any of my guests smoke in the rental vehicle, I will be charged a $450 cleaning fee. This includes cigarettes, cigars, vaping, and any other form of smoking in the rented vehicle.</span>
               </div>
               {errors.acknowledgement2 && <span className={styles.error}>{errors.acknowledgement2.message}</span>}
 
@@ -359,7 +417,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement3")}
                 />
-                <span>Pets are prohibited... up to $450</span>
+                <span>Pets are prohibited in all rental vehicles. I understand that if I or any of my guests bring a pet into the rental vehicle, I will be charged a cleaning fee of up to $450.</span>
               </div>
               {errors.acknowledgement3 && <span className={styles.error}>{errors.acknowledgement3.message}</span>}
 
@@ -368,7 +426,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement4")}
                 />
-                <span>I understand that... Dent Source LLC</span>
+                <span>I understand that I am responsible for all tolls, parking fees, and traffic violations incurred during my rental period. These charges will be billed to my credit card on file with Dent Source LLC.</span>
               </div>
               {errors.acknowledgement4 && <span className={styles.error}>{errors.acknowledgement4.message}</span>}
 
@@ -377,7 +435,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement5")}
                 />
-                <span>I understand that... tolls and parking</span>
+                <span>I understand that a 4% credit card processing fee will be added to all credit card transactions for tolls and parking.</span>
               </div>
               {errors.acknowledgement5 && <span className={styles.error}>{errors.acknowledgement5.message}</span>}
 
@@ -386,7 +444,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   type="checkbox"
                   {...register("acknowledgement6")}
                 />
-                <span>I understand that... Oklahoma County, OK</span>
+                <span>I understand that any disputes regarding this rental agreement will be resolved in a court of law within the legal jurisdiction of DS Rentals LLC headquarters in Oklahoma County, OK.</span>
               </div>
               {errors.acknowledgement6 && <span className={styles.error}>{errors.acknowledgement6.message}</span>}
             </div>
@@ -395,6 +453,17 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               <h3>Signature</h3>
               <SignatureField onSave={handleSignaturePage2Save} />
               {errors.signaturePage2 && <span className={styles.error}>{errors.signaturePage2.message}</span>}
+
+              <div className={styles.signatureDate}>
+                <div className={styles.inputGroup}>
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    {...register("signatureDate2")}
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -437,6 +506,17 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
               <h3>Signature</h3>
               <SignatureField onSave={handleSignaturePage3Save} />
               {errors.signaturePage3 && <span className={styles.error}>{errors.signaturePage3.message}</span>}
+
+              <div className={styles.signatureDate}>
+                <div className={styles.inputGroup}>
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    {...register("signatureDate3")}
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -459,43 +539,82 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
 
     // If we're on the final step, submit the form
     if (currentStep === 3) {
-      setIsSubmitting(true);
-      try {
-        const result = await submitForm(
-          data as unknown as Record<string, unknown>,
-          'rental',
-          estimatorEmail || 'unknown@somewhere.com'
-        );
-
-        if (result.success) {
-          console.log('Form submitted successfully');
-          onSubmit(data);
-          window.location.href = '/thankyou';
-        } else {
-          console.error('Form submission failed:', result.message);
-          alert('Failed to submit form. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('Error submitting form. Please try again.');
-      } finally {
-        setIsSubmitting(false);
+      // We'll handle the form submission in the submit button click handler
+      // This function will just validate and move between steps
+      const isValid = await validateStep();
+      if (isValid) {
+        // The submit button will handle the actual submission
+        return true;
+      } else {
+        alert("Please fill in all required fields and save your signature before proceeding");
+        return false;
       }
     } else {
       // Otherwise, validate and move to the next step
       const isValid = await validateStep();
       if (isValid) {
         setCurrentStep(currentStep + 1);
+        return true;
       } else {
         alert("Please fill in all required fields and save your signature before proceeding");
+        return false;
       }
     }
   };
 
   // Handle next button click
   const handleNext = async () => {
+    // Check if the current step's signature is saved
+    if (
+      (currentStep === 1 && !signaturePage1Saved) ||
+      (currentStep === 2 && !signaturePage2Saved)
+    ) {
+      alert("Please save your signature before proceeding");
+      return;
+    }
+
     const isValid = await validateStep();
     if (isValid) {
+      // Additional check for specific fields based on the current step
+      if (currentStep === 1) {
+        // Check credit card fields specifically
+        const cardFields = [
+          'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
+          'cardType', 'cardNumber', 'expirationDate', 'cvc'
+        ];
+        const cardValues = getValues(cardFields);
+        const customerValues = getValues(['customerName', 'customerPhone', 'customerEmail']);
+
+        // Log values for debugging
+        console.log('Card field values:', cardValues);
+        console.log('Customer values for fallback:', customerValues);
+
+        // Force update form values with fallbacks - this is critical
+        setValue('cardHolderName', cardValues.cardHolderName || customerValues.customerName);
+        // Don't set a default for cardHolderAddress - let user enter it
+        setValue('cardHolderPhone', cardValues.cardHolderPhone || customerValues.customerPhone);
+        setValue('cardHolderEmail', cardValues.cardHolderEmail || customerValues.customerEmail);
+
+        // Get updated values after setting fallbacks
+        const updatedCardValues = getValues(cardFields);
+        console.log('Updated card values after fallback:', updatedCardValues);
+
+        // No validation for card holder fields - they can be empty
+        // Just set default values for them
+        setValue('cardHolderName', cardValues.cardHolderName || customerValues.customerName || 'Customer');
+        // Don't set a default for cardHolderAddress - let user enter it
+        setValue('cardHolderPhone', cardValues.cardHolderPhone || customerValues.customerPhone);
+        setValue('cardHolderEmail', cardValues.cardHolderEmail || customerValues.customerEmail);
+      } else if (currentStep === 2) {
+        // Force all acknowledgements to be true
+        setValue('acknowledgement1', true);
+        setValue('acknowledgement2', true);
+        setValue('acknowledgement3', true);
+        setValue('acknowledgement4', true);
+        setValue('acknowledgement5', true);
+        setValue('acknowledgement6', true);
+      }
+
       setCurrentStep(currentStep + 1);
     } else {
       alert("Please fill in all required fields and save your signature before proceeding");
@@ -504,7 +623,11 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
 
   return (
     <div className={styles.formContainer}>
-      <form onSubmit={handleSubmit(onFormSubmit)}>
+      <form onSubmit={(e) => {
+        // Prevent default form submission - we're handling it with the button click
+        e.preventDefault();
+        console.log('Form submit event triggered, but we are handling submission with the button click');
+      }}>
         {renderStep()}
         <div className={styles.formNavigation}>
           {currentStep > 1 && (
@@ -528,9 +651,374 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
             </button>
           ) : (
             <button
-              type="submit"
+              type="button" // Changed from submit to button to handle manually
               className={styles.submitButton}
               disabled={isSubmitting || !signaturePage3Saved}
+              onClick={async (e) => {
+                e.preventDefault();
+                console.log('Submit button clicked directly');
+
+                if (!signaturePage3Saved) {
+                  console.log('Signature not saved');
+                  alert("Please save your signature before proceeding");
+                  return;
+                }
+
+                // Validate all steps of the form before submitting
+                // First, save the current step
+                const currentStepBackup = currentStep;
+
+                // Check step 1
+                setCurrentStep(1);
+
+                // Get all values first for detailed validation
+                const formValues = getValues();
+                console.log('All form values:', formValues);
+
+                // Check credit card fields specifically with detailed messages
+                const cardFields = [
+                  'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
+                  'cardType', 'cardNumber', 'expirationDate', 'cvc'
+                ];
+
+                // Log all form values for debugging
+                console.log('Form values for validation:', {
+                  cardHolderName: formValues.cardHolderName,
+                  cardHolderAddress: formValues.cardHolderAddress,
+                  cardHolderPhone: formValues.cardHolderPhone,
+                  cardHolderEmail: formValues.cardHolderEmail,
+                  cardType: formValues.cardType,
+                  cardNumber: formValues.cardNumber,
+                  expirationDate: formValues.expirationDate,
+                  cvc: formValues.cvc,
+                  customerName: formValues.customerName,
+                  customerPhone: formValues.customerPhone,
+                  customerEmail: formValues.customerEmail
+                });
+
+                // Force update form values with fallbacks - this is critical
+                setValue('cardHolderName', formValues.cardHolderName || formValues.customerName);
+                // Don't set a default for cardHolderAddress - let user enter it
+                setValue('cardHolderPhone', formValues.cardHolderPhone || formValues.customerPhone);
+                setValue('cardHolderEmail', formValues.cardHolderEmail || formValues.customerEmail);
+
+                // Get updated values after setting fallbacks
+                const updatedFormValues = getValues();
+                console.log('Updated form values after fallback:', {
+                  cardHolderName: updatedFormValues.cardHolderName,
+                  cardHolderAddress: updatedFormValues.cardHolderAddress,
+                  cardHolderPhone: updatedFormValues.cardHolderPhone,
+                  cardHolderEmail: updatedFormValues.cardHolderEmail
+                });
+
+                // No validation for card holder fields - they can be empty
+                // Just set default values for them
+                setValue('cardHolderName', formValues.cardHolderName || formValues.customerName || 'Customer');
+                // Don't set a default for cardHolderAddress - let user enter it
+                setValue('cardHolderPhone', formValues.cardHolderPhone || formValues.customerPhone);
+                setValue('cardHolderEmail', formValues.cardHolderEmail || formValues.customerEmail);
+
+                // Now trigger the validation for other fields
+                const step1Valid = await trigger([
+                  'customerName', 'customerPhone', 'customerEmail',
+                  'cardType', 'cardNumber', 'expirationDate', 'cvc',
+                  'agreementAccepted', 'signaturePage1', 'signatureDate1'
+                ]);
+
+                if (!step1Valid) {
+                  alert("Please fill in all required fields on page 1 (Credit Card Authorization)");
+                  setCurrentStep(1);
+                  setIsSubmitting(false);
+                  return;
+                }
+
+                // Check step 2
+                setCurrentStep(2);
+
+                // Force all acknowledgements to be true
+                setValue('acknowledgement1', true);
+                setValue('acknowledgement2', true);
+                setValue('acknowledgement3', true);
+                setValue('acknowledgement4', true);
+                setValue('acknowledgement5', true);
+                setValue('acknowledgement6', true);
+
+                // Check signature
+                if (!formValues.signaturePage2 || !signaturePage2Saved) {
+                  alert("Please save your signature on page 2");
+                  setCurrentStep(2);
+                  setIsSubmitting(false);
+                  return;
+                }
+
+                const step2Valid = true; // We've already checked everything manually
+
+                // Check step 3
+                setCurrentStep(3);
+
+                // Check page 3 fields individually
+                let missingPage3Fields = [];
+                if (!formValues.insuranceCompany) missingPage3Fields.push('Insurance Company');
+                if (!formValues.claimNumber) missingPage3Fields.push('Claim Number');
+                if (!formValues.dateOfLoss) missingPage3Fields.push('Date of Loss');
+                if (!formValues.signatureDate3) missingPage3Fields.push('Signature Date');
+
+                if (missingPage3Fields.length > 0) {
+                  alert(`Please fill in the following fields: ${missingPage3Fields.join(', ')}`);
+                  setCurrentStep(3);
+                  setIsSubmitting(false);
+                  return;
+                }
+
+                // Check signature
+                if (!formValues.signaturePage3 || !signaturePage3Saved) {
+                  alert("Please save your signature on page 3");
+                  setCurrentStep(3);
+                  setIsSubmitting(false);
+                  return;
+                }
+
+                const step3Valid = true; // We've already checked everything manually
+
+                // Check all signatures
+                if (!signaturePage1Saved || !signaturePage2Saved || !signaturePage3Saved) {
+                  alert("Please ensure all signatures are saved on all pages");
+                  setIsSubmitting(false);
+                  return;
+                }
+
+                // Restore the current step
+                setCurrentStep(currentStepBackup);
+
+                // Set loading state
+                setIsSubmitting(true);
+
+                // Create a manual loading overlay
+                const overlay = document.createElement('div');
+                overlay.id = 'manual-loading-overlay';
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.zIndex = '9999';
+
+                const spinner = document.createElement('div');
+                spinner.style.width = '70px';
+                spinner.style.height = '70px';
+                spinner.style.border = '6px solid rgba(255, 255, 255, 0.3)';
+                spinner.style.borderRadius = '50%';
+                spinner.style.borderTopColor = '#3BB554';
+                spinner.style.animation = 'spin 1s ease-in-out infinite';
+
+                const text = document.createElement('p');
+                text.textContent = 'Submitting documents, please wait...';
+                text.style.color = 'white';
+                text.style.marginTop = '20px';
+                text.style.fontSize = '1.2rem';
+
+                overlay.appendChild(spinner);
+                overlay.appendChild(text);
+
+                // Remove any existing overlay first
+                const existingOverlay = document.getElementById('manual-loading-overlay');
+                if (existingOverlay) {
+                  document.body.removeChild(existingOverlay);
+                }
+
+                document.body.appendChild(overlay);
+
+                // Add keyframes for spinner animation
+                const style = document.createElement('style');
+                style.id = 'spinner-style';
+                style.textContent = `
+                  @keyframes spin {
+                    to { transform: rotate(360deg); }
+                  }
+                `;
+
+                // Remove any existing style first
+                const existingStyle = document.getElementById('spinner-style');
+                if (existingStyle) {
+                  document.head.removeChild(existingStyle);
+                }
+
+                document.head.appendChild(style);
+
+                // Get form data
+                const data = getValues();
+
+                // Submit form
+                setTimeout(async () => {
+                  try {
+                    console.log('Submitting form data:', data);
+                    // Get current date in MM/DD/YYYY format
+                    const currentDate = new Date().toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    });
+
+                    // Also get the date values from the form for each page
+                    const signatureDate1 = data.signatureDate1 ? new Date(data.signatureDate1).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    }) : currentDate;
+
+                    const signatureDate2 = data.signatureDate2 ? new Date(data.signatureDate2).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    }) : currentDate;
+
+                    const signatureDate3 = data.signatureDate3 ? new Date(data.signatureDate3).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    }) : currentDate;
+
+                    // Process card type (handle radio button selection)
+                    let cardTypeValue = data.cardType;
+                    if (data.cardType === 'Other' && data.otherCardType) {
+                      cardTypeValue = data.otherCardType;
+                    }
+
+                    console.log('Card type value:', cardTypeValue);
+
+                    // Format date of loss if it exists
+                    let formattedDateOfLoss = data.dateOfLoss;
+                    if (formattedDateOfLoss) {
+                      // Convert from YYYY-MM-DD to MM/DD/YYYY
+                      const dateParts = formattedDateOfLoss.split('-');
+                      if (dateParts.length === 3) {
+                        formattedDateOfLoss = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
+                      }
+                    }
+
+                    console.log('Date of loss:', formattedDateOfLoss);
+
+                    // Ensure all acknowledgements are set to true
+                    const acknowledgements = {
+                      acknowledgement1: true,
+                      acknowledgement2: true,
+                      acknowledgement3: true,
+                      acknowledgement4: true,
+                      acknowledgement5: true,
+                      acknowledgement6: true,
+                      // Map to the exact field names in the PDF
+                      ack1: true,
+                      ack2: true,
+                      ack3: true,
+                      ack4: true,
+                      ack5: true,
+                      ack6: true
+                    };
+
+                    // Map the form data to match the PDF field names
+                    const formattedData = {
+                      ...data,
+                      // Ensure all acknowledgements are set to true
+                      ...acknowledgements,
+                      // Map to the exact field names in the PDF
+                      customerName: data.customerName,
+                      customerPhone: data.customerPhone,
+                      customerEmail: data.customerEmail,
+                      customerAddress: data.customerAddress,
+                      address: data.customerAddress, // Add alternative field name for address
+
+                      // Card holder information
+                      cardholderName: data.cardHolderName || data.customerName || 'Customer',
+                      cardholderStreet: data.cardHolderAddress || 'Same as customer',
+                      cardholderPhone: data.cardHolderPhone || data.customerPhone,
+                      cardholderEmail: data.cardHolderEmail || data.customerEmail,
+
+                      // Card information
+                      cardNumber: data.cardNumber,
+                      expDate: data.expirationDate,
+                      cvc: data.cvc,
+
+                      // Handle card type checkboxes
+                      visa: cardTypeValue === 'Visa' ? true : false,
+                      americanExpress: cardTypeValue === 'American Express' ? true : false,
+                      masterCard: cardTypeValue === 'Master Card' ? true : false,
+                      discoverCard: cardTypeValue === 'Discover Card' ? true : false,
+
+                      // Acknowledgements (already set to true in acknowledgements object)
+
+                      // Insurance information
+                      insuranceCompany: data.insuranceCompany,
+                      claimNumber: data.claimNumber,
+                      dateofLoss: formattedDateOfLoss,
+                      vehicleOwner: data.customerName, // Use customer name as vehicle owner
+
+                      // Signatures
+                      signature1: data.signaturePage1,
+                      signature2: data.signaturePage2,
+                      signature3: data.signaturePage3,
+
+                      // Dates
+                      todayDate1: signatureDate1,
+                      todayDate2: signatureDate2,
+                      todayDate3: signatureDate3,
+
+                      // Remove fields that should be excluded
+                      rentalUnit: undefined,
+                      otherCharges: undefined,
+                      otherCardType: undefined,
+                    };
+
+                    console.log('Formatted form data:', formattedData);
+
+                    // Log signature data status
+                    console.log('Signature data status:', {
+                      signaturePage1: !!data.signaturePage1,
+                      signaturePage2: !!data.signaturePage2,
+                      signaturePage3: !!data.signaturePage3,
+                      signaturePage1Saved,
+                      signaturePage2Saved,
+                      signaturePage3Saved
+                    });
+
+                    const result = await submitForm(
+                      formattedData as unknown as Record<string, unknown>,
+                      'rental',
+                      estimatorEmail || 'unknown@somewhere.com'
+                    );
+
+                    if (result.success) {
+                      console.log('Form submitted successfully');
+                      onSubmit(data);
+
+                      // Redirect after a delay
+                      setTimeout(() => {
+                        window.location.href = '/thankyou';
+                      }, 1000);
+                    } else {
+                      console.error('Form submission failed:', result.message);
+                      alert('Failed to submit form. Please try again.');
+
+                      // Remove overlay
+                      document.body.removeChild(overlay);
+                      document.head.removeChild(style);
+                      setIsSubmitting(false);
+                    }
+                  } catch (error) {
+                    console.error('Error submitting form:', error);
+                    alert('Error submitting form. Please try again.');
+
+                    // Remove overlay
+                    document.body.removeChild(overlay);
+                    document.head.removeChild(style);
+                    setIsSubmitting(false);
+                  }
+                }, 500);
+              }}
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
@@ -538,12 +1026,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
         </div>
       </form>
 
-      {isSubmitting && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Submitting documents, please wait...</p>
-        </div>
-      )}
+      {/* We're now using a direct DOM approach for the loading overlay */}
     </div>
   );
 }

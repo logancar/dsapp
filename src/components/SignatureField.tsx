@@ -52,7 +52,7 @@ const SignatureField: React.FC<SignatureFieldProps> = ({ onSave }) => {
         canvasProps={{
           className: styles.signatureCanvas,
           width: canvasWidth,
-          height: 200
+          height: 150
         }}
         onEnd={() => setHasSignature(true)}
       />

@@ -211,12 +211,13 @@
 .acknowledgementRow {
   display: flex;
   align-items: flex-start;
-  gap: clamp(0.5rem, 1.5vw, 1rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
   text-align: left;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .acknowledgementRow:hover {
@@ -224,18 +225,20 @@
 }
 
 .acknowledgementRow input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
+  width: 24px !important;
+  height: 24px !important;
   margin-top: 0.25rem;
   accent-color: var(--accent-primary);
   cursor: pointer;
   flex-shrink: 0;
+  transform: scale(1.2);
 }
 
 .acknowledgementRow span {
   font-size: clamp(0.9rem, 2.5vw, 1rem);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  flex: 1;
 }
 
 .acknowledgementRow input[type="checkbox"] {
@@ -268,6 +271,19 @@
   margin-bottom: clamp(0.75rem, 2vw, 1rem);
   font-size: clamp(1.1rem, 3vw, 1.25rem);
   color: var(--text-primary);
+}
+
+.signatureDate {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  width: 100%;
+}
+
+.signatureDate .inputGroup {
+  width: 100%;
+  max-width: 200px;
+  margin-bottom: 0;
 }
 
 /* Signature Canvas */

@@ -23,9 +23,15 @@ import './styles/global.css';
 function App() {
   // Handle form submission
   const handleSubmit = (data: any) => {
-    console.log('Form submitted:', data);
-    localStorage.setItem('formData', JSON.stringify(data));
-    window.location.href = '/thankyou'; // Direct to thank you page
+    console.log('App.tsx: Form submitted:', data);
+    try {
+      localStorage.setItem('formData', JSON.stringify(data));
+      console.log('App.tsx: Form data saved to localStorage');
+      // Note: The form component will handle the redirect to the thank you page
+      // This function is just a callback that gets called when the form is submitted
+    } catch (error) {
+      console.error('App.tsx: Error saving form data to localStorage:', error);
+    }
   };
 
   return (
