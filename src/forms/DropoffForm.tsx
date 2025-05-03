@@ -185,12 +185,13 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
   const location = useLocation();
   const locationState = location.state as LocationState;
   const estimatorEmail = locationState?.email || 'unknown@somewhere.com';
-  const estimatorName = locationState?.name || 'Unknown';
+  // Remove unused variable
+  // const estimatorName = locationState?.name || 'Unknown';
 
   // Add loading state - explicitly set to false initially
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const { register, handleSubmit, setValue, watch, getValues, formState: { errors } } = useForm<DropoffFormData>({
+  const { register, setValue, watch, getValues, formState: { errors } } = useForm<DropoffFormData>({
     defaultValues: {
       referralSources: {
         google: false,
@@ -1190,7 +1191,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                 setTimeout(async () => {
                   try {
                     console.log('Submitting form data:', data);
-                    const result = await submitForm(data, 'dropoff', estimatorEmail);
+                    const result = await submitForm(data as unknown as Record<string, unknown>, 'dropoff', estimatorEmail);
 
                     if (result.success) {
                       console.log('Form submitted successfully');

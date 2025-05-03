@@ -114,8 +114,8 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
   const location = useLocation();
   const { email: estimatorEmail } = location.state as LocationState;
 
-  const { register, handleSubmit, watch, setValue, getValues, formState: { errors }, trigger } = useForm<RentalFormData>({
-    resolver: yupResolver(schema),
+  const { register, watch, setValue, getValues, formState: { errors }, trigger } = useForm<RentalFormData>({
+    resolver: yupResolver(schema) as any,
     mode: 'onChange'
   });
 
@@ -526,6 +526,8 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
     }
   };
 
+  // Removed unused function
+  /*
   const onFormSubmit = async (data: RentalFormData) => {
     // Check if the current step's signature is saved
     if (
@@ -536,7 +538,9 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
       alert("Please save your signature before proceeding");
       return;
     }
+  */
 
+    /* Removed rest of unused function
     // If we're on the final step, submit the form
     if (currentStep === 3) {
       // We'll handle the form submission in the submit button click handler
@@ -560,7 +564,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
         return false;
       }
     }
-  };
+    */
 
   // Handle next button click
   const handleNext = async () => {
@@ -578,33 +582,28 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
       // Additional check for specific fields based on the current step
       if (currentStep === 1) {
         // Check credit card fields specifically
-        const cardFields = [
-          'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
-          'cardType', 'cardNumber', 'expirationDate', 'cvc'
-        ];
-        const cardValues = getValues(cardFields);
-        const customerValues = getValues(['customerName', 'customerPhone', 'customerEmail']);
+        // Get all form values
+        const formValues = getValues();
 
         // Log values for debugging
-        console.log('Card field values:', cardValues);
-        console.log('Customer values for fallback:', customerValues);
+        console.log('Form values:', formValues);
 
         // Force update form values with fallbacks - this is critical
-        setValue('cardHolderName', cardValues.cardHolderName || customerValues.customerName);
+        setValue('cardHolderName', formValues.cardHolderName || formValues.customerName);
         // Don't set a default for cardHolderAddress - let user enter it
-        setValue('cardHolderPhone', cardValues.cardHolderPhone || customerValues.customerPhone);
-        setValue('cardHolderEmail', cardValues.cardHolderEmail || customerValues.customerEmail);
+        setValue('cardHolderPhone', formValues.cardHolderPhone || formValues.customerPhone);
+        setValue('cardHolderEmail', formValues.cardHolderEmail || formValues.customerEmail);
 
         // Get updated values after setting fallbacks
-        const updatedCardValues = getValues(cardFields);
-        console.log('Updated card values after fallback:', updatedCardValues);
+        const updatedFormValues = getValues();
+        console.log('Updated values after fallback:', updatedFormValues);
 
         // No validation for card holder fields - they can be empty
         // Just set default values for them
-        setValue('cardHolderName', cardValues.cardHolderName || customerValues.customerName || 'Customer');
+        setValue('cardHolderName', updatedFormValues.cardHolderName || updatedFormValues.customerName || 'Customer');
         // Don't set a default for cardHolderAddress - let user enter it
-        setValue('cardHolderPhone', cardValues.cardHolderPhone || customerValues.customerPhone);
-        setValue('cardHolderEmail', cardValues.cardHolderEmail || customerValues.customerEmail);
+        setValue('cardHolderPhone', updatedFormValues.cardHolderPhone || updatedFormValues.customerPhone);
+        setValue('cardHolderEmail', updatedFormValues.cardHolderEmail || updatedFormValues.customerEmail);
       } else if (currentStep === 2) {
         // Force all acknowledgements to be true
         setValue('acknowledgement1', true);
@@ -676,10 +675,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                 console.log('All form values:', formValues);
 
                 // Check credit card fields specifically with detailed messages
-                const cardFields = [
-                  'cardHolderName', 'cardHolderAddress', 'cardHolderPhone', 'cardHolderEmail',
-                  'cardType', 'cardNumber', 'expirationDate', 'cvc'
-                ];
+                // Removed unused variable cardFields
 
                 // Log all form values for debugging
                 console.log('Form values for validation:', {
@@ -751,7 +747,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   return;
                 }
 
-                const step2Valid = true; // We've already checked everything manually
+                // We've already checked everything manually
 
                 // Check step 3
                 setCurrentStep(3);
@@ -778,7 +774,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                   return;
                 }
 
-                const step3Valid = true; // We've already checked everything manually
+                // We've already checked everything manually
 
                 // Check all signatures
                 if (!signaturePage1Saved || !signaturePage2Saved || !signaturePage3Saved) {
