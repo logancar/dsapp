@@ -984,7 +984,7 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                     const result = await submitForm(
                       formattedData as unknown as Record<string, unknown>,
                       'rental',
-                      estimatorEmail || 'unknown@somewhere.com'
+                      estimatorEmail || 'info@autohail.group'
                     );
 
                     if (result.success) {

@@ -184,7 +184,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
   // Get estimator email from location state
   const location = useLocation();
   const locationState = location.state as LocationState;
-  const estimatorEmail = locationState?.email || 'unknown@somewhere.com';
+  const estimatorEmail = locationState?.email || 'info@autohail.group';
   // Remove unused variable
   // const estimatorName = locationState?.name || 'Unknown';
 

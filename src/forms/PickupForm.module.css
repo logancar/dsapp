@@ -136,7 +136,7 @@ form {
 
 .acknowledgementRow {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: clamp(0.5rem, 2vw, 1rem);
   margin-bottom: clamp(0.75rem, 2vw, 1rem);
   padding: 0.5rem;
@@ -148,35 +148,92 @@ form {
   background-color: rgba(255, 255, 255, 0.03);
 }
 
-.acknowledgementRow input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  margin-top: 0.25rem;
-  accent-color: var(--accent-primary);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.acknowledgementRow span {
+.acknowledgementRow p {
   font-size: clamp(0.9rem, 2.5vw, 1rem);
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
 }
 
-.partsOwedBox {
+.initialsBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-self: flex-end;
+}
+
+.initialsBox span {
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.initialsInput {
+  width: 50px;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.partsOwedTextarea {
   width: 100%;
-  height: clamp(80px, 20vw, 100px);
+  min-height: clamp(80px, 20vw, 100px);
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0.75rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+  resize: vertical;
   transition: border-color 0.2s ease;
 }
 
-.partsOwedBox:hover {
+.partsOwedTextarea:hover {
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.partsOwedTextarea:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.signatureRow {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.signatureColumn {
+  flex: 3;
+}
+
+.dateColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.signatureColumn p, .dateColumn p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .placeholder {

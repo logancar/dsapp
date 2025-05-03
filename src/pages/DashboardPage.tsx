@@ -25,7 +25,7 @@ function DashboardPage() {
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const estimatorName = locationState?.name || 'Unknown';
-  const estimatorEmail = locationState?.email || 'unknown@somewhere.com';
+  const estimatorEmail = locationState?.email || 'info@autohail.group';
 
   const forms = [
     { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg },

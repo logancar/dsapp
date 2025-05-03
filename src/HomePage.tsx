@@ -8,13 +8,13 @@ import styles from "./HomePage.module.css";
   You can replace the name "Logan" with others for each ID if you like.
 */
 const validIDs: Record<string, { name: string; email: string }> = {
-  "1111": { name: "Logan", email: "logan@dent-source.com" },
-  "2222": { name: "Miguel", email: "miguel@dent-source.com" },
-  "3333": { name: "Zach", email: "zach@dent-source.com" },
-  "9999": { name: "Jerimiah", email: "jerimiah@dent-source.com" },
-  "4444": { name: "Matthew", email: "matt.n@dent-source.com" },
-  "5555": { name: "Kristina", email: "kristina@dent-source.com" },
-  "8310": { name: "Anna", email: "reception@dent-source.com" },
+  "1111": { name: "Logan", email: "logan@autohail.group" },
+  "2222": { name: "Miguel", email: "miguel@autohail.group" },
+  "3333": { name: "Zach", email: "zach@autohail.group" },
+  "9999": { name: "Lindsey", email: "lindsey@autohail.group" },
+  "4444": { name: "Matthew", email: "matt.n@autohail.group" },
+  "5555": { name: "Lindsey", email: "lindsey@autohail.group" },
+  "8310": { name: "Receptionist", email: "receptionist@autohail.group" },
 };
 
 function HomePage() {

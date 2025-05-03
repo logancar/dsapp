@@ -66,66 +66,17 @@ async function fillPdf(pdfType, formData, outputPath) {
     // Updated field mappings with actual PDF field names
     const fieldMappings = {
         pickup: {
-            // Referral Sources
-            google: "google",
-            tv: "tv",
-            sms: "sms",
-            facebook: "facebook",
-            hulu: "hulu",
-            pandora: "pandora",
-            waze: "waze",
-            radio: "radio",
-            ref: "ref",
-            insta: "insta",
-            fire: "fire",
-            billboard: "billboard",
-            mailer: "mailer",
-            hanger: "hanger",
-            internet: "internet",
-            youtube: "youtube",
-            prime: "prime",
-            sales: "sales",
+            // Completion section
+            customerName: "Customer_Name",
 
-            // Authorization
-            insuranceCo: "insuranceCo",
-            vehicleDescription: "vehicleDescription",
-            vin: "vin",
-            claimNumber: "claimNumber",
-            claimNumber2: "claimNumber2",
-            dol: "dol",
-
-            // Personal Information
-            customerName: "customerName",
-            customerPhone: "customerPhone",
-            altPhone: "altPhone",
-            address: "address",
-            city: "city",
-            state: "state",
-            zip: "zip",
-            customerEmail: "customerEmail",
-
-            // Insurance Information
-            insured: "insured",
-            insuredPhone: "insuredPhone",
-            provider: "provider",
-            deductible: "deductible",
-
-            // Questions
-            estimateDone: "estimateDone",
-            check: "check",
-            referrer: "referrer",
-
-            // Authorizations
-            auth1: "auth1",
-            auth2: "auth2",
-            auth3: "auth3",
-            auth4: "auth4",
-            auth5: "auth5",
-            auth6: "auth6",
+            // Acknowledgments with initials
+            rentalInitials: "Rental_Initials_es_:signer:initials",
+            reviewsInitials: "Review_Initials_es_:signer:initials",
 
             // Date
             date: "Date"
-            // Signature fields (signature1 and signature2) are handled separately
+            // Signature field is handled separately
+            // Note: Parts Owed doesn't have a field in the PDF
         },
         rental: {
             // Customer Information (Page 1)
@@ -247,17 +198,9 @@ async function fillPdf(pdfType, formData, outputPath) {
     const signaturePositions = {
         pickup: [
             {
-                field: "signature1",
-                x: 100,
-                y: 150,
-                width: 200,
-                height: 50,
-                page: 0
-            },
-            {
-                field: "signature2",
-                x: 100,
-                y: 150,
+                field: "signature",
+                x: 135,
+                y: 607,
                 width: 200,
                 height: 50,
                 page: 0
@@ -932,6 +875,8 @@ async function addSignatureToPdf(pdfDoc, signatureImage, position) {
     let yPos = pageHeight - position.y - position.height;
 
     console.log(`Calculated signature position: (${xPos}, ${yPos}) from original (${position.x}, ${position.y})`);
+    console.log(`Page height: ${pageHeight}, Signature height: ${position.height}`);
+    console.log(`Formula: yPos = pageHeight(${pageHeight}) - position.y(${position.y}) - position.height(${position.height}) = ${yPos}`);
 
     targetPage.drawImage(signatureImage, {
         x: xPos,
