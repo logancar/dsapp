@@ -13,6 +13,8 @@ import pickupImg from '../assets/pickup.jpg';
 interface LocationState {
   name?: string;
   email?: string;
+  isCustomer?: boolean;
+  estimatorEmail?: string;
 }
 
 function DashboardPage() {
@@ -24,8 +26,12 @@ function DashboardPage() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  const estimatorName = locationState?.name || 'Unknown';
-  const estimatorEmail = locationState?.email || 'info@autohail.group';
+  const isCustomer = locationState?.isCustomer || false;
+  const userName = locationState?.name || 'Unknown';
+  // For customers, use the linked estimator's email for form submissions
+  const userEmail = isCustomer
+    ? locationState?.estimatorEmail || 'info@autohail.group'
+    : locationState?.email || 'info@autohail.group';
 
   const forms = [
     { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg },
@@ -34,16 +40,27 @@ function DashboardPage() {
   ];
 
   const handleClick = useCallback((formType: string) => {
+    // Prevent customers from accessing rental docs
+    if (isCustomer && formType === 'rental') {
+      alert("Rental documents are not available for customer access.");
+      return;
+    }
+
     const targetRoute = `/${formType}-form`;
     if (consentGiven) {
       navigate(targetRoute, {
-        state: { name: estimatorName, email: estimatorEmail },
+        state: {
+          name: userName,
+          email: userEmail,
+          isCustomer: isCustomer,
+          estimatorEmail: isCustomer ? userEmail : undefined
+        },
       });
     } else {
       setPendingRoute(targetRoute);
       setIsPopupOpen(true);
     }
-  }, [consentGiven, navigate, estimatorName, estimatorEmail]);
+  }, [consentGiven, navigate, userName, userEmail, isCustomer]);
 
   const handleAccept = useCallback(() => {
     setConsentGiven(true);
@@ -51,11 +68,16 @@ function DashboardPage() {
 
     if (pendingRoute) {
       navigate(pendingRoute, {
-        state: { name: estimatorName, email: estimatorEmail },
+        state: {
+          name: userName,
+          email: userEmail,
+          isCustomer: isCustomer,
+          estimatorEmail: isCustomer ? userEmail : undefined
+        },
       });
       setPendingRoute(null);
     }
-  }, [pendingRoute, navigate, estimatorName, estimatorEmail, setConsentGiven]);
+  }, [pendingRoute, navigate, userName, userEmail, isCustomer, setConsentGiven]);
 
   const handleOptOut = useCallback(() => {
     setIsPopupOpen(false);
@@ -65,10 +87,10 @@ function DashboardPage() {
   return (
     <div className={styles.container}>
       <div className={styles.nameLabel}>
-        Logged in as: <span className={styles.nameGreen}>{estimatorName}</span>
+        Logged in as: <span className={styles.nameGreen}>{userName}</span>
       </div>
       <h2 className={styles.heading}>
-        Welcome <span className={styles.nameGreen}>{estimatorName}</span>.
+        Welcome <span className={styles.nameGreen}>{userName}</span>.
         Please select which documents you would like to view.
       </h2>
 
@@ -76,17 +98,22 @@ function DashboardPage() {
         {forms.map((f) => (
           <motion.div
             key={f.id}
-            className={styles.thumbnailCard}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className={`${styles.thumbnailCard} ${isCustomer && f.id === 'rental' ? styles.disabled : ''}`}
+            whileHover={isCustomer && f.id === 'rental' ? {} : { scale: 1.05 }}
+            whileTap={isCustomer && f.id === 'rental' ? {} : { scale: 0.95 }}
             onClick={() => handleClick(f.id)}
           >
             <img
               src={f.img}
               alt={f.label}
-              className={styles.thumbnailImage}
+              className={`${styles.thumbnailImage} ${isCustomer && f.id === 'rental' ? styles.disabledImage : ''}`}
             />
             <p className={styles.thumbnailText}>{f.label}</p>
+            {isCustomer && f.id === 'rental' && (
+              <div className={styles.disabledOverlay}>
+                Not Available
+              </div>
+            )}
           </motion.div>
         ))}
       </div>

@@ -180,8 +180,9 @@ async function fillPdf(pdfType, formData, outputPath) {
             hasEstimate: "estimateDone",
             hasReceivedCheck: "check",
 
-            // Signature
-            signature: "signature1"
+            // Signatures
+            signature: "signature1",
+            signature2: "signature2"
         }
     };
 
@@ -199,47 +200,61 @@ async function fillPdf(pdfType, formData, outputPath) {
         pickup: [
             {
                 field: "signature",
-                x: 135,
-                y: 607,
+                x: 153,  // Moved left by 50% from center (306/2)
+                y: 150,  // Adjusted to be in the signature line area
                 width: 200,
                 height: 50,
-                page: 0
+                page: 0,
+                pdfField: null  // No existing signature field in the PDF
             }
         ],
         rental: [
             {
                 field: "signaturePage1",
-                x: 50,    // Far left
-                y: 650,   // Very low on page
-                width: 200,
-                height: 50,
-                page: 0
+                x: 71.3123,  // Use exact coordinates from the actual signature1 field
+                y: 104.161,  // Use exact coordinates from the actual signature1 field
+                width: 215.4667,
+                height: 22.063,
+                page: 0,
+                pdfField: "signature1"  // Use the existing signature1 field in the PDF
             },
             {
                 field: "signaturePage2",
-                x: 50,    // Far left
-                y: 650,   // Very low on page
-                width: 200,
-                height: 50,
-                page: 1
+                x: 77.7421,  // Use exact coordinates from the actual signature2 field
+                y: 154.43,   // Use exact coordinates from the actual signature2 field
+                width: 227.2369,
+                height: 32,
+                page: 1,
+                pdfField: "signature2"  // Use the existing signature2 field in the PDF
             },
             {
                 field: "signaturePage3",
-                x: 50,    // Far left
-                y: 650,   // Very low on page
-                width: 200,
-                height: 50,
-                page: 2
+                x: 61.3753,  // Use exact coordinates from the actual signature3 field
+                y: 335.049,  // Use exact coordinates from the actual signature3 field
+                width: 314.8367,
+                height: 32,
+                page: 2,
+                pdfField: "signature3"  // Use the existing signature3 field in the PDF
             }
         ],
         dropoff: [
             {
                 field: "signature",
-                x: 100,
-                y: 150,
-                width: 200,
-                height: 50,
-                page: 0
+                x: 63.4912,  // Use exact coordinates from the actual signature1 field
+                y: 392.798,  // Use exact coordinates from the actual signature1 field
+                width: 150,
+                height: 32,
+                page: 1,  // Second page (0-indexed as page 1)
+                pdfField: "signature1"  // Use the existing signature1 field in the PDF
+            },
+            {
+                field: "signature2",  // Match the key to the field name in the PDF
+                x: 104.728,  // Use exact coordinates from the actual signature2 field
+                y: 28.8695,  // Use exact coordinates from the actual signature2 field
+                width: 150,
+                height: 32,
+                page: 3,  // Last page (0-indexed as page 3)
+                pdfField: "signature2"  // Use the existing signature2 field in the PDF
             }
         ]
     };
@@ -337,12 +352,22 @@ async function fillPdf(pdfType, formData, outputPath) {
 
     // Fill form fields
     console.log('Starting to fill form fields...');
+    console.log('Form data keys:', Object.keys(formData));
+
+    // For dropoff form, duplicate the signature to signature2 field for the last page
+    if (pdfType === 'dropoff' && formData.signature) {
+        console.log('Duplicating signature to signature2 for last page');
+        formData.signature2 = formData.signature;
+        console.log('Signature duplicated. Keys available:', Object.keys(formData).filter(k => k.includes('signature')));
+    }
+
     for (const key in formData) {
         if (key === 'signature1' || key === 'signature2' || key === 'signature' ||
             key === 'signaturePage1' || key === 'signaturePage2' || key === 'signaturePage3') {
             console.log(`Processing signature field ${key} for form type:`, pdfType);
+            console.log(`Signature data length: ${formData[key]?.length || 0} characters`);
             const signatureImage = await handleSignatureImage(pdfDoc, formData[key]);
-            console.log('Signature image created');
+            console.log(`Signature image created for ${key}`);
 
             // First, try to find any existing signature fields in the PDF
             let existingSignatureField = null;
@@ -425,6 +450,45 @@ async function fillPdf(pdfType, formData, outputPath) {
             if (!position) {
                 console.error(`No position defined for signature field: ${key}`);
                 continue; // Skip this signature field
+            }
+
+            // If the position has a pdfField property, try to use the existing PDF field
+            if (position.pdfField) {
+                try {
+                    console.log(`Trying to use existing PDF signature field: ${position.pdfField}`);
+                    const signatureField = form.getSignature(position.pdfField);
+
+                    if (signatureField) {
+                        console.log(`Found existing signature field: ${position.pdfField}`);
+                        // We can't directly set the signature image to the field,
+                        // so we'll still use our manual positioning but with the field's coordinates
+
+                        try {
+                            const widget = signatureField.acroField.getWidgets()[0];
+                            if (widget) {
+                                const rect = widget.getRectangle();
+                                console.log(`Using existing signature field position: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}, page=${widget.P.objectNumber}`);
+
+                                // Use the existing field's position but keep our manual page number
+                                const updatedPosition = {
+                                    ...position,
+                                    x: rect.x,
+                                    y: rect.y,
+                                    width: rect.width,
+                                    height: rect.height
+                                };
+
+                                await addSignatureToPdf(pdfDoc, signatureImage, updatedPosition);
+                                console.log(`Signature ${key} added to PDF using existing field position`);
+                                continue;
+                            }
+                        } catch (e) {
+                            console.log(`Could not get widget for signature field: ${e.message}`);
+                        }
+                    }
+                } catch (e) {
+                    console.log(`Could not use existing signature field: ${e.message}`);
+                }
             }
 
             console.log(`Using manual position for ${key}:`, JSON.stringify(position));
@@ -841,22 +905,28 @@ async function handleSignatureImage(pdfDoc, signatureDataUrl) {
 }
 
 async function addSignatureToPdf(pdfDoc, signatureImage, position) {
+    console.log('=== ADDING SIGNATURE TO PDF ===');
+    console.log('Position object:', JSON.stringify(position));
+
     if (!position || typeof position.page !== 'number') {
         console.error('Invalid position object:', position);
         throw new Error('Invalid signature position configuration');
     }
 
     const pages = pdfDoc.getPages();
+    console.log(`PDF has ${pages.length} pages. Trying to add signature to page ${position.page}`);
+
     if (position.page >= pages.length) {
-        console.error(`Page ${position.page} does not exist in PDF`);
+        console.error(`Page ${position.page} does not exist in PDF with ${pages.length} pages`);
         throw new Error(`Invalid page number: ${position.page}`);
     }
 
     const targetPage = pages[position.page];
+    console.log(`Successfully got page ${position.page}`);
 
     // Get page dimensions
     const { width: pageWidth, height: pageHeight } = targetPage.getSize();
-    console.log(`Page dimensions: width=${pageWidth}, height=${pageHeight}`);
+    console.log(`Page ${position.page} dimensions: width=${pageWidth}, height=${pageHeight}`);
 
     // Calculate absolute position (handle negative coordinates)
     // For x: negative means from right edge, positive means from left edge
@@ -872,20 +942,39 @@ async function addSignatureToPdf(pdfDoc, signatureImage, position) {
 
     // For y position, we need to adjust based on page height
     // In PDF, y=0 is at the bottom, but we want to position from the top
-    let yPos = pageHeight - position.y - position.height;
+    let yPos;
+
+    // In PDF coordinates, (0,0) is bottom-left, and y increases upward
+    // Our position.y is specified from the bottom of the page
+    // So we can use position.y directly without transformation
+    yPos = position.y;
+
+    // Special handling for signature2 on the last page of DropoffForm
+    if (position.pdfField === 'signature2') {
+        console.log(`Using exact coordinates for signature2 field: x=${position.x}, y=${position.y}`);
+    } else {
+        console.log(`Using direct y-coordinate: ${yPos} (from bottom of page)`);
+    }
 
     console.log(`Calculated signature position: (${xPos}, ${yPos}) from original (${position.x}, ${position.y})`);
     console.log(`Page height: ${pageHeight}, Signature height: ${position.height}`);
-    console.log(`Formula: yPos = pageHeight(${pageHeight}) - position.y(${position.y}) - position.height(${position.height}) = ${yPos}`);
 
-    targetPage.drawImage(signatureImage, {
-        x: xPos,
-        y: yPos,
-        width: position.width,
-        height: position.height
-    });
+    // No conditional needed since we're using the same formula for all pages
+    console.log(`Using PDF native coordinates with y-origin at bottom: yPos = ${yPos}`);
+    console.log(`Signature will be placed ${yPos} units from the bottom of the page`);
 
-    console.log(`Signature drawn on page ${position.page} at position (${xPos}, ${yPos})`);
+    try {
+        targetPage.drawImage(signatureImage, {
+            x: xPos,
+            y: yPos,
+            width: position.width,
+            height: position.height
+        });
+        console.log(`✅ Signature successfully drawn on page ${position.page} at position (${xPos}, ${yPos})`);
+    } catch (error) {
+        console.error(`❌ Error drawing signature on page ${position.page}:`, error.message);
+        throw error;
+    }
 }
 
 module.exports = { fillPdf };

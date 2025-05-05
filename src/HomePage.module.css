@@ -69,8 +69,8 @@
   margin-bottom: 20px;
 }
 
-/* 
-  This is the main input for the Employee ID 
+/*
+  This is the main input for the Employee ID
   Named .input for consistency with HomePage.tsx
 */
 .input {
@@ -172,5 +172,130 @@
     width: 70px;
     height: 70px;
     font-size: 24px;
+  }
+}
+
+/* Customer Login Button */
+.customerLoginButton {
+  background-color: #222;
+  border: 2px solid #3BB554;
+  color: #3BB554;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.customerLoginButton:hover {
+  background-color: #2a2a2a;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #1a1a1a;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  width: 90%;
+  max-width: 500px;
+  min-width: 320px;
+}
+
+.modalTitle {
+  font-size: 24px;
+  font-weight: bold;
+  color: #3BB554;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  color: #ABABAB;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #222;
+  border: 2px solid #3BB554;
+  border-radius: 12px;
+  outline: none;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+}
+
+.cancelButton, .loginButton {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.cancelButton {
+  background-color: #333;
+  border: 2px solid #555;
+  color: #fff;
+}
+
+.loginButton {
+  background-color: #3BB554;
+  border: 2px solid #3BB554;
+  color: #fff;
+}
+
+.cancelButton:hover {
+  background-color: #444;
+}
+
+.loginButton:hover {
+  background-color: #309144;
+}
+
+/* Responsive adjustments for modal */
+@media only screen and (max-device-width: 428px) {
+  .modal {
+    padding: 20px;
+    width: 95%;
+  }
+
+  .modalButtons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cancelButton, .loginButton {
+    width: 100%;
   }
 }

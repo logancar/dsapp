@@ -20,6 +20,13 @@ const validIDs: Record<string, { name: string; email: string }> = {
 function HomePage() {
   const navigate = useNavigate();
   const [employeeID, setEmployeeID] = useState("");
+  const [showCustomerLogin, setShowCustomerLogin] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    loginCode: ""
+  });
 
   // Insert digit if we have <4
   const handleInput = (digit: string) => {
@@ -76,6 +83,68 @@ function HomePage() {
     }
   };
 
+  // Handle customer login form input changes
+  const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCustomerInfo(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Map estimator codes to their emails
+  const estimatorCodes: Record<string, string> = {
+    "DSMIGUEL": "miguel@autohail.group",
+    "DSMATTHEW": "matt.n@autohail.group",
+    "DSZACH": "zach@autohail.group",
+    "DSLOGAN": "logan@autohail.group",
+    "DSLINDSEY": "lindsey@autohail.group",
+    "DSRECEPTIONIST": "receptionist@autohail.group",
+    // Keep the original code as a fallback that goes to Logan
+    "DENTSOURCE": "logan@autohail.group"
+  };
+
+  // Handle customer login submission
+  const handleCustomerLogin = () => {
+    const { firstName, lastName, email, loginCode } = customerInfo;
+
+    // Basic validation
+    if (!firstName || !lastName || !email || !loginCode) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    // Check if login code is valid (matches an estimator code)
+    const estimatorEmail = estimatorCodes[loginCode.toUpperCase()];
+    if (estimatorEmail) {
+      // Navigate to dashboard with customer info and linked estimator
+      navigate("/dashboard", {
+        state: {
+          name: `${firstName} ${lastName}`,
+          email: email,
+          isCustomer: true,
+          estimatorEmail: estimatorEmail
+        }
+      });
+    } else {
+      alert("Invalid login code. Please try again.");
+    }
+  };
+
+  // Toggle customer login modal
+  const toggleCustomerLogin = () => {
+    setShowCustomerLogin(prev => !prev);
+    // Reset form when opening
+    if (!showCustomerLogin) {
+      setCustomerInfo({
+        firstName: "",
+        lastName: "",
+        email: "",
+        loginCode: ""
+      });
+    }
+  };
+
   // Create a reusable NumpadButton component
   const NumpadButton = ({ onClick, children }: { onClick: () => void, children: React.ReactNode }) => (
     <motion.button
@@ -118,8 +187,103 @@ function HomePage() {
             <NumpadButton onClick={() => handleInput("0")}>0</NumpadButton>
             <NumpadButton onClick={handleSubmit}>✓</NumpadButton>
           </div>
+
+          <motion.button
+            className={styles.customerLoginButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleCustomerLogin}
+          >
+            Customer Login
+          </motion.button>
         </motion.div>
       </div>
+
+      {/* Customer Login Modal */}
+      {showCustomerLogin && (
+        <div className={styles.modalOverlay}>
+          <motion.div
+            className={styles.modal}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h2 className={styles.modalTitle}>Customer Login</h2>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={customerInfo.firstName}
+                onChange={handleCustomerInputChange}
+                className={styles.modalInput}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={customerInfo.lastName}
+                onChange={handleCustomerInputChange}
+                className={styles.modalInput}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={customerInfo.email}
+                onChange={handleCustomerInputChange}
+                className={styles.modalInput}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="loginCode">Login Code</label>
+              <input
+                type="password"
+                id="loginCode"
+                name="loginCode"
+                value={customerInfo.loginCode}
+                onChange={handleCustomerInputChange}
+                className={styles.modalInput}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className={styles.modalButtons}>
+              <motion.button
+                className={styles.cancelButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleCustomerLogin}
+              >
+                Cancel
+              </motion.button>
+
+              <motion.button
+                className={styles.loginButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCustomerLogin}
+              >
+                Login
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

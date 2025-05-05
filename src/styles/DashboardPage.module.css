@@ -86,3 +86,37 @@
     height: 150px;
   }
 }
+
+/* Styles for disabled rental form for customers */
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  position: relative;
+  filter: grayscale(80%);
+  box-shadow: none;
+}
+
+.disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.disabledImage {
+  filter: blur(1px) grayscale(100%);
+}
+
+.disabledOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-weight: bold;
+  border-radius: 0.75rem;
+  font-size: 1.2rem;
+}
