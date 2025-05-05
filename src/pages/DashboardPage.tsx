@@ -33,10 +33,12 @@ function DashboardPage() {
     ? locationState?.estimatorEmail || 'info@autohail.group'
     : locationState?.email || 'info@autohail.group';
 
+  // Forms in specific order for the 2x2 grid on mobile:
+  // Top left: Drop Off, Top right: Rental, Bottom left: Pickup, Bottom right: empty
   const forms = [
-    { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg },
-    { id: 'rental', label: 'Rental Docs', img: rentalImg },
-    { id: 'pickup', label: 'Pick Up Docs', img: pickupImg },
+    { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg, order: 1 },
+    { id: 'rental', label: 'Rental Docs', img: rentalImg, order: 2 },
+    { id: 'pickup', label: 'Pick Up Docs', img: pickupImg, order: 3 },
   ];
 
   const handleClick = useCallback((formType: string) => {

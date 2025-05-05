@@ -55,6 +55,18 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Fix for iPad white background issue */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* iPad specific */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      background-color: #000000 !important;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+  }
+}
+
 /* Prevent text selection on iOS */
 * {
   -webkit-touch-callout: none;
@@ -327,5 +339,18 @@ button.numpadButton {
   min-height: 100vh;
   position: relative;
   overflow-y: auto;
+  background-color: var(--background-primary);
+}
+
+/* Fix for iPad white background issue */
+@supports (-webkit-touch-callout: none) {
+  .app-container {
+    /* iPad specific */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      background-color: #0D0D0D !important;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+  }
 }
 

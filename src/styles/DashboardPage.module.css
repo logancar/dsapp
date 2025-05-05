@@ -10,6 +10,38 @@
   position: relative;
 }
 
+/* Fix for iPad white background issue */
+@supports (-webkit-touch-callout: none) {
+  .container {
+    /* Ensure background color is explicitly set for iOS devices */
+    background-color: #0D0D0D !important;
+
+    /* iPad specific */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      background-color: #0D0D0D !important;
+      min-height: 100vh;
+      height: -webkit-fill-available;
+    }
+
+    /* iPhone specific */
+    @media only screen and (max-device-width: 428px) {
+      background-color: #0D0D0D !important;
+      min-height: 100vh;
+      height: -webkit-fill-available;
+      padding: 1rem;
+      padding-top: 2rem;
+      overflow-y: hidden; /* Prevent scrolling on iPhone */
+    }
+  }
+
+  .heading {
+    @media only screen and (max-device-width: 428px) {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
 .nameLabel {
   position: absolute;
   top: 1rem;
@@ -34,6 +66,98 @@
   gap: 2rem;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+/* iPhone and small screen grid layout */
+@media (max-width: 480px) {
+  .thumbnails {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      "dropoff rental"
+      "pickup empty";
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Position each card in the correct grid area */
+  .thumbnails > div:nth-child(1) {
+    grid-area: dropoff;
+  }
+
+  .thumbnails > div:nth-child(2) {
+    grid-area: rental;
+  }
+
+  .thumbnails > div:nth-child(3) {
+    grid-area: pickup;
+  }
+}
+
+/* iOS-specific adjustments for iPhone */
+@supports (-webkit-touch-callout: none) {
+  .thumbnails {
+    @media only screen and (max-device-width: 428px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-template-areas:
+        "dropoff rental"
+        "pickup empty";
+      gap: 1rem;
+      width: 100%;
+      max-width: 100%;
+      padding: 0 0.5rem;
+    }
+  }
+
+  /* Position each card in the correct grid area */
+  .thumbnails > div:nth-child(1) {
+    @media only screen and (max-device-width: 428px) {
+      grid-area: dropoff;
+    }
+  }
+
+  .thumbnails > div:nth-child(2) {
+    @media only screen and (max-device-width: 428px) {
+      grid-area: rental;
+    }
+  }
+
+  .thumbnails > div:nth-child(3) {
+    @media only screen and (max-device-width: 428px) {
+      grid-area: pickup;
+    }
+  }
+
+  .thumbnailCard {
+    @media only screen and (max-device-width: 428px) {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      margin: 0;
+    }
+  }
+
+  .thumbnailImage {
+    @media only screen and (max-device-width: 428px) {
+      width: 120px;
+      height: 120px;
+    }
+  }
+
+  .thumbnailText {
+    @media only screen and (max-device-width: 428px) {
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+  }
 }
 
 .thumbnailCard {
@@ -81,9 +205,24 @@
     gap: 1rem;
   }
 
+  .thumbnailCard {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
   .thumbnailImage {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
+  }
+
+  .thumbnailText {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
   }
 }
 
