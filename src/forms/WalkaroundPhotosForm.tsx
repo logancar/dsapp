@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './WalkaroundPhotosForm.module.css';
 import CameraCapture from '../components/CameraCapture';
 import { submitForm } from '../services/api';
@@ -106,7 +106,6 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   const [photoSteps, setPhotoSteps] = useState<PhotoStep[]>(PHOTO_STEPS);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const locationState = location.state as LocationState;
 
   const isCustomer = locationState?.isCustomer || false;
@@ -137,7 +136,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       alert('Please take a photo before proceeding.');
       return;
     }
-    
+
     if (currentStepIndex < photoSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
       window.scrollTo(0, 0);
@@ -165,7 +164,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       imageData: undefined
     };
     setPhotoSteps(updatedSteps);
-    
+
     // If we're in review mode, navigate to the step to retake
     if (isReviewStep) {
       setCurrentStepIndex(index);
@@ -287,12 +286,12 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         <h3 className={styles.instructionTitle}>{currentStep.title}</h3>
         <p className={styles.instructionText}>{currentStep.instruction}</p>
       </div>
-      
-      <CameraCapture 
-        onCapture={handleCapture} 
+
+      <CameraCapture
+        onCapture={handleCapture}
         capturedImage={currentStep.imageData}
       />
-      
+
       <div className={styles.buttonContainer}>
         <button
           className={`${styles.button} ${styles.secondaryButton}`}
@@ -301,7 +300,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         >
           Back
         </button>
-        
+
         {(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') && (
           <button
             className={`${styles.button} ${styles.secondaryButton}`}
@@ -311,7 +310,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             Skip
           </button>
         )}
-        
+
         {currentStep.imageData ? (
           <button
             className={`${styles.button} ${styles.secondaryButton}`}
@@ -321,7 +320,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             Retake
           </button>
         ) : null}
-        
+
         <button
           className={`${styles.button} ${styles.primaryButton} ${!currentStep.imageData && !(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') ? styles.disabled : ''}`}
           onClick={handleNext}
@@ -339,19 +338,19 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         <h3 className={styles.instructionTitle}>{currentStep.title}</h3>
         <p className={styles.instructionText}>{currentStep.instruction}</p>
       </div>
-      
+
       <div className={styles.reviewGrid}>
         {photoSteps.slice(1, -1).map((step, index) => (
           <div key={step.id} className={styles.reviewItem}>
             {step.imageData ? (
               <>
-                <img 
-                  src={step.imageData} 
-                  alt={step.title} 
-                  className={styles.reviewImage} 
+                <img
+                  src={step.imageData}
+                  alt={step.title}
+                  className={styles.reviewImage}
                 />
                 <div className={styles.reviewLabel}>{step.title}</div>
-                <button 
+                <button
                   className={styles.retakeButton}
                   onClick={() => handleRetake(index + 1)}
                   disabled={isSubmitting}
@@ -360,12 +359,12 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
                 </button>
               </>
             ) : (
-              <div 
-                className={styles.reviewImage} 
-                style={{ 
-                  backgroundColor: '#333', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+              <div
+                className={styles.reviewImage}
+                style={{
+                  backgroundColor: '#333',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   flexDirection: 'column',
                   padding: '1rem',
@@ -382,7 +381,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
           </div>
         ))}
       </div>
-      
+
       <div className={styles.buttonContainer}>
         <button
           className={`${styles.button} ${styles.secondaryButton}`}
@@ -405,14 +404,14 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   return (
     <div className={styles.formContainer}>
       <h1 className={styles.centerHeading}>Vehicle Walkaround Photos</h1>
-      
+
       <div className={styles.progressBar}>
-        <div 
-          className={styles.progressFill} 
+        <div
+          className={styles.progressFill}
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      
+
       {isIntroStep && renderIntroStep()}
       {isPhotoStep && renderPhotoStep()}
       {isReviewStep && renderReviewStep()}
