@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
 const { fillPdf } = require('./fillPdf'); // Fixed import name
+const { createWalkaroundPdf } = require('./createWalkaroundPdf');
 const { sendEmail } = require('./emailService');
 
 const app = express();
@@ -137,7 +138,11 @@ app.post("/submit-form", async (req, res) => {
         // Check if signature exists based on form type
         let hasRequiredSignatures = false;
 
-        if (pdfType === 'rental') {
+        if (pdfType === 'walkaround') {
+            // Walkaround photos don't require signatures
+            console.log('Walkaround photos submission - no signatures required');
+            hasRequiredSignatures = true;
+        } else if (pdfType === 'rental') {
             // For rental form, check all three signatures
             if (formData.signaturePage1 && formData.signaturePage2 && formData.signaturePage3) {
                 console.log('All three signatures found for rental form');
@@ -173,7 +178,13 @@ app.post("/submit-form", async (req, res) => {
         // Generate PDF
         console.log('Starting PDF generation');
         try {
-            await fillPdf(pdfType, formData, outputFilePath);
+            if (pdfType === 'walkaround') {
+                // For walkaround photos, use the special photo PDF generator
+                await createWalkaroundPdf(formData, outputFilePath);
+            } else {
+                // For regular forms, use the standard PDF filler
+                await fillPdf(pdfType, formData, outputFilePath);
+            }
             console.log('PDF generation completed');
         } catch (pdfError) {
             console.error('Error generating PDF:', pdfError);

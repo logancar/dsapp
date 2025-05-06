@@ -225,6 +225,12 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         submittedAt: new Date().toISOString(),
       };
 
+      // If this is a customer, add their email to the form data
+      // so they can receive a copy of the photos
+      if (isCustomer && locationState?.email) {
+        formData.email = locationState.email;
+      }
+
       // Add each photo with its ID as the key
       photoSteps.forEach(step => {
         if (step.imageData && step.id !== 'intro' && step.id !== 'review') {
@@ -232,7 +238,8 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         }
       });
 
-      // Submit the form
+      // Submit the form - for customers, use the estimator's email
+      // for the PDF to be sent to the estimator
       const result = await submitForm(
         formData,
         'walkaround',

@@ -46,21 +46,39 @@ async function sendEmail(to, pdfPath, formType, isCustomer = false) {
     const subjectLines = {
         rental: "Rental Agreement",
         pickup: "Pickup Acknowledgement",
-        dropoff: "Dropoff Form"
+        dropoff: "Dropoff Form",
+        walkaround: "Vehicle Walkaround Photos"
     };
+
+    // Customize email content based on form type
+    let emailSubject, emailText, attachmentFilename;
+
+    if (formType === 'walkaround') {
+        emailSubject = isCustomer
+            ? `Your Vehicle Walkaround Photos`
+            : `New Vehicle Walkaround Photos Submission`;
+        emailText = isCustomer
+            ? `Thank you for completing the vehicle walkaround photos. Please find your photos attached as a PDF document.`
+            : `A new set of vehicle walkaround photos has been submitted. Please find the photos attached as a PDF document.`;
+        attachmentFilename = `vehicle-walkaround-photos.pdf`;
+    } else {
+        emailSubject = isCustomer
+            ? `Your ${subjectLines[formType]}`
+            : `New ${subjectLines[formType]} Submission`;
+        emailText = isCustomer
+            ? `Thank you for completing the ${subjectLines[formType].toLowerCase()}. Please find your copy attached.`
+            : `A new ${subjectLines[formType].toLowerCase()} has been submitted. Please find the document attached.`;
+        attachmentFilename = `${formType}-form.pdf`;
+    }
 
     const mailOptions = {
         from: process.env.SMTP_USER,
         to: to,
-        subject: isCustomer
-            ? `Your ${subjectLines[formType]}`
-            : `New ${subjectLines[formType]} Submission`,
-        text: isCustomer
-            ? `Thank you for completing the ${subjectLines[formType].toLowerCase()}. Please find your copy attached.`
-            : `A new ${subjectLines[formType].toLowerCase()} has been submitted. Please find the document attached.`,
+        subject: emailSubject,
+        text: emailText,
         attachments: [
             {
-                filename: `${formType}-form.pdf`,
+                filename: attachmentFilename,
                 path: pdfPath
             }
         ]
