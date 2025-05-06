@@ -69,7 +69,8 @@ function SendCustomerEmailPage() {
     setIsLoading(true);
 
     try {
-      const result = await sendCustomerEmail({
+      // Call the API without storing the unused result
+      await sendCustomerEmail({
         customerName,
         customerEmail,
         estimatorName,
