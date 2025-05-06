@@ -88,8 +88,31 @@
   margin-bottom: 1rem;
 }
 
+.fallbackButton {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.fallbackButton:hover {
+  background-color: #2a9940;
+}
+
+.orText {
+  margin: 0.75rem 0;
+  color: #aaa;
+}
+
 .fileInput {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   background-color: rgba(255, 255, 255, 0.1);
   padding: 0.75rem;
   border-radius: 0.5rem;
