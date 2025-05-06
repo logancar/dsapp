@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './CameraCapture.module.css';
 
 interface CameraCaptureProps {
@@ -7,175 +7,9 @@ interface CameraCaptureProps {
 }
 
 const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, capturedImage }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [hasCamera, setHasCamera] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Detect iOS device
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-
-  // Initialize camera when component mounts
-  useEffect(() => {
-    if (capturedImage) {
-      // If we already have a captured image, don't start the camera
-      setIsLoading(false);
-      return;
-    }
-
-    const startCamera = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // iOS specific constraints
-        const constraints = {
-          video: {
-            facingMode: 'environment', // Prefer rear camera on mobile
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
-        };
-
-        console.log('Requesting camera with constraints:', constraints);
-        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('Camera access granted, stream tracks:', mediaStream.getTracks().length);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          videoRef.current.setAttribute('playsinline', 'true'); // Important for iOS
-          videoRef.current.setAttribute('autoplay', 'true');
-
-          // For iOS, we need to manually play the video
-          if (isIOS) {
-            try {
-              await videoRef.current.play();
-              console.log('Video playback started manually');
-            } catch (playError) {
-              console.error('Error playing video:', playError);
-            }
-          }
-
-          setStream(mediaStream);
-          setHasCamera(true);
-        }
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-        setHasCamera(false);
-        setError('Could not access camera. Please ensure you have granted camera permissions and are using a supported browser.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    startCamera();
-
-    // Cleanup function to stop camera when component unmounts
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => {
-          console.log('Stopping track:', track.kind, track.label);
-          track.stop();
-        });
-      }
-    };
-  }, [capturedImage, isIOS]);
-
-  const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-
-      try {
-        console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
-
-        // Set canvas dimensions to match video
-        // If video dimensions are 0 (which can happen on iOS), use fallback dimensions
-        const width = video.videoWidth || 1280;
-        const height = video.videoHeight || 720;
-
-        canvas.width = width;
-        canvas.height = height;
-
-        // Draw the current video frame to the canvas
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // For iOS, we might need to handle the case where the video isn't actually playing
-          if (isIOS && (video.videoWidth === 0 || video.videoHeight === 0)) {
-            console.log('Using fallback for iOS camera capture');
-            // Draw a placeholder for iOS devices when video dimensions are not available
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '20px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Camera capture not available', canvas.width / 2, canvas.height / 2);
-
-            // Use file input as fallback
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.capture = 'environment';
-            fileInput.click();
-
-            fileInput.onchange = (e) => {
-              const file = (e.target as HTMLInputElement).files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  if (event.target?.result) {
-                    onCapture(event.target.result as string);
-                  }
-                };
-                reader.readAsDataURL(file);
-              }
-            };
-
-            return;
-          } else {
-            // Normal flow for non-iOS or working iOS
-            console.log('Drawing video to canvas');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          }
-
-          // Convert canvas to data URL and pass to parent
-          const imageData = canvas.toDataURL('image/jpeg', 0.8);
-          console.log('Image captured, data URL length:', imageData.length);
-          onCapture(imageData);
-
-          // Stop the camera stream
-          if (stream) {
-            stream.getTracks().forEach(track => {
-              console.log('Stopping track after capture:', track.kind);
-              track.stop();
-            });
-            setStream(null);
-          }
-        }
-      } catch (err) {
-        console.error('Error capturing image:', err);
-        // Fallback to file input
-        setHasCamera(false);
-      }
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onCapture(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  // If we already have a captured image, show it
   if (capturedImage) {
     return (
       <div className={styles.container}>
@@ -188,71 +22,80 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, capturedImage 
     );
   }
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsLoading(true);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          onCapture(event.target.result as string);
+          setIsLoading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const takePicture = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.capture = 'environment';
+
+    fileInput.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files.length > 0) {
+        setIsLoading(true);
+        const file = target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            onCapture(event.target.result as string);
+            setIsLoading(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    fileInput.click();
+  };
+
   return (
     <div className={styles.container}>
       {isLoading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
-          <p>Accessing camera...</p>
+          <p>Processing image...</p>
         </div>
-      ) : hasCamera ? (
-        <>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className={styles.videoFeed}
-            onCanPlay={() => {
-              console.log('Video can play now');
-              setIsLoading(false);
-            }}
-          />
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
-          <button
-            className={styles.captureButton}
-            onClick={handleCapture}
-          >
-            <span className={styles.captureIcon}></span>
-          </button>
-        </>
       ) : (
-        <div className={styles.fallbackContainer}>
-          {error && <p className={styles.errorMessage}>{error}</p>}
-          <p>Please take a photo using your camera:</p>
+        <div className={styles.cameraPlaceholder}>
+          <div className={styles.cameraIcon}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <p className={styles.cameraText}>Tap to take a photo</p>
           <button
-            className={styles.fallbackButton}
-            onClick={() => {
-              const fileInput = document.createElement('input');
-              fileInput.type = 'file';
-              fileInput.accept = 'image/*';
-              fileInput.capture = 'environment';
-              fileInput.onchange = (e) => {
-                const target = e.target as HTMLInputElement;
-                if (target.files && target.files.length > 0) {
-                  const file = target.files[0];
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    if (event.target?.result) {
-                      onCapture(event.target.result as string);
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                }
-              };
-              fileInput.click();
-            }}
+            className={styles.takePictureButton}
+            onClick={takePicture}
           >
             Take Photo
           </button>
+
           <p className={styles.orText}>- or -</p>
-          <p>Upload a photo from your device:</p>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className={styles.fileInput}
-          />
+
+          <label className={styles.uploadLabel}>
+            Choose from gallery
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className={styles.fileInput}
+            />
+          </label>
         </div>
       )}
     </div>
