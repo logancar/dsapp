@@ -1,0 +1,187 @@
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #0D0D0D;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.75rem;
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  min-height: 44px;
+  transition: border-color 0.2s ease;
+  -webkit-text-fill-color: white !important; /* Fix for iOS autofill */
+}
+
+/* Fix for iOS autofill background */
+.formGroup input:-webkit-autofill,
+.formGroup input:-webkit-autofill:hover,
+.formGroup input:-webkit-autofill:focus,
+.formGroup input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #1a1a1a inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.formGroup input:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.infoBox {
+  background-color: rgba(59, 181, 84, 0.1);
+  border-left: 4px solid var(--accent-primary);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.infoTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--accent-primary);
+}
+
+.infoText {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.submitButton:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.backButton {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  color: white;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.loadingText {
+  color: white;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+.successMessage {
+  background-color: rgba(59, 181, 84, 0.1);
+  border: 1px solid var(--accent-primary);
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.errorMessage {
+  background-color: rgba(229, 57, 53, 0.1);
+  border: 1px solid #E53935;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  text-align: left;
+  color: #E53935;
+}
+
+.errorHelp {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(229, 57, 53, 0.5);
+  font-size: 0.9rem;
+}
+
+.errorHelp ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0;
+}
+
+.errorHelp code {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    margin: 1rem auto;
+    padding: 1.5rem;
+  }
+}

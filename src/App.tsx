@@ -14,6 +14,7 @@ import PickupForm from './forms/PickupForm';
 import DropoffForm from './forms/DropoffForm';
 import WalkaroundPhotosForm from './forms/WalkaroundPhotosForm';
 import TestConsentPopup from './pages/TestConsentPopup';
+import SendCustomerEmailPage from './pages/SendCustomerEmailPage';
 
 // Context Provider
 import { ConsentProvider } from './context/ConsentContext';
@@ -47,6 +48,7 @@ function App() {
               <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
               <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
               <Route path="/walkaround-form" element={<WalkaroundPhotosForm onSubmit={handleSubmit} />} />
+              <Route path="/send-customer-email" element={<SendCustomerEmailPage />} />
               <Route path="/thankyou" element={<ThanksPage />} />
               <Route path="/test-consent" element={<TestConsentPopup />} />
             </Routes>

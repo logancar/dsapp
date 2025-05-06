@@ -12,6 +12,14 @@ interface FormSubmissionResponse {
   error?: string;
 }
 
+interface CustomerEmailData {
+  customerName: string;
+  customerEmail: string;
+  estimatorName: string;
+  estimatorEmail: string;
+  estimatorCode: string;
+}
+
 // Function to test if the server is reachable
 export const testServerConnection = async (): Promise<boolean> => {
   try {
@@ -143,4 +151,107 @@ export const submitForm = async (
   }
 };
 
+export const sendCustomerEmail = async (
+  data: CustomerEmailData
+): Promise<FormSubmissionResponse> => {
+  console.log('sendCustomerEmail function called with:', data);
 
+  // Input validation
+  if (!data.customerName || !data.customerEmail || !data.estimatorName || !data.estimatorEmail || !data.estimatorCode) {
+    console.error('Missing required data for customer email');
+    throw new Error('All fields are required');
+  }
+
+  if (!isValidEmail(data.customerEmail)) {
+    console.error('Invalid customer email format:', data.customerEmail);
+    throw new Error('Invalid customer email format');
+  }
+
+  if (!isValidEmail(data.estimatorEmail)) {
+    console.error('Invalid estimator email format:', data.estimatorEmail);
+    throw new Error('Invalid estimator email format');
+  }
+
+  try {
+    // Add a small delay to simulate network latency and ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // For development/testing, we can simulate a successful response if the server is not available
+    if (isDevelopment) {
+      try {
+        // First try to connect to the real server
+        const testResponse = await fetch(`${API_BASE_URL}/test`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+        });
+
+        // If test fails, we'll catch it in the next block
+        await testResponse.json();
+      } catch (testError) {
+        console.warn('Server connection test failed, using simulated response for development');
+        console.info('To send real emails, make sure your backend server is running at:', API_BASE_URL);
+
+        // Simulate successful response for development
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        return {
+          success: true,
+          message: `[DEVELOPMENT MODE] Email would be sent to ${data.customerName} at ${data.customerEmail}`
+        };
+      }
+    }
+
+    const url = `${API_BASE_URL}/api/send-customer-email`;
+    console.log('Sending customer email request to:', url);
+    console.log('Environment:', isDevelopment ? 'Development' : 'Production');
+
+    console.log('Sending fetch request...');
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'omit',
+      body: JSON.stringify(data),
+    });
+
+    console.log('Response status:', response.status);
+    const responseData = await response.json();
+    console.log('Response data:', responseData);
+
+    if (!response.ok) {
+      console.error('Server Error Response:', responseData);
+      throw new Error(responseData.message || responseData.error || 'Failed to send email');
+    }
+
+    // Add a small delay to ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    console.log('Email sent successfully');
+    return responseData as FormSubmissionResponse;
+  } catch (error) {
+    console.error('API Error Details:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'Unknown error'
+    });
+
+    // Check for network errors
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('Network error - server might be down or unreachable');
+
+      if (isDevelopment) {
+        console.warn('Server connection failed. Make sure your backend server is running at:', API_BASE_URL);
+        console.warn('To start the server: cd server && node server.js');
+      }
+    }
+
+    // Add a small delay before throwing the error to ensure loading animation is visible
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    throw error;
+  }
+};

@@ -121,4 +121,4 @@ transporter.verify(function(error, success) {
     }
 });
 
-module.exports = { sendEmail };
+module.exports = { sendEmail, transporter };

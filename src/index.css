@@ -129,6 +129,18 @@ input, select, textarea {
   width: 100%;
   transition: all 0.2s ease;
   margin-bottom: 16px;
+  -webkit-text-fill-color: var(--text-primary) !important; /* Fix for iOS autofill */
+}
+
+/* Fix for iOS autofill making text black */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--background-tertiary) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Override for checkboxes and radio buttons */

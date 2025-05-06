@@ -276,6 +276,198 @@ app.get("/test", (req, res) => {
     });
 });
 
+// Route to handle sending emails to customers
+app.post("/api/send-customer-email", async (req, res) => {
+    console.log('==== CUSTOMER EMAIL REQUEST RECEIVED ====');
+    console.log('Request IP:', req.ip);
+    console.log('Request headers:', req.headers);
+
+    try {
+        console.log('Parsing request body...');
+        const { customerName, customerEmail, estimatorName, estimatorEmail, estimatorCode } = req.body;
+
+        // Log the data for debugging
+        console.log('Customer email data received:', {
+            customerName,
+            customerEmail,
+            estimatorName,
+            estimatorEmail,
+            estimatorCode
+        });
+
+        // Validate required fields
+        if (!customerName || !customerEmail || !estimatorName || !estimatorEmail || !estimatorCode) {
+            console.error('Missing required fields:', {
+                hasCustomerName: !!customerName,
+                hasCustomerEmail: !!customerEmail,
+                hasEstimatorName: !!estimatorName,
+                hasEstimatorEmail: !!estimatorEmail,
+                hasEstimatorCode: !!estimatorCode
+            });
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields",
+                details: {
+                    hasCustomerName: !!customerName,
+                    hasCustomerEmail: !!customerEmail,
+                    hasEstimatorName: !!estimatorName,
+                    hasEstimatorEmail: !!estimatorEmail,
+                    hasEstimatorCode: !!estimatorCode
+                }
+            });
+        }
+
+        // Create email content
+        const emailSubject = "Your Dent Source Paperwork – Complete Before Vehicle Pickup";
+        const customerPortalUrl = "https://dentsourcekiosk.netlify.app/";
+
+        const emailHtml = `
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                h2 { color: #3BB554; }
+                .highlight { background-color: #f5f5f5; padding: 15px; border-left: 4px solid #3BB554; margin: 20px 0; }
+                .code { font-family: monospace; font-weight: bold; font-size: 18px; background: #eee; padding: 5px 10px; }
+                .steps { margin: 20px 0; }
+                .step { margin-bottom: 15px; }
+                .footer { margin-top: 30px; font-size: 12px; color: #777; border-top: 1px solid #eee; padding-top: 20px; }
+                a { color: #3BB554; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Hi ${customerName},</h2>
+
+                <p>Thank you for choosing Dent Source — we're here to make the repair process easy and stress-free.</p>
+
+                <p>Before we arrive to pick up your vehicle, we need you to complete a quick set of digital forms.</p>
+
+                <div class="highlight">
+                    <h3>How to Get Started:</h3>
+
+                    <div class="steps">
+                        <div class="step">
+                            <strong>1.</strong> Click the link below to open the Dent Source Customer Portal:<br>
+                            👉 <a href="${customerPortalUrl}">${customerPortalUrl}</a>
+                        </div>
+
+                        <div class="step">
+                            <strong>2.</strong> Scroll to the bottom and select "Customer Login"
+                        </div>
+
+                        <div class="step">
+                            <strong>3.</strong> Enter your login details and use this code when prompted:<br>
+                            🔐 <span class="code">${estimatorCode}</span><br>
+                            <em>(This connects your paperwork to your estimator, ${estimatorName}.)</em>
+                        </div>
+
+                        <div class="step">
+                            <strong>4.</strong> Once inside, you'll see two forms:
+                            <ul>
+                                <li><strong>Drop-Off Form</strong> (fill this out now)</li>
+                                <li><strong>Pick-Up Form</strong> (complete this after your vehicle is returned)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>If you have any questions, feel free to reply to this email or reach out to your estimator directly.</p>
+
+                <p>We appreciate your trust in Dent Source.</p>
+
+                <p>—<br>
+                Dent Source Team<br>
+                <a href="https://dent-source.com">https://dent-source.com</a><br>
+                ${estimatorEmail}</p>
+
+                <div class="footer">
+                    <p>This email was sent to you because you're a customer of Dent Source.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        // Plain text version as fallback
+        const emailText = `
+Hi ${customerName},
+
+Thank you for choosing Dent Source — we're here to make the repair process easy and stress-free.
+
+Before we arrive to pick up your vehicle, we need you to complete a quick set of digital forms.
+
+---
+
+HOW TO GET STARTED:
+
+1. Click the link below to open the Dent Source Customer Portal:
+   ${customerPortalUrl}
+
+2. Scroll to the bottom and select "Customer Login"
+
+3. Enter your login details and use this code when prompted:
+   ${estimatorCode}
+   (This connects your paperwork to your estimator, ${estimatorName}.)
+
+4. Once inside, you'll see two forms:
+   - Drop-Off Form (fill this out now)
+   - Pick-Up Form (complete this after your vehicle is returned)
+
+---
+
+If you have any questions, feel free to reply to this email or reach out to your estimator directly.
+
+We appreciate your trust in Dent Source.
+
+—
+Dent Source Team
+https://dent-source.com
+${estimatorEmail}
+        `;
+
+        // Send the email
+        console.log('Preparing to send customer email');
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: customerEmail,
+            subject: emailSubject,
+            text: emailText,
+            html: emailHtml
+        };
+
+        console.log('Mail options prepared');
+
+        // Use the existing nodemailer transporter from emailService.js
+        const { transporter } = require('./emailService');
+
+        console.log('Sending email...');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully to', customerEmail);
+        console.log('Message ID:', info.messageId);
+        console.log('Response:', info.response);
+
+        console.log('==== CUSTOMER EMAIL SENT SUCCESSFULLY ====');
+        res.json({
+            success: true,
+            message: `Email sent successfully to ${customerName} at ${customerEmail}`
+        });
+    } catch (error) {
+        console.error("==== ERROR SENDING CUSTOMER EMAIL ====");
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+
+        res.status(500).json({
+            success: false,
+            message: "Error sending customer email",
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Global Error Handler:', err);

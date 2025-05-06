@@ -269,3 +269,37 @@
   border-radius: 0.75rem;
   font-size: 1.2rem;
 }
+
+/* Styles for the Send Email to Customer button */
+.emailButton {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emailButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.emailIcon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 480px) {
+  .emailButton {
+    width: 100%;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+  }
+}

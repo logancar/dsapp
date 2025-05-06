@@ -122,6 +122,25 @@ function DashboardPage() {
         ))}
       </div>
 
+      {/* Show "Send Email to Customer" button only for estimators */}
+      {!isCustomer && (
+        <motion.button
+          className={styles.emailButton}
+          onClick={() => navigate('/send-customer-email', {
+            state: {
+              name: userName,
+              email: userEmail,
+              isCustomer: false
+            }
+          })}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className={styles.emailIcon}>✉️</span>
+          Send Email to Customer
+        </motion.button>
+      )}
+
       {isPopupOpen && (
         <ConsentPopup
           isOpen={true}
