@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './WalkaroundPhotosForm.module.css';
-import CameraCapture from '../components/CameraCapture';
 import { submitForm } from '../services/api';
 
 interface LocationState {
@@ -105,6 +104,11 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [photoSteps, setPhotoSteps] = useState<PhotoStep[]>(PHOTO_STEPS);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [captureStartTime, setCaptureStartTime] = useState<number | null>(null);
+  const [captureTime, setCaptureTime] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const location = useLocation();
   const locationState = location.state as LocationState;
 
@@ -117,9 +121,22 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
   const currentStep = photoSteps[currentStepIndex];
   const isIntroStep = currentStepIndex === 0;
-  const isReviewStep = currentStepIndex === photoSteps.length - 1;
-  const isPhotoStep = !isIntroStep && !isReviewStep;
-  const progress = (currentStepIndex / (photoSteps.length - 1)) * 100;
+
+  // Count completed photos
+  const completedPhotos = photoSteps.filter(step =>
+    step.imageData && step.id !== 'intro' && step.id !== 'review'
+  ).length;
+
+  // Start timer when first photo is taken
+  useEffect(() => {
+    if (completedPhotos === 1 && captureStartTime === null) {
+      setCaptureStartTime(Date.now());
+    }
+
+    if (completedPhotos > 0 && captureStartTime !== null) {
+      setCaptureTime(Math.round((Date.now() - captureStartTime) / 1000));
+    }
+  }, [completedPhotos, captureStartTime]);
 
   const handleCapture = (imageData: string) => {
     const updatedSteps = [...photoSteps];
@@ -128,47 +145,52 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       imageData
     };
     setPhotoSteps(updatedSteps);
-  };
 
-  const handleNext = () => {
-    if (isPhotoStep && !currentStep.imageData) {
-      // If this is a photo step and no image has been captured, show an alert
-      alert('Please take a photo before proceeding.');
-      return;
-    }
-
-    if (currentStepIndex < photoSteps.length - 1) {
+    // Automatically move to next step after capture
+    if (currentStepIndex < photoSteps.length - 2) { // Don't auto-advance to review step
       setCurrentStepIndex(currentStepIndex + 1);
-      window.scrollTo(0, 0);
+    } else {
+      setShowSummary(true);
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
-      window.scrollTo(0, 0);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          handleCapture(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const takePicture = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
   const handleSkip = () => {
     // Only allow skipping for roof and VIN/odometer steps
     if (currentStep.id === 'roof' || currentStep.id === 'vin_odometer') {
-      handleNext();
+      if (currentStepIndex < photoSteps.length - 2) {
+        setCurrentStepIndex(currentStepIndex + 1);
+      } else {
+        setShowSummary(true);
+      }
     }
   };
 
   const handleRetake = (index: number) => {
-    const updatedSteps = [...photoSteps];
-    updatedSteps[index] = {
-      ...updatedSteps[index],
-      imageData: undefined
-    };
-    setPhotoSteps(updatedSteps);
+    setShowSummary(false);
+    setCurrentStepIndex(index);
+  };
 
-    // If we're in review mode, navigate to the step to retake
-    if (isReviewStep) {
-      setCurrentStepIndex(index);
-    }
+  const handleStart = () => {
+    setCurrentStepIndex(1); // Move to first photo step
   };
 
   const handleSubmit = async () => {
@@ -270,158 +292,161 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
     }
   };
 
-  const renderIntroStep = () => (
-    <div className={styles.stepContainer}>
-      <div className={styles.instructionBox}>
-        <h3 className={styles.instructionTitle}>{currentStep.title}</h3>
-        <p className={styles.instructionText}>{currentStep.instruction}</p>
+  // Render the intro screen
+  if (isIntroStep) {
+    return (
+      <div className={styles.formContainer}>
+        <h1 className={styles.centerHeading}>Vehicle Walkaround Photos</h1>
+        <div className={styles.introContainer}>
+          <h2>{currentStep.title}</h2>
+          <p>{currentStep.instruction}</p>
+          <button
+            className={styles.startButton}
+            onClick={handleStart}
+          >
+            Start
+          </button>
+        </div>
       </div>
-      <div className={styles.buttonContainer}>
-        <button
-          className={`${styles.button} ${styles.primaryButton}`}
-          onClick={handleNext}
-        >
-          Start
-        </button>
+    );
+  }
+
+  // Render the summary screen
+  if (showSummary) {
+    return (
+      <div className={styles.formContainer}>
+        <h1 className={styles.centerHeading}>Vehicle Walkaround Photos</h1>
+
+        <div className={styles.summaryContainer}>
+          <h2 className={styles.summaryTitle}>
+            Wow! That was fast.
+          </h2>
+          <p className={styles.summaryText}>
+            You captured {completedPhotos} photos
+            {captureTime ? ` in ${captureTime} seconds` : ''}.
+          </p>
+
+          <div className={styles.photoGrid}>
+            {photoSteps.slice(1, -1).map((step, index) => (
+              <div key={step.id} className={styles.photoGridItem}>
+                {step.imageData ? (
+                  <img
+                    src={step.imageData}
+                    alt={step.title}
+                    className={styles.thumbnailImage}
+                    onClick={() => handleRetake(index + 1)}
+                  />
+                ) : (
+                  <div
+                    className={styles.missingPhoto}
+                    onClick={() => handleRetake(index + 1)}
+                  >
+                    <span className={styles.cameraIcon}>📷</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            className={styles.submitButton}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Done'}
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  const renderPhotoStep = () => (
-    <div className={styles.stepContainer}>
-      <div className={styles.instructionBox}>
-        <h3 className={styles.instructionTitle}>{currentStep.title}</h3>
-        <p className={styles.instructionText}>{currentStep.instruction}</p>
+  // Render the camera view
+  return (
+    <div className={styles.cameraContainer}>
+      {/* Thumbnail strip at the top */}
+      <div className={styles.thumbnailStrip}>
+        <span className={styles.photoCount}>{completedPhotos} Photos</span>
+        {photoSteps.slice(1, currentStepIndex).map((step, index) => (
+          step.imageData && (
+            <img
+              key={step.id}
+              src={step.imageData}
+              alt={step.title}
+              className={styles.stripThumbnail}
+              onClick={() => handleRetake(index + 1)}
+            />
+          )
+        ))}
       </div>
 
-      <CameraCapture
-        onCapture={handleCapture}
-        capturedImage={currentStep.imageData}
-      />
+      {/* Camera view */}
+      <div className={styles.cameraView}>
+        {/* Targeting overlay */}
+        <div className={styles.targetOverlay}>
+          <div className={styles.targetBox}></div>
+        </div>
 
-      <div className={styles.buttonContainer}>
-        <button
-          className={`${styles.button} ${styles.secondaryButton}`}
-          onClick={handlePrevious}
-          disabled={isSubmitting}
-        >
-          Back
-        </button>
+        {/* Step title at the bottom */}
+        <div className={styles.stepTitle}>
+          {currentStep.title}
+        </div>
+      </div>
 
+      {/* Camera controls */}
+      <div className={styles.cameraControls}>
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+        />
+
+        {/* Skip button (only for optional steps) */}
         {(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') && (
           <button
-            className={`${styles.button} ${styles.secondaryButton}`}
+            className={styles.skipButton}
             onClick={handleSkip}
-            disabled={isSubmitting}
           >
             Skip
           </button>
         )}
 
-        {currentStep.imageData ? (
-          <button
-            className={`${styles.button} ${styles.secondaryButton}`}
-            onClick={() => handleRetake(currentStepIndex)}
-            disabled={isSubmitting}
-          >
-            Retake
-          </button>
-        ) : null}
-
+        {/* Capture button */}
         <button
-          className={`${styles.button} ${styles.primaryButton} ${!currentStep.imageData && !(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') ? styles.disabled : ''}`}
-          onClick={handleNext}
-          disabled={!currentStep.imageData && !(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') || isSubmitting}
+          className={styles.captureButton}
+          onClick={takePicture}
         >
-          Next
+          <div className={styles.captureButtonInner}></div>
+        </button>
+
+        {/* Review button */}
+        <button
+          className={styles.reviewButton}
+          onClick={() => setShowSummary(true)}
+        >
+          Review
         </button>
       </div>
-    </div>
-  );
 
-  const renderReviewStep = () => (
-    <div className={styles.stepContainer}>
-      <div className={styles.instructionBox}>
-        <h3 className={styles.instructionTitle}>{currentStep.title}</h3>
-        <p className={styles.instructionText}>{currentStep.instruction}</p>
-      </div>
-
-      <div className={styles.reviewGrid}>
-        {photoSteps.slice(1, -1).map((step, index) => (
-          <div key={step.id} className={styles.reviewItem}>
-            {step.imageData ? (
-              <>
-                <img
-                  src={step.imageData}
-                  alt={step.title}
-                  className={styles.reviewImage}
-                />
-                <div className={styles.reviewLabel}>{step.title}</div>
-                <button
-                  className={styles.retakeButton}
-                  onClick={() => handleRetake(index + 1)}
-                  disabled={isSubmitting}
-                >
-                  ↺
-                </button>
-              </>
-            ) : (
-              <div
-                className={styles.reviewImage}
-                style={{
-                  backgroundColor: '#333',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'column',
-                  padding: '1rem',
-                  textAlign: 'center'
-                }}
-                onClick={() => setCurrentStepIndex(index + 1)}
-              >
-                <div>{step.title}</div>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                  {step.id === 'roof' || step.id === 'vin_odometer' ? 'Optional' : 'Missing'}
-                </div>
-              </div>
-            )}
+      {/* Next step instruction */}
+      <div className={styles.nextStepInstruction}>
+        <div className={styles.walkIcon}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4C13.1046 4 14 3.10457 14 2C14 0.89543 13.1046 0 12 0C10.8954 0 10 0.89543 10 2C10 3.10457 10.8954 4 12 4Z" fill="white"/>
+            <path d="M15 22L13 18L15 14L11 15L9 22M15 22H9M15 22L17 10L13 8M9 22L7 10L11 8M13 8L12 7L11 8M13 8L11 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div className={styles.instructionText}>
+          <div className={styles.walkToText}>walk to the</div>
+          <div className={styles.nextStepTitle}>
+            {currentStepIndex < photoSteps.length - 2
+              ? photoSteps[currentStepIndex + 1].title
+              : 'FINISH'}
           </div>
-        ))}
+        </div>
       </div>
-
-      <div className={styles.buttonContainer}>
-        <button
-          className={`${styles.button} ${styles.secondaryButton}`}
-          onClick={handlePrevious}
-          disabled={isSubmitting}
-        >
-          Back
-        </button>
-        <button
-          className={`${styles.button} ${styles.primaryButton}`}
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit All Photos'}
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className={styles.formContainer}>
-      <h1 className={styles.centerHeading}>Vehicle Walkaround Photos</h1>
-
-      <div className={styles.progressBar}>
-        <div
-          className={styles.progressFill}
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-
-      {isIntroStep && renderIntroStep()}
-      {isPhotoStep && renderPhotoStep()}
-      {isReviewStep && renderReviewStep()}
     </div>
   );
 };

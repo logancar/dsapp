@@ -15,63 +15,262 @@
   color: var(--accent-primary);
 }
 
-.stepContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.instructionBox {
+/* Intro screen styles */
+.introContainer {
   background-color: var(--background-tertiary);
-  padding: 1.5rem;
   border-radius: 0.75rem;
-  border-left: 4px solid var(--accent-primary);
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 1.5rem;
 }
 
-.instructionTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--accent-primary);
+.startButton {
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  transition: background-color 0.2s;
+  min-width: 120px;
+}
+
+.startButton:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Camera view styles */
+.cameraContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  z-index: 1000;
+}
+
+.thumbnailStrip {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  overflow-x: auto;
+  height: 60px;
+  z-index: 1001;
+}
+
+.photoCount {
+  color: #fff;
+  margin-right: 15px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.stripThumbnail {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  margin-right: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cameraView {
+  flex: 1;
+  position: relative;
+  background-color: #222;
+  overflow: hidden;
+}
+
+.targetOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.targetBox {
+  width: 150px;
+  height: 150px;
+  border: 2px solid yellow;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+.stepTitle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cameraControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background-color: #000;
+  position: relative;
+}
+
+.captureButton {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.captureButtonInner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.skipButton, .reviewButton {
+  position: absolute;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.skipButton {
+  left: 20px;
+}
+
+.reviewButton {
+  right: 20px;
+}
+
+.nextStepInstruction {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+}
+
+.walkIcon {
+  margin-right: 15px;
 }
 
 .instructionText {
-  font-size: 1rem;
-  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
 }
 
-.cameraContainer {
-  width: 100%;
-  aspect-ratio: 4/3;
-  background-color: #000;
+.walkToText {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.nextStepTitle {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Summary screen styles */
+.summaryContainer {
+  background-color: var(--background-tertiary);
   border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.summaryTitle {
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.summaryText {
+  margin-bottom: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.photoGridItem {
+  aspect-ratio: 1;
+  border-radius: 0.375rem;
   overflow: hidden;
   position: relative;
-  margin-bottom: 1rem;
 }
 
-.cameraFeed {
+.thumbnailImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.capturedImage {
+.missingPhoto {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background-color: #000;
-}
-
-.buttonContainer {
+  background-color: var(--background-tertiary);
   display: flex;
-  gap: 1rem;
   justify-content: center;
-  margin-top: 1.5rem;
+  align-items: center;
+  cursor: pointer;
 }
 
+.cameraIcon {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.submitButton {
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  max-width: 300px;
+}
+
+.submitButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.submitButton:disabled {
+  background-color: var(--disabled);
+  cursor: not-allowed;
+}
+
+/* Legacy styles for compatibility */
 .button {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -111,90 +310,17 @@
   background-color: var(--accent-primary);
 }
 
-.progressBar {
-  width: 100%;
-  height: 8px;
-  background-color: var(--background-tertiary);
-  border-radius: 4px;
-  margin: 1.5rem 0;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background-color: var(--accent-primary);
-  transition: width 0.3s ease;
-}
-
-.reviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.reviewItem {
-  position: relative;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  aspect-ratio: 1/1;
-}
-
-.reviewImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.reviewLabel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.5rem;
-  font-size: 0.8rem;
-  text-align: center;
-}
-
-.retakeButton {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background-color: var(--danger);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  opacity: 0.8;
-}
-
-.retakeButton:hover {
-  opacity: 1;
-}
-
-/* Mobile responsiveness */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .formContainer {
     padding: 1rem;
   }
-  
-  .buttonContainer {
-    flex-direction: column;
-  }
-  
-  .button {
-    width: 100%;
-  }
-  
-  .reviewGrid {
+
+  .photoGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .submitButton {
+    width: 100%;
   }
 }
