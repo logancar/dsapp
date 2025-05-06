@@ -58,10 +58,10 @@
 .thumbnailStrip {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 8px;
   background-color: rgba(0, 0, 0, 0.7);
   overflow-x: auto;
-  height: 60px;
+  height: 50px;
   z-index: 1001;
 }
 
@@ -73,8 +73,8 @@
 }
 
 .stripThumbnail {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
   margin-right: 8px;
   object-fit: cover;
@@ -86,6 +86,9 @@
   position: relative;
   background-color: #222;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .targetOverlay {
@@ -114,9 +117,9 @@
   width: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
-  padding: 10px;
+  padding: 8px;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
 }
 
@@ -124,14 +127,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 20px 0;
   background-color: #000;
   position: relative;
 }
 
 .captureButton {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.2);
   border: none;
@@ -139,48 +142,58 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  z-index: 10;
 }
 
 .captureButtonInner {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background-color: white;
 }
 
-.skipButton, .reviewButton {
+.skipButton {
   position: absolute;
-  background: none;
-  border: none;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
   color: white;
   font-size: 16px;
   cursor: pointer;
-  padding: 10px;
-}
-
-.skipButton {
-  left: 20px;
+  padding: 10px 15px;
 }
 
 .reviewButton {
+  position: absolute;
   right: 20px;
+  top: 20px; /* Move to top of controls area */
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 15px;
 }
 
 .nextStepInstruction {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 15px;
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
 }
 
 .walkIcon {
   margin-right: 15px;
+  flex-shrink: 0;
 }
 
 .instructionText {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .walkToText {
@@ -189,8 +202,11 @@
 }
 
 .nextStepTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Summary screen styles */

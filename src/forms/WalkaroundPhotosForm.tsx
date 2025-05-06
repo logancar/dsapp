@@ -138,6 +138,49 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
     }
   }, [completedPhotos, captureStartTime]);
 
+  // Initialize camera when component mounts and not in intro step
+  useEffect(() => {
+    if (!isIntroStep) {
+      const initCamera = async () => {
+        try {
+          const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+          if (!videoElement) return;
+
+          // Request camera access
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            },
+            audio: false
+          });
+
+          // Set the stream as the video source
+          videoElement.srcObject = stream;
+
+          console.log('Camera initialized successfully');
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          alert('Unable to access camera. Please make sure you have granted camera permissions.');
+        }
+      };
+
+      initCamera();
+
+      // Clean up function to stop camera when component unmounts
+      return () => {
+        const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+        if (videoElement && videoElement.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          const tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
+          videoElement.srcObject = null;
+        }
+      };
+    }
+  }, [isIntroStep, currentStepIndex]);
+
   const handleCapture = (imageData: string) => {
     const updatedSteps = [...photoSteps];
     updatedSteps[currentStepIndex] = {
@@ -168,8 +211,38 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   };
 
   const takePicture = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+    try {
+      const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+
+      // If video is not available, fall back to file input
+      if (!videoElement || !videoElement.srcObject) {
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+        return;
+      }
+
+      // Create a canvas element to capture the current video frame
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+
+      // Draw the current video frame to the canvas
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas to a data URL and pass it to handleCapture
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        handleCapture(imageData);
+      }
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+
+      // Fall back to file input if there's an error
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
     }
   };
 
@@ -381,6 +454,22 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
       {/* Camera view */}
       <div className={styles.cameraView}>
+        {/* Video element for camera feed */}
+        <video
+          id="camera-feed"
+          autoPlay
+          playsInline
+          muted
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        ></video>
+
         {/* Targeting overlay */}
         <div className={styles.targetOverlay}>
           <div className={styles.targetBox}></div>
@@ -394,14 +483,13 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
       {/* Camera controls */}
       <div className={styles.cameraControls}>
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileSelect}
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-        />
+        {/* Review button - moved to top of controls area */}
+        <button
+          className={styles.reviewButton}
+          onClick={() => setShowSummary(true)}
+        >
+          Review
+        </button>
 
         {/* Skip button (only for optional steps) */}
         {(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') && (
@@ -413,20 +501,22 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
           </button>
         )}
 
+        {/* Hidden file input */}
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+        />
+
         {/* Capture button */}
         <button
           className={styles.captureButton}
           onClick={takePicture}
         >
           <div className={styles.captureButtonInner}></div>
-        </button>
-
-        {/* Review button */}
-        <button
-          className={styles.reviewButton}
-          onClick={() => setShowSummary(true)}
-        >
-          Review
         </button>
       </div>
 
