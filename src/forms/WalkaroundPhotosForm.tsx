@@ -138,9 +138,14 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
     }
   }, [completedPhotos, captureStartTime]);
 
-  // Initialize camera when component mounts and not in intro step
+  // Track if camera has been initialized
+  const [cameraInitialized, setCameraInitialized] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Initialize camera only once when component mounts and not in intro step
   useEffect(() => {
-    if (!isIntroStep) {
+    // Only initialize camera if we're past the intro step and haven't initialized yet
+    if (!isIntroStep && !cameraInitialized) {
       const initCamera = async () => {
         try {
           const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
@@ -156,8 +161,14 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             audio: false
           });
 
+          // Store the stream in the ref
+          streamRef.current = stream;
+
           // Set the stream as the video source
           videoElement.srcObject = stream;
+
+          // Mark camera as initialized
+          setCameraInitialized(true);
 
           console.log('Camera initialized successfully');
         } catch (error) {
@@ -167,19 +178,17 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       };
 
       initCamera();
-
-      // Clean up function to stop camera when component unmounts
-      return () => {
-        const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
-        if (videoElement && videoElement.srcObject) {
-          const stream = videoElement.srcObject as MediaStream;
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-          videoElement.srcObject = null;
-        }
-      };
     }
-  }, [isIntroStep, currentStepIndex]);
+
+    // Clean up function to stop camera when component unmounts
+    return () => {
+      if (streamRef.current) {
+        const tracks = streamRef.current.getTracks();
+        tracks.forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [isIntroStep, cameraInitialized]);
 
   const handleCapture = (imageData: string) => {
     const updatedSteps = [...photoSteps];
@@ -481,16 +490,16 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         </div>
       </div>
 
+      {/* Review button - fixed position at top right */}
+      <button
+        className={styles.reviewButton}
+        onClick={() => setShowSummary(true)}
+      >
+        Review All
+      </button>
+
       {/* Camera controls */}
       <div className={styles.cameraControls}>
-        {/* Review button - moved to top of controls area */}
-        <button
-          className={styles.reviewButton}
-          onClick={() => setShowSummary(true)}
-        >
-          Review
-        </button>
-
         {/* Skip button (only for optional steps) */}
         {(currentStep.id === 'roof' || currentStep.id === 'vin_odometer') && (
           <button
