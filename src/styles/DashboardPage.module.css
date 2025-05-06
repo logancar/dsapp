@@ -76,7 +76,7 @@
     grid-template-rows: 1fr 1fr;
     grid-template-areas:
       "dropoff rental"
-      "pickup empty";
+      "pickup walkaround";
     gap: 1rem;
     width: 100%;
     max-width: 100%;
@@ -94,6 +94,10 @@
   .thumbnails > div:nth-child(3) {
     grid-area: pickup;
   }
+
+  .thumbnails > div:nth-child(4) {
+    grid-area: walkaround;
+  }
 }
 
 /* iOS-specific adjustments for iPhone */
@@ -105,7 +109,7 @@
       grid-template-rows: 1fr 1fr;
       grid-template-areas:
         "dropoff rental"
-        "pickup empty";
+        "pickup walkaround";
       gap: 1rem;
       width: 100%;
       max-width: 100%;
@@ -129,6 +133,12 @@
   .thumbnails > div:nth-child(3) {
     @media only screen and (max-device-width: 428px) {
       grid-area: pickup;
+    }
+  }
+
+  .thumbnails > div:nth-child(4) {
+    @media only screen and (max-device-width: 428px) {
+      grid-area: walkaround;
     }
   }
 

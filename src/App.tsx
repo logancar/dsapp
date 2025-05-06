@@ -12,6 +12,7 @@ import ThanksPage from './ThanksPage';
 import RentalForm from './forms/RentalForm';
 import PickupForm from './forms/PickupForm';
 import DropoffForm from './forms/DropoffForm';
+import WalkaroundPhotosForm from './forms/WalkaroundPhotosForm';
 import TestConsentPopup from './pages/TestConsentPopup';
 
 // Context Provider
@@ -45,6 +46,7 @@ function App() {
               <Route path="/rental-form" element={<RentalForm onSubmit={handleSubmit} />} />
               <Route path="/pickup-form" element={<PickupForm onSubmit={handleSubmit} />} />
               <Route path="/dropoff-form" element={<DropoffForm onSubmit={handleSubmit} />} />
+              <Route path="/walkaround-form" element={<WalkaroundPhotosForm onSubmit={handleSubmit} />} />
               <Route path="/thankyou" element={<ThanksPage />} />
               <Route path="/test-consent" element={<TestConsentPopup />} />
             </Routes>

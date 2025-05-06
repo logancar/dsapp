@@ -9,6 +9,7 @@ import ConsentPopup from '../components/ConsentPopup';
 import rentalImg from '../assets/rental.jpg';
 import dropoffImg from '../assets/dropoff.jpg';
 import pickupImg from '../assets/pickup.jpg';
+import walkaroundImg from '../assets/walkaround.jpg';
 
 interface LocationState {
   name?: string;
@@ -34,11 +35,12 @@ function DashboardPage() {
     : locationState?.email || 'info@autohail.group';
 
   // Forms in specific order for the 2x2 grid on mobile:
-  // Top left: Drop Off, Top right: Rental, Bottom left: Pickup, Bottom right: empty
+  // Top left: Drop Off, Top right: Rental, Bottom left: Pickup, Bottom right: Walkaround Photos
   const forms = [
     { id: 'dropoff', label: 'Drop Off Docs', img: dropoffImg, order: 1 },
     { id: 'rental', label: 'Rental Docs', img: rentalImg, order: 2 },
     { id: 'pickup', label: 'Pick Up Docs', img: pickupImg, order: 3 },
+    { id: 'walkaround', label: 'Walkaround Photos', img: walkaroundImg, order: 4 },
   ];
 
   const handleClick = useCallback((formType: string) => {

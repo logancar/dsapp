@@ -1,0 +1,200 @@
+.formContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background-color: var(--background-secondary);
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+}
+
+.centerHeading {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--accent-primary);
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.instructionBox {
+  background-color: var(--background-tertiary);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--accent-primary);
+  margin-bottom: 1.5rem;
+}
+
+.instructionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--accent-primary);
+}
+
+.instructionText {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.cameraContainer {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background-color: #000;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.cameraFeed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.capturedImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #000;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  min-height: 44px;
+}
+
+.primaryButton {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.primaryButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.secondaryButton {
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
+}
+
+.secondaryButton:hover {
+  background-color: var(--border-color);
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disabled:hover {
+  background-color: var(--accent-primary);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--background-tertiary);
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--accent-primary);
+  transition: width 0.3s ease;
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.reviewItem {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  aspect-ratio: 1/1;
+}
+
+.reviewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reviewLabel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.retakeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.retakeButton:hover {
+  opacity: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .formContainer {
+    padding: 1rem;
+  }
+  
+  .buttonContainer {
+    flex-direction: column;
+  }
+  
+  .button {
+    width: 100%;
+  }
+  
+  .reviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

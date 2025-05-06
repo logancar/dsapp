@@ -4,7 +4,7 @@ export const API_BASE_URL = isDevelopment
   ? 'http://localhost:8081' // Changed to 8081 to match server port
   : 'https://dskiosk.up.railway.app';
 
-type PdfType = 'rental' | 'pickup' | 'dropoff';
+type PdfType = 'rental' | 'pickup' | 'dropoff' | 'walkaround';
 
 interface FormSubmissionResponse {
   success: boolean;
@@ -65,12 +65,18 @@ export const submitForm = async (
     console.log('PDF Type:', pdfType);
     console.log('Estimator Email:', estimatorEmail);
 
-    // Check if we have a signature
-    const hasSignature = formData.signature || formData.signature1 || formData.signature2;
-    if (hasSignature) {
-      console.log('Signature is present in the form data');
+    // Check if we have a signature (not needed for walkaround photos)
+    if (pdfType !== 'walkaround') {
+      const hasSignature = formData.signature || formData.signature1 || formData.signature2;
+      if (hasSignature) {
+        console.log('Signature is present in the form data');
+      } else {
+        console.warn('No signature found in form data!');
+      }
     } else {
-      console.warn('No signature found in form data!');
+      // For walkaround photos, check if we have at least one photo
+      const photoKeys = Object.keys(formData).filter(key => key.startsWith('photo_'));
+      console.log(`Found ${photoKeys.length} photos in walkaround submission`);
     }
 
     // Add a timestamp to the form data
