@@ -350,6 +350,35 @@ async function fillPdf(pdfType, formData, outputPath) {
         }
     }
 
+    // Special handling for address in dropoff form
+    if (pdfType === 'dropoff' && formData.address) {
+        console.log('Attempting to directly set address in dropoff form:', formData.address);
+        // Try multiple possible field names for address
+        const addressFieldNames = [
+            'address', 'Address', 'customerAddress', 'CustomerAddress',
+            'addr', 'Addr', 'street', 'Street', 'streetAddress', 'StreetAddress'
+        ];
+
+        let addressFieldFound = false;
+        for (const fieldName of addressFieldNames) {
+            try {
+                const textField = form.getTextField(fieldName);
+                if (textField) {
+                    textField.setText(formData.address);
+                    console.log(`Successfully set address field ${fieldName} to "${formData.address}"`);
+                    addressFieldFound = true;
+                    break;
+                }
+            } catch (e) {
+                console.log(`Could not set address field ${fieldName}: ${e.message}`);
+            }
+        }
+
+        if (!addressFieldFound) {
+            console.log('Could not find any address field in the PDF for dropoff form');
+        }
+    }
+
     // Fill form fields
     console.log('Starting to fill form fields...');
     console.log('Form data keys:', Object.keys(formData));

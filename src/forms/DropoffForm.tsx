@@ -177,10 +177,6 @@ const schema = yup.object().shape({
 }).required();
 
 export default function DropoffForm({ onSubmit }: DropoffFormProps) {
-  // Generate random field names to prevent autofill
-  const randomAddressField = `address_${Math.random().toString(36).substring(2, 15)}`;
-  const randomEmailField = `email_${Math.random().toString(36).substring(2, 15)}`;
-
   // Get estimator email from location state
   const location = useLocation();
   const locationState = location.state as LocationState;
@@ -253,12 +249,8 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
     };
   }, []);
 
-  // Clear form fields and reset loading state on component mount
+  // Reset loading state on component mount
   useEffect(() => {
-    // Reset address and email fields
-    setValue('address', '');
-    setValue('email', '');
-
     // Ensure loading state is false when component mounts
     console.log('Component mounted, setting isSubmitting to false');
     setIsSubmitting(false);
@@ -543,7 +535,6 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                     spellCheck="false"
                     data-form-type="other"
                     data-lpignore="true"
-                    name={randomAddressField}
                   />
                 </div>
                 {errors.address && (
@@ -613,7 +604,6 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                     spellCheck="false"
                     data-form-type="other"
                     data-lpignore="true"
-                    name={randomEmailField}
                   />
                 </div>
                 {errors.email && (
