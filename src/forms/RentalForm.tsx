@@ -981,27 +981,55 @@ export default function RentalForm({ onSubmit }: { onSubmit: (data: RentalFormDa
                       signaturePage3Saved
                     });
 
-                    const result = await submitForm(
-                      formattedData as unknown as Record<string, unknown>,
-                      'rental',
-                      estimatorEmail || 'info@autohail.group'
-                    );
+                    try {
+                      console.log('Submitting rental form data...');
 
-                    if (result.success) {
-                      console.log('Form submitted successfully');
-                      onSubmit(data);
+                      // Add additional logging for debugging
+                      console.log('Checking signature data:');
+                      console.log('- Page 1 signature length:', formattedData.signature1 ? formattedData.signature1.toString().length : 0);
+                      console.log('- Page 2 signature length:', formattedData.signature2 ? formattedData.signature2.toString().length : 0);
+                      console.log('- Page 3 signature length:', formattedData.signature3 ? formattedData.signature3.toString().length : 0);
 
-                      // Redirect after a delay
-                      setTimeout(() => {
-                        window.location.href = '/thankyou';
-                      }, 1000);
-                    } else {
-                      console.error('Form submission failed:', result.message);
-                      alert('Failed to submit form. Please try again.');
+                      const result = await submitForm(
+                        formattedData as unknown as Record<string, unknown>,
+                        'rental',
+                        estimatorEmail || 'info@autohail.group'
+                      );
 
-                      // Remove overlay
-                      document.body.removeChild(overlay);
-                      document.head.removeChild(style);
+                      if (result.success) {
+                        console.log('Form submitted successfully');
+                        onSubmit(data);
+
+                        // Redirect after a delay
+                        setTimeout(() => {
+                          window.location.href = '/thankyou';
+                        }, 1000);
+                      } else {
+                        console.error('Form submission failed:', result.message);
+                        alert('Failed to submit form. Please try again.');
+
+                        // Remove overlay
+                        document.body.removeChild(overlay);
+                        document.head.removeChild(style);
+                      }
+                    } catch (submitError) {
+                      console.error('Error during form submission:', submitError);
+
+                      // Check for specific error types
+                      if (submitError instanceof TypeError && submitError.message.includes('Failed to fetch')) {
+                        alert('Network error: Could not connect to the server. Please check your internet connection and try again.');
+                      } else if (submitError instanceof Error) {
+                        alert(`Error submitting form: ${submitError.message}`);
+                      } else {
+                        alert('An unknown error occurred while submitting the form. Please try again.');
+                      }
+
+                      // Remove the loading overlay
+                      const existingOverlay = document.getElementById('manual-loading-overlay');
+                      if (existingOverlay) {
+                        document.body.removeChild(existingOverlay);
+                      }
+
                       setIsSubmitting(false);
                     }
                   } catch (error) {

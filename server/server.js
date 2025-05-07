@@ -178,6 +178,34 @@ app.post("/submit-form", async (req, res) => {
         // Generate PDF
         console.log('Starting PDF generation');
         try {
+            // Add more detailed logging for rental form
+            if (pdfType === 'rental') {
+                console.log('=== RENTAL FORM SUBMISSION DETAILS ===');
+                console.log('Checking for required signatures:');
+                console.log('- Page 1 signature:', !!formData.signaturePage1);
+                console.log('- Page 2 signature:', !!formData.signaturePage2);
+                console.log('- Page 3 signature:', !!formData.signaturePage3);
+
+                // Check for card type information
+                console.log('Card type information:');
+                console.log('- Card type:', formData.cardType);
+                if (formData.cardType === 'Other') {
+                    console.log('- Other card type:', formData.otherCardType);
+                }
+
+                // Check for insurance information
+                console.log('Insurance information:');
+                console.log('- Insurance company:', formData.insuranceCompany);
+                console.log('- Claim number:', formData.claimNumber);
+                console.log('- Date of loss:', formData.dateOfLoss);
+
+                // Check for acknowledgements
+                console.log('Acknowledgements:');
+                for (let i = 1; i <= 6; i++) {
+                    console.log(`- Acknowledgement ${i}:`, !!formData[`acknowledgement${i}`]);
+                }
+            }
+
             if (pdfType === 'walkaround') {
                 // For walkaround photos, use the special photo PDF generator
                 await createWalkaroundPdf(formData, outputFilePath);
@@ -189,6 +217,24 @@ app.post("/submit-form", async (req, res) => {
         } catch (pdfError) {
             console.error('Error generating PDF:', pdfError);
             console.error('Error stack:', pdfError.stack);
+
+            // Add more detailed error information
+            if (pdfType === 'rental') {
+                console.error('=== RENTAL FORM ERROR DETAILS ===');
+                console.error('Error occurred during rental form processing');
+                console.error('Error message:', pdfError.message);
+                console.error('Error name:', pdfError.name);
+
+                // Try to determine which part of the process failed
+                if (pdfError.message.includes('signature')) {
+                    console.error('Error appears to be related to signature processing');
+                } else if (pdfError.message.includes('field')) {
+                    console.error('Error appears to be related to field mapping');
+                } else if (pdfError.message.includes('PDF')) {
+                    console.error('Error appears to be related to PDF structure');
+                }
+            }
+
             throw new Error(`PDF generation failed: ${pdfError.message}`);
         }
 

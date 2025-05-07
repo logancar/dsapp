@@ -66,6 +66,32 @@ export const submitForm = async (
   }
 
   try {
+    // For development/testing, we can simulate a successful response if the server is not available
+    if (isDevelopment) {
+      try {
+        // First try to connect to the real server
+        const testResponse = await fetch(`${API_BASE_URL}/test`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+        });
+
+        // If test fails, we'll catch it in the next block
+        await testResponse.json();
+      } catch (testError) {
+        console.warn('Server connection test failed, using simulated response for development');
+        console.info('To submit forms, make sure your backend server is running at:', API_BASE_URL);
+
+        // Simulate successful response for development
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        return {
+          success: true,
+          message: `[DEVELOPMENT MODE] Form would be submitted for ${pdfType} type`
+        };
+      }
+    }
+
     const url = `${API_BASE_URL}/submit-form`;
     console.log('Submitting form data to:', url);
     console.log('Environment:', isDevelopment ? 'Development' : 'Production');
@@ -75,11 +101,28 @@ export const submitForm = async (
 
     // Check if we have a signature (not needed for walkaround photos)
     if (pdfType !== 'walkaround') {
-      const hasSignature = formData.signature || formData.signature1 || formData.signature2;
-      if (hasSignature) {
-        console.log('Signature is present in the form data');
+      // For rental form, check all three signatures
+      if (pdfType === 'rental') {
+        const hasSignature1 = formData.signaturePage1 || formData.signature1;
+        const hasSignature2 = formData.signaturePage2 || formData.signature2;
+        const hasSignature3 = formData.signaturePage3 || formData.signature3;
+
+        console.log('Rental form signatures check:');
+        console.log('- Page 1 signature:', !!hasSignature1);
+        console.log('- Page 2 signature:', !!hasSignature2);
+        console.log('- Page 3 signature:', !!hasSignature3);
+
+        if (!hasSignature1 || !hasSignature2 || !hasSignature3) {
+          console.warn('Missing one or more signatures in rental form!');
+        }
       } else {
-        console.warn('No signature found in form data!');
+        // For other forms
+        const hasSignature = formData.signature || formData.signature1 || formData.signature2;
+        if (hasSignature) {
+          console.log('Signature is present in the form data');
+        } else {
+          console.warn('No signature found in form data!');
+        }
       }
     } else {
       // For walkaround photos, check if we have at least one photo
@@ -142,6 +185,11 @@ export const submitForm = async (
     // Check for network errors
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       console.error('Network error - server might be down or unreachable');
+
+      if (isDevelopment) {
+        console.warn('Server connection failed. Make sure your backend server is running at:', API_BASE_URL);
+        console.warn('To start the server: cd server && node server.js');
+      }
     }
 
     // Add a small delay before throwing the error to ensure loading animation is visible
