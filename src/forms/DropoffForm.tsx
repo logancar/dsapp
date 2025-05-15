@@ -52,9 +52,9 @@ interface DropoffFormData {
 
   // New fields
   howDidhear: string;
-  referralAddress: string;
-  referralPhone: string;
-  referralEmail: string;
+  referralAddress?: string;
+  referralPhone?: string;
+  referralEmail?: string;
   dropDate: string;
   location: string;
   estimator: string;
