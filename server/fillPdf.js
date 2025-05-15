@@ -1,4 +1,4 @@
-const { PDFDocument } = require("pdf-lib");
+const { PDFDocument, rgb, StandardFonts } = require("pdf-lib");
 const fs = require("fs");
 const path = require("path");
 
@@ -126,6 +126,15 @@ async function fillPdf(pdfType, formData, outputPath) {
             datePage3: "todayDate3",
         },
         dropoff: {
+            // New fields
+            howDidhear: "howDidhear",
+            referralAddress: "referralAddress",
+            referralPhone: "referralPhone",
+            referralEmail: "referralEmail",
+            dropDate: "dropDate",
+            location: "location",
+            estimator: "estimator",
+
             // Personal Information
             name: "customerName",
             phone: "customerPhone",
@@ -138,7 +147,8 @@ async function fillPdf(pdfType, formData, outputPath) {
 
             // Vehicle Information
             vehicleDescription: "vehicleDescription",
-            vin: "vin",
+            vin: "vin", // VIN field on page 2
+            vin2: "vin2", // VIN field on page 3
 
             // Insurance Information
             insuranceCompany: "insuranceCo",
@@ -379,6 +389,39 @@ async function fillPdf(pdfType, formData, outputPath) {
         }
     }
 
+    // DIRECT APPROACH FOR VIN2 FIELD - SIMPLIFIED
+    if (pdfType === 'dropoff' && formData.vin) {
+        console.log('DIRECT APPROACH: Setting vin2 field to match vin field');
+
+        // Always set vin2 in formData to match vin
+        formData.vin2 = formData.vin;
+        console.log('Set formData.vin2 =', formData.vin2);
+
+        // Direct approach - just set the field
+        try {
+            const vin2Field = form.getTextField('vin2');
+            if (vin2Field) {
+                vin2Field.setText(formData.vin);
+                console.log('Successfully set vin2 field directly');
+
+                // Log the field's properties for debugging
+                try {
+                    const widget = vin2Field.acroField.getWidgets()[0];
+                    if (widget) {
+                        const rect = widget.getRectangle();
+                        console.log(`vin2 field position: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`);
+                    }
+                } catch (posError) {
+                    console.log(`Could not get vin2 field position: ${posError.message}`);
+                }
+            } else {
+                console.log('Could not find vin2 field directly - this should not happen as we verified it exists');
+            }
+        } catch (e) {
+            console.error('Error setting vin2 field directly:', e.message);
+        }
+    }
+
     // Fill form fields
     console.log('Starting to fill form fields...');
     console.log('Form data keys:', Object.keys(formData));
@@ -388,6 +431,55 @@ async function fillPdf(pdfType, formData, outputPath) {
         console.log('Duplicating signature to signature2 for last page');
         formData.signature2 = formData.signature;
         console.log('Signature duplicated. Keys available:', Object.keys(formData).filter(k => k.includes('signature')));
+    }
+
+    // Make absolutely sure vin2 is set in formData
+    if (pdfType === 'dropoff' && formData.vin) {
+        formData.vin2 = formData.vin;
+        console.log('Ensuring vin2 is set in formData for the main form filling loop:', formData.vin2);
+
+        // Double-check that we can access the vin2 field
+        try {
+            const vin2Field = form.getTextField('vin2');
+            if (vin2Field) {
+                console.log('vin2 field exists and is accessible in the form');
+            } else {
+                console.log('WARNING: vin2 field does not exist in the form - this should not happen');
+            }
+        } catch (e) {
+            console.error('Error accessing vin2 field:', e.message);
+        }
+    }
+
+    // Handle the new fields for dropoff form
+    if (pdfType === 'dropoff') {
+        // Set dropDate to today's date if not provided
+        if (!formData.dropDate) {
+            formData.dropDate = currentDate;
+            console.log('Setting dropDate to current date:', formData.dropDate);
+        }
+
+        // Verify the new fields exist in the PDF
+        const newFields = ['howDidhear', 'referralAddress', 'referralPhone', 'referralEmail', 'dropDate', 'location', 'estimator'];
+
+        for (const fieldName of newFields) {
+            try {
+                const field = form.getTextField(fieldName);
+                if (field) {
+                    console.log(`Field ${fieldName} exists in the PDF`);
+
+                    // Make sure the field has a value in formData
+                    if (!formData[fieldName] && fieldName !== 'dropDate') { // dropDate is handled separately
+                        formData[fieldName] = fieldName === 'howDidhear' ? 'Not specified' : '';
+                        console.log(`Set default value for ${fieldName}:`, formData[fieldName]);
+                    }
+                } else {
+                    console.log(`WARNING: Field ${fieldName} does not exist in the PDF`);
+                }
+            } catch (e) {
+                console.error(`Error accessing ${fieldName} field:`, e.message);
+            }
+        }
     }
 
     for (const key in formData) {
@@ -724,6 +816,38 @@ async function fillPdf(pdfType, formData, outputPath) {
                         }
                     }
                 }
+                // Special handling for vin2 field
+                else if (key === 'vin2' && pdfType === 'dropoff') {
+                    console.log('Special handling for vin2 field in main loop');
+                    try {
+                        // Direct approach - just set the field
+                        const textField = form.getTextField('vin2');
+                        if (textField) {
+                            textField.setText(formData[key]);
+                            console.log('Successfully set vin2 field in main loop');
+                        } else {
+                            console.log('Could not find vin2 field in main loop - this should not happen');
+                        }
+                    } catch (e) {
+                        console.log('Error setting vin2 field in main loop:', e.message);
+                    }
+                }
+                // Special handling for new fields
+                else if (['howDidhear', 'referralAddress', 'referralPhone', 'referralEmail', 'dropDate', 'location', 'estimator'].includes(key) && pdfType === 'dropoff') {
+                    console.log(`Special handling for ${key} field in main loop`);
+                    try {
+                        // Direct approach - just set the field
+                        const textField = form.getTextField(key);
+                        if (textField) {
+                            textField.setText(formData[key] || '');
+                            console.log(`Successfully set ${key} field in main loop to "${formData[key]}"`);
+                        } else {
+                            console.log(`Could not find ${key} field in main loop - this should not happen`);
+                        }
+                    } catch (e) {
+                        console.log(`Error setting ${key} field in main loop:`, e.message);
+                    }
+                }
                 // For regular text fields
                 else {
                     const primaryFieldName = mappedFields[key];
@@ -890,6 +1014,53 @@ async function fillPdf(pdfType, formData, outputPath) {
             }
         } catch (error) {
             console.log('Error filling date field:', error.message);
+        }
+    }
+
+    // Final check for vin2 field and new fields before flattening
+    if (pdfType === 'dropoff') {
+        // Check vin2 field
+        try {
+            const vin2Field = form.getTextField('vin2');
+            if (vin2Field) {
+                const currentValue = vin2Field.getText();
+                console.log(`Final check: vin2 field value before flattening: "${currentValue}"`);
+
+                // If it's empty, try setting it one more time
+                if (!currentValue && formData.vin) {
+                    vin2Field.setText(formData.vin);
+                    console.log(`Final attempt: Set vin2 field to "${formData.vin}"`);
+                }
+            }
+        } catch (e) {
+            console.log('Error in final vin2 check:', e.message);
+        }
+
+        // Check new fields
+        const newFields = ['howDidhear', 'referralAddress', 'referralPhone', 'referralEmail', 'dropDate', 'location', 'estimator'];
+
+        for (const fieldName of newFields) {
+            try {
+                const field = form.getTextField(fieldName);
+                if (field) {
+                    const currentValue = field.getText();
+                    console.log(`Final check: ${fieldName} field value before flattening: "${currentValue}"`);
+
+                    // If it's empty, try setting it one more time
+                    if (!currentValue && formData[fieldName]) {
+                        field.setText(formData[fieldName]);
+                        console.log(`Final attempt: Set ${fieldName} field to "${formData[fieldName]}"`);
+                    }
+
+                    // Special handling for dropDate - always ensure it has today's date
+                    if (fieldName === 'dropDate' && !currentValue) {
+                        field.setText(currentDate);
+                        console.log(`Final attempt: Set dropDate field to today's date: "${currentDate}"`);
+                    }
+                }
+            } catch (e) {
+                console.log(`Error in final ${fieldName} check:`, e.message);
+            }
         }
     }
 

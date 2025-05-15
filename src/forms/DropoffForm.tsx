@@ -50,6 +50,15 @@ interface DropoffFormData {
     other: boolean;
   };
 
+  // New fields
+  howDidhear: string;
+  referralAddress: string;
+  referralPhone: string;
+  referralEmail: string;
+  dropDate: string;
+  location: string;
+  estimator: string;
+
   // Authorization
   insuranceCompany: string;
   signature: string;
@@ -102,6 +111,15 @@ interface DropoffFormData {
 }
 
 const schema = yup.object().shape({
+  // New fields
+  howDidhear: yup.string().required('How did you hear about us is required'),
+  referralAddress: yup.string().optional(),
+  referralPhone: yup.string().optional(),
+  referralEmail: yup.string().email('Invalid email').optional(),
+  dropDate: yup.string().required('Drop date is required'),
+  location: yup.string().required('Location is required'),
+  estimator: yup.string().required('Estimator is required'),
+
   insuranceCompany: yup.string().required('Insurance company is required'),
   vin: yup
     .string()
@@ -189,6 +207,15 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
 
   const { register, setValue, watch, getValues, formState: { errors } } = useForm<DropoffFormData>({
     defaultValues: {
+      // New fields with default values
+      howDidhear: '',
+      referralAddress: '',
+      referralPhone: '',
+      referralEmail: '',
+      dropDate: new Date().toISOString().split('T')[0], // Today's date
+      location: '',
+      estimator: locationState?.name || '', // Use estimator name from location state if available
+
       referralSources: {
         google: false,
         waze: false,
@@ -478,6 +505,89 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
           <div className={styles.formStep}>
             <h2 className={styles.centerHeading}>Personal Information</h2>
             <div className={styles.personalInfoSection}>
+              {/* New fields section */}
+              <div className={styles.fieldGroup}>
+                <label>How did you hear about us?</label>
+                <input
+                  type="text"
+                  {...register('howDidhear')}
+                  autoComplete="off"
+                  placeholder="Please provide details"
+                />
+                {errors.howDidhear && (
+                  <span className={styles.error}>{errors.howDidhear.message}</span>
+                )}
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Referral Address: (optional)</label>
+                <input
+                  type="text"
+                  {...register('referralAddress')}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Referral Phone: (optional)</label>
+                <input
+                  type="tel"
+                  {...register('referralPhone')}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Referral Email: (optional)</label>
+                <input
+                  type="email"
+                  {...register('referralEmail')}
+                  autoComplete="off"
+                />
+                {errors.referralEmail && (
+                  <span className={styles.error}>{errors.referralEmail.message}</span>
+                )}
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Drop Date:</label>
+                <input
+                  type="date"
+                  {...register('dropDate')}
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  autoComplete="off"
+                />
+                {errors.dropDate && (
+                  <span className={styles.error}>{errors.dropDate.message}</span>
+                )}
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Location:</label>
+                <input
+                  type="text"
+                  {...register('location')}
+                  autoComplete="off"
+                />
+                {errors.location && (
+                  <span className={styles.error}>{errors.location.message}</span>
+                )}
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label>Estimator:</label>
+                <input
+                  type="text"
+                  {...register('estimator')}
+                  defaultValue={locationState?.name || ''}
+                  autoComplete="off"
+                />
+                {errors.estimator && (
+                  <span className={styles.error}>{errors.estimator.message}</span>
+                )}
+              </div>
+
+              {/* Original fields */}
               <div className={styles.fieldGroup}>
                 <label>Name:</label>
                 <input

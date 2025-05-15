@@ -260,7 +260,13 @@ app.post("/submit-form", async (req, res) => {
                 })
                 .catch(error => {
                     console.error(`Error sending email to estimator (${estimatorEmail}):`, error);
-                    throw new Error(`Failed to send email to estimator: ${error.message}`);
+                    console.error('This error is caught and will not prevent form submission success');
+                    // Return a partial success object instead of throwing
+                    return {
+                        partial: true,
+                        error: error.message,
+                        message: `Failed to send email to estimator: ${error.message}`
+                    };
                 })
         );
 
@@ -275,14 +281,27 @@ app.post("/submit-form", async (req, res) => {
                     })
                     .catch(error => {
                         console.error(`Error sending email to customer (${formData.email}):`, error);
-                        throw new Error(`Failed to send email to customer: ${error.message}`);
+                        console.error('This error is caught and will not prevent form submission success');
+                        // Return a partial success object instead of throwing
+                        return {
+                            partial: true,
+                            error: error.message,
+                            message: `Failed to send email to customer: ${error.message}`
+                        };
                     })
             );
         }
 
         console.log('Waiting for all emails to be sent...');
-        const emailResults = await Promise.all(emailPromises);
-        console.log(`All emails sent successfully (${emailResults.length} total)`);
+        try {
+            const emailResults = await Promise.all(emailPromises);
+            console.log(`All emails sent successfully (${emailResults.length} total)`);
+        } catch (emailError) {
+            console.error('Error in Promise.all for emails:', emailError);
+            console.error('This error is caught and will not prevent form submission success');
+            // Don't rethrow the error - we still want to return success if the PDF was generated
+            // even if there was an email sending issue
+        }
 
         // Clean up PDF file
         try {
@@ -294,21 +313,32 @@ app.post("/submit-form", async (req, res) => {
         }
 
         console.log('==== FORM SUBMISSION COMPLETED SUCCESSFULLY ====');
-        res.json({
-            success: true,
-            message: "PDF generated and emails sent successfully!"
-        });
+
+        // Make sure we haven't already sent a response
+        if (!res.headersSent) {
+            res.json({
+                success: true,
+                message: "PDF generated and emails sent successfully!"
+            });
+        } else {
+            console.log('Headers already sent, cannot send success response');
+        }
     } catch (error) {
         console.error("==== ERROR PROCESSING FORM ====");
         console.error("Error message:", error.message);
         console.error("Error stack:", error.stack);
 
-        res.status(500).json({
-            success: false,
-            message: "Error processing form",
-            error: error.message,
-            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
+        // Make sure we haven't already sent a response
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: "Error processing form",
+                error: error.message,
+                details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        } else {
+            console.log('Headers already sent, cannot send error response');
+        }
     }
 });
 
