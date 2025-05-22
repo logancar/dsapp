@@ -142,38 +142,97 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   const [cameraInitialized, setCameraInitialized] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // Track camera initialization status
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraLoading, setIsCameraLoading] = useState(false);
+
   // Initialize camera only once when component mounts and not in intro step
   useEffect(() => {
     // Only initialize camera if we're past the intro step and haven't initialized yet
     if (!isIntroStep && !cameraInitialized) {
       const initCamera = async () => {
+        setIsCameraLoading(true);
+        setCameraError(null);
+
         try {
+          console.log('Initializing camera...');
           const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
-          if (!videoElement) return;
+          if (!videoElement) {
+            console.error('Video element not found');
+            setCameraError('Video element not found');
+            setIsCameraLoading(false);
+            return;
+          }
 
-          // Request camera access
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: 'environment',
-              width: { ideal: 1920 },
-              height: { ideal: 1080 }
-            },
-            audio: false
-          });
+          console.log('Requesting camera access...');
 
-          // Store the stream in the ref
-          streamRef.current = stream;
+          // First try with ideal settings
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
+              audio: false
+            });
 
-          // Set the stream as the video source
-          videoElement.srcObject = stream;
+            // Store the stream in the ref
+            streamRef.current = stream;
 
-          // Mark camera as initialized
-          setCameraInitialized(true);
+            // Set the stream as the video source
+            videoElement.srcObject = stream;
 
-          console.log('Camera initialized successfully');
+            // Add event listeners to detect when video is actually playing
+            videoElement.onloadedmetadata = () => {
+              console.log('Video metadata loaded, video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+              videoElement.play().catch(e => console.error('Error playing video:', e));
+            };
+
+            videoElement.onplaying = () => {
+              console.log('Video is now playing');
+              // Mark camera as initialized only when video is actually playing
+              setCameraInitialized(true);
+              setIsCameraLoading(false);
+            };
+
+            console.log('Camera stream obtained successfully');
+          } catch (error) {
+            console.warn('Failed with ideal settings, trying fallback settings:', error);
+
+            // Fallback to basic settings
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            });
+
+            // Store the stream in the ref
+            streamRef.current = stream;
+
+            // Set the stream as the video source
+            videoElement.srcObject = stream;
+
+            // Add event listeners to detect when video is actually playing
+            videoElement.onloadedmetadata = () => {
+              console.log('Video metadata loaded (fallback), video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+              videoElement.play().catch(e => console.error('Error playing video:', e));
+            };
+
+            videoElement.onplaying = () => {
+              console.log('Video is now playing (fallback)');
+              // Mark camera as initialized only when video is actually playing
+              setCameraInitialized(true);
+              setIsCameraLoading(false);
+            };
+
+            console.log('Camera initialized with fallback settings');
+          }
         } catch (error) {
           console.error('Error accessing camera:', error);
-          alert('Unable to access camera. Please make sure you have granted camera permissions.');
+          setCameraError('Unable to access camera. Please make sure you have granted camera permissions.');
+          setIsCameraLoading(false);
+
+          // Don't show alert, we'll display the error in the UI
         }
       };
 
@@ -183,8 +242,12 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
     // Clean up function to stop camera when component unmounts
     return () => {
       if (streamRef.current) {
+        console.log('Stopping camera stream...');
         const tracks = streamRef.current.getTracks();
-        tracks.forEach(track => track.stop());
+        tracks.forEach(track => {
+          console.log(`Stopping track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
+          track.stop();
+        });
         streamRef.current = null;
       }
     };
@@ -207,43 +270,120 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File selected');
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Processing file:', file.name, 'type:', file.type, 'size:', file.size);
+
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        console.error('Selected file is not an image');
+        alert('Please select an image file');
+        return;
+      }
+
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        console.error('File too large');
+        alert('Image is too large. Please select an image under 10MB');
+        return;
+      }
+
       const reader = new FileReader();
+
       reader.onload = (event) => {
         if (event.target?.result) {
-          handleCapture(event.target.result as string);
+          const imageData = event.target.result as string;
+          console.log('File read successfully, data URL length:', imageData.length);
+
+          // Validate the image data
+          if (imageData === 'data:,' || imageData.length < 1000) {
+            console.error('Invalid image data from file');
+            alert('Could not read the selected image. Please try another image.');
+            return;
+          }
+
+          handleCapture(imageData);
         }
       };
+
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        alert('Error reading the selected image. Please try again.');
+      };
+
       reader.readAsDataURL(file);
+    } else {
+      console.log('No file selected');
     }
   };
 
   const takePicture = () => {
     try {
+      console.log('Taking picture...');
       const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
 
-      // If video is not available, fall back to file input
-      if (!videoElement || !videoElement.srcObject) {
+      // If video is not available or not playing, fall back to file input
+      if (!videoElement || !videoElement.srcObject || videoElement.readyState < 2) {
+        console.log('Video not ready, falling back to file input');
+        console.log('Video element exists:', !!videoElement);
+        console.log('Video has srcObject:', !!(videoElement && videoElement.srcObject));
+        console.log('Video readyState:', videoElement?.readyState);
+
         if (fileInputRef.current) {
           fileInputRef.current.click();
         }
         return;
       }
 
+      // Log video dimensions
+      console.log('Video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+
       // Create a canvas element to capture the current video frame
       const canvas = document.createElement('canvas');
+
+      // Make sure we have valid dimensions
+      if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+        console.error('Invalid video dimensions, falling back to file input');
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+        return;
+      }
+
       canvas.width = videoElement.videoWidth;
       canvas.height = videoElement.videoHeight;
 
       // Draw the current video frame to the canvas
       const context = canvas.getContext('2d');
       if (context) {
+        // Clear the canvas first
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the video frame
         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-        // Convert the canvas to a data URL and pass it to handleCapture
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        // Convert the canvas to a data URL
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+
+        // Validate the image data
+        if (imageData === 'data:,' || imageData.length < 1000) {
+          console.error('Invalid image data captured, falling back to file input');
+          console.log('Image data:', imageData.substring(0, 100) + '...');
+
+          if (fileInputRef.current) {
+            fileInputRef.current.click();
+          }
+          return;
+        }
+
+        console.log('Photo captured successfully, data URL length:', imageData.length);
         handleCapture(imageData);
+      } else {
+        console.error('Could not get canvas context');
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
       }
     } catch (error) {
       console.error('Error capturing photo:', error);
@@ -475,14 +615,63 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             objectFit: 'cover',
             position: 'absolute',
             top: 0,
-            left: 0
+            left: 0,
+            display: cameraError ? 'none' : 'block'
           }}
         ></video>
 
-        {/* Targeting overlay */}
-        <div className={styles.targetOverlay}>
-          <div className={styles.targetBox}></div>
-        </div>
+        {/* Camera loading state */}
+        {isCameraLoading && !cameraError && (
+          <div className={styles.cameraLoadingOverlay}>
+            <div className={styles.cameraLoadingSpinner}></div>
+            <p className={styles.cameraLoadingText}>Accessing camera...</p>
+          </div>
+        )}
+
+        {/* Camera error state */}
+        {cameraError && (
+          <div className={styles.cameraErrorOverlay}>
+            <div className={styles.cameraErrorIcon}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 9L9 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 9L15 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className={styles.cameraErrorText}>{cameraError}</p>
+            <p className={styles.cameraErrorSubtext}>Tap the button below to use your photo gallery instead</p>
+            <div className={styles.cameraErrorButtons}>
+              <button
+                className={styles.cameraErrorButton}
+                onClick={() => {
+                  // Reset camera error and try again
+                  setCameraError(null);
+                  setCameraInitialized(false);
+                }}
+              >
+                Try Camera Again
+              </button>
+              <button
+                className={styles.cameraErrorButton}
+                onClick={() => {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.removeAttribute('capture');
+                    fileInputRef.current.click();
+                  }
+                }}
+              >
+                Use Gallery
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Targeting overlay - only show when camera is working */}
+        {!cameraError && !isCameraLoading && (
+          <div className={styles.targetOverlay}>
+            <div className={styles.targetBox}></div>
+          </div>
+        )}
 
         {/* Step title at the bottom */}
         <div className={styles.stepTitle}>
@@ -510,11 +699,28 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
           </button>
         )}
 
+        {/* Gallery button */}
+        <button
+          className={styles.galleryButton}
+          onClick={() => {
+            if (fileInputRef.current) {
+              // Remove the capture attribute to open gallery
+              fileInputRef.current.removeAttribute('capture');
+              fileInputRef.current.click();
+            }
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5" fill="white"/>
+            <path d="M6 16L8 14L10 16L14 12L18 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
         {/* Hidden file input */}
         <input
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={handleFileSelect}
           ref={fileInputRef}
           style={{ display: 'none' }}
