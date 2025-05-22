@@ -196,74 +196,139 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
 
       console.log('Requesting camera access...');
 
-      // First try with ideal settings for landscape orientation
-      try {
-        const constraints = {
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        };
+      // Check if this is iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      console.log('Device is iOS:', isIOS);
 
-        console.log('Using constraints:', JSON.stringify(constraints));
+      // iOS-specific settings
+      if (isIOS) {
+        try {
+          // iOS works better with simpler constraints
+          const constraints = {
+            video: {
+              facingMode: 'environment'
+            },
+            audio: false
+          };
 
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log('Using iOS constraints:', JSON.stringify(constraints));
 
-        // Store the stream in the ref
-        streamRef.current = stream;
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-        // Set the stream as the video source
-        videoRef.current.srcObject = stream;
+          // Store the stream in the ref
+          streamRef.current = stream;
 
-        // Add event listeners to detect when video is actually playing
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded, video dimensions:',
-            videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
-          videoRef.current?.play().catch(e => console.error('Error playing video:', e));
-        };
+          // For iOS, we need to set important attributes on the video element
+          if (videoRef.current) {
+            videoRef.current.setAttribute('autoplay', 'true');
+            videoRef.current.setAttribute('playsinline', 'true');
+            videoRef.current.setAttribute('muted', 'true');
 
-        videoRef.current.onplaying = () => {
-          console.log('Video is now playing');
-          // Mark camera as initialized only when video is actually playing
-          setCameraInitialized(true);
+            // Set the stream as the video source
+            videoRef.current.srcObject = stream;
+
+            // Force play on iOS
+            videoRef.current.play().catch(e => {
+              console.error('Error playing video on iOS:', e);
+              // Try again with user interaction
+              document.body.addEventListener('touchend', function playVideoOnTouch() {
+                videoRef.current?.play().catch(e => console.error('Error on touch play:', e));
+                document.body.removeEventListener('touchend', playVideoOnTouch);
+              }, { once: true });
+            });
+
+            // Add event listeners for iOS
+            videoRef.current.onloadedmetadata = () => {
+              console.log('iOS: Video metadata loaded, dimensions:',
+                videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
+
+              // Force play again after metadata is loaded
+              videoRef.current?.play().catch(e => console.error('Error playing after metadata:', e));
+            };
+
+            videoRef.current.onplaying = () => {
+              console.log('iOS: Video is now playing');
+              setCameraInitialized(true);
+              setIsCameraLoading(false);
+            };
+          }
+
+          console.log('iOS camera stream obtained successfully');
+        } catch (iosError) {
+          console.error('iOS camera access error:', iosError);
+          setCameraError('Unable to access camera on iOS. Please check your camera permissions in Settings.');
           setIsCameraLoading(false);
-        };
+        }
+      } else {
+        // Non-iOS devices - try with ideal settings first
+        try {
+          const constraints = {
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          };
 
-        console.log('Camera stream obtained successfully');
-      } catch (error) {
-        console.warn('Failed with ideal settings, trying fallback settings:', error);
+          console.log('Using constraints:', JSON.stringify(constraints));
 
-        // Fallback to basic settings
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-        // Store the stream in the ref
-        streamRef.current = stream;
+          // Store the stream in the ref
+          streamRef.current = stream;
 
-        // Set the stream as the video source
-        if (videoRef.current) {
+          // Set the stream as the video source
           videoRef.current.srcObject = stream;
 
           // Add event listeners to detect when video is actually playing
           videoRef.current.onloadedmetadata = () => {
-            console.log('Video metadata loaded (fallback), video dimensions:',
+            console.log('Video metadata loaded, video dimensions:',
               videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
             videoRef.current?.play().catch(e => console.error('Error playing video:', e));
           };
 
           videoRef.current.onplaying = () => {
-            console.log('Video is now playing (fallback)');
+            console.log('Video is now playing');
             // Mark camera as initialized only when video is actually playing
             setCameraInitialized(true);
             setIsCameraLoading(false);
           };
-        }
 
-        console.log('Camera initialized with fallback settings');
+          console.log('Camera stream obtained successfully');
+        } catch (error) {
+          console.warn('Failed with ideal settings, trying fallback settings:', error);
+
+          // Fallback to basic settings
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+
+          // Store the stream in the ref
+          streamRef.current = stream;
+
+          // Set the stream as the video source
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+
+            // Add event listeners to detect when video is actually playing
+            videoRef.current.onloadedmetadata = () => {
+              console.log('Video metadata loaded (fallback), video dimensions:',
+                videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
+              videoRef.current?.play().catch(e => console.error('Error playing video:', e));
+            };
+
+            videoRef.current.onplaying = () => {
+              console.log('Video is now playing (fallback)');
+              // Mark camera as initialized only when video is actually playing
+              setCameraInitialized(true);
+              setIsCameraLoading(false);
+            };
+          }
+
+          console.log('Camera initialized with fallback settings');
+        }
       }
     } catch (error) {
       console.error('Error accessing camera:', error);
@@ -300,18 +365,34 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
         return;
       }
 
+      // Check if this is iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
       // Create a canvas element to capture the current video frame
       const canvas = document.createElement('canvas');
 
       // Make sure we have valid dimensions
       if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
         console.error('Invalid video dimensions');
-        setIsCapturing(false);
-        return;
-      }
+        console.log('Video element:', videoRef.current);
+        console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+        console.log('Ready state:', videoRef.current.readyState);
 
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+        if (isIOS) {
+          // On iOS, sometimes the video dimensions aren't reported correctly
+          // Use a fallback size based on the video element's display size
+          const videoRect = videoRef.current.getBoundingClientRect();
+          canvas.width = videoRect.width || 640;
+          canvas.height = videoRect.height || 480;
+          console.log('Using fallback dimensions for iOS:', canvas.width, 'x', canvas.height);
+        } else {
+          setIsCapturing(false);
+          return;
+        }
+      } else {
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+      }
 
       // Draw the current video frame to the canvas
       const context = canvas.getContext('2d');
@@ -319,47 +400,57 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
         // Clear the canvas first
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the video frame
-        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        try {
+          // Draw the video frame
+          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-        // Convert the canvas to a data URL
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+          // Convert the canvas to a data URL
+          const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
-        // Validate the image data
-        if (imageData === 'data:,' || imageData.length < 1000) {
-          console.error('Invalid image data captured');
-          setIsCapturing(false);
-          return;
-        }
+          // Validate the image data
+          if (imageData === 'data:,' || imageData.length < 1000) {
+            console.error('Invalid image data captured');
 
-        console.log('Photo captured successfully, data URL length:', imageData.length);
+            if (isIOS) {
+              // On iOS, try an alternative approach
+              console.log('Trying alternative capture method for iOS');
 
-        // Trigger shutter effect
-        const shutterElement = document.getElementById('shutter-effect');
-        if (shutterElement) {
-          shutterElement.classList.add(styles.shutterFlash);
-          setTimeout(() => {
-            shutterElement.classList.remove(styles.shutterFlash);
-          }, 200);
-        }
+              // Force a redraw of the video frame
+              videoRef.current.style.display = 'none';
+              void videoRef.current.offsetHeight; // Trigger reflow
+              videoRef.current.style.display = 'block';
 
-        // Update the photo steps with the captured image
-        const updatedSteps = [...photoSteps];
-        updatedSteps[currentStepIndex] = {
-          ...updatedSteps[currentStepIndex],
-          imageData
-        };
-        setPhotoSteps(updatedSteps);
+              // Try again after a short delay
+              setTimeout(() => {
+                try {
+                  context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                  const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
 
-        // Automatically move to next step after capture
-        setTimeout(() => {
-          if (currentStepIndex < photoSteps.length - 2) { // Don't auto-advance to review step
-            setCurrentStepIndex(currentStepIndex + 1);
-          } else {
-            setShowSummary(true);
+                  if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
+                    console.log('iOS alternative capture successful');
+                    processImageData(retryImageData);
+                  } else {
+                    console.error('iOS alternative capture failed');
+                    setIsCapturing(false);
+                  }
+                } catch (retryError) {
+                  console.error('Error in iOS alternative capture:', retryError);
+                  setIsCapturing(false);
+                }
+              }, 100);
+              return;
+            } else {
+              setIsCapturing(false);
+              return;
+            }
           }
+
+          // Process the valid image data
+          processImageData(imageData);
+        } catch (drawError) {
+          console.error('Error drawing to canvas:', drawError);
           setIsCapturing(false);
-        }, 300); // Slight delay to allow shutter effect to complete
+        }
       } else {
         console.error('Could not get canvas context');
         setIsCapturing(false);
@@ -368,6 +459,38 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
       console.error('Error capturing photo:', error);
       setIsCapturing(false);
     }
+  };
+
+  // Helper function to process captured image data
+  const processImageData = (imageData: string) => {
+    console.log('Photo captured successfully, data URL length:', imageData.length);
+
+    // Trigger shutter effect
+    const shutterElement = document.getElementById('shutter-effect');
+    if (shutterElement) {
+      shutterElement.classList.add(styles.shutterFlash);
+      setTimeout(() => {
+        shutterElement.classList.remove(styles.shutterFlash);
+      }, 200);
+    }
+
+    // Update the photo steps with the captured image
+    const updatedSteps = [...photoSteps];
+    updatedSteps[currentStepIndex] = {
+      ...updatedSteps[currentStepIndex],
+      imageData
+    };
+    setPhotoSteps(updatedSteps);
+
+    // Automatically move to next step after capture
+    setTimeout(() => {
+      if (currentStepIndex < photoSteps.length - 2) { // Don't auto-advance to review step
+        setCurrentStepIndex(currentStepIndex + 1);
+      } else {
+        setShowSummary(true);
+      }
+      setIsCapturing(false);
+    }, 300); // Slight delay to allow shutter effect to complete
   };
 
   // Function to handle skipping optional steps
@@ -654,6 +777,12 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
             autoPlay
             playsInline
             muted
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              backgroundColor: '#000'
+            }}
           ></video>
 
           {/* Shutter effect overlay */}
