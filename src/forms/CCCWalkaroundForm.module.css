@@ -1,0 +1,486 @@
+/* Main container styles */
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+/* Intro screen styles */
+.introContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  background-color: #000;
+}
+
+.introTitle {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #3BB554; /* Dent Source green */
+}
+
+.introText {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.startButton {
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.startButton:hover {
+  background-color: #2a9940;
+}
+
+/* Camera view styles */
+.cameraContainer {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.cameraView {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.videoFeed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Camera loading and error states */
+.cameraLoadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 20;
+}
+
+.cameraLoadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.cameraLoadingText {
+  color: white;
+  font-size: 18px;
+  text-align: center;
+}
+
+.cameraErrorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 20;
+  padding: 20px;
+}
+
+.cameraErrorIcon {
+  margin-bottom: 20px;
+}
+
+.cameraErrorText {
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Overlay guides */
+.overlayGuide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.frontOverlay,
+.rearOverlay {
+  width: 80%;
+  height: 40%;
+  border: 2px dashed rgba(59, 181, 84, 0.7);
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+.cornerOverlay {
+  width: 70%;
+  height: 50%;
+  border: 2px dashed rgba(59, 181, 84, 0.7);
+  transform: skew(-10deg);
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+.sideOverlay {
+  width: 90%;
+  height: 30%;
+  border: 2px dashed rgba(59, 181, 84, 0.7);
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+.roofOverlay {
+  width: 60%;
+  height: 60%;
+  border: 2px dashed rgba(59, 181, 84, 0.7);
+  border-radius: 5px;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+.detailOverlay {
+  width: 50%;
+  height: 50%;
+  border: 2px dashed rgba(59, 181, 84, 0.7);
+  border-radius: 5px;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+}
+
+/* Camera controls */
+.cameraControls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  z-index: 15;
+}
+
+.captureButton {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #3BB554;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s;
+}
+
+.captureButton:hover {
+  transform: scale(1.05);
+}
+
+.captureButtonInner {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: #3BB554;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.skipButton {
+  position: absolute;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 15px;
+}
+
+/* Progress indicator */
+.progressContainer {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.progressText {
+  color: white;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100px;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #3BB554;
+  transition: width 0.3s ease;
+}
+
+/* Instruction banner */
+.instructionBanner {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  text-align: center;
+  z-index: 15;
+}
+
+.instructionText {
+  color: white;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Animation for shutter effect */
+@keyframes shutterFlash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.shutterEffect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.shutterFlash {
+  animation: shutterFlash 0.2s ease-out;
+}
+
+/* Review screen styles */
+.reviewContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.reviewTitle {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: #3BB554;
+  text-align: center;
+}
+
+.reviewText {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.photoGridItem {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.photoLabel {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px;
+  font-size: 0.75rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.gridThumbnail {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.missingPhoto {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.cameraIcon {
+  font-size: 2rem;
+}
+
+.reviewButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.retakeAllButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.continueButton {
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.continueButton:disabled {
+  background-color: rgba(59, 181, 84, 0.5);
+  cursor: not-allowed;
+}
+
+/* Comment box styles */
+.commentBox {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  padding: 1rem;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  resize: vertical;
+}
+
+.commentBox::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.retryButton {
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .photoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .progressContainer {
+    top: 10px;
+    left: 10px;
+  }
+
+  .captureButton {
+    width: 70px;
+    height: 70px;
+  }
+
+  .captureButtonInner {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .photoGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .reviewButtons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .retakeAllButton,
+  .continueButton {
+    width: 100%;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -10,14 +10,14 @@ const path = require("path");
  */
 async function createWalkaroundPdf(formData, outputPath) {
     console.log('Creating walkaround PDF...');
-    
+
     try {
         // Create a new PDF document
         const pdfDoc = await PDFDocument.create();
-        
+
         // Add a cover page
         const coverPage = pdfDoc.addPage([612, 792]); // Standard US Letter size
-        
+
         // Add title and customer information to cover page
         coverPage.drawText('Vehicle Walkaround Photos', {
             x: 50,
@@ -25,27 +25,27 @@ async function createWalkaroundPdf(formData, outputPath) {
             size: 24,
             color: rgb(0, 0, 0)
         });
-        
+
         // Add customer information
         const customerName = formData.userName || 'Unknown';
-        const submittedDate = formData.submittedAt 
-            ? new Date(formData.submittedAt).toLocaleDateString() 
+        const submittedDate = formData.submittedAt
+            ? new Date(formData.submittedAt).toLocaleDateString()
             : new Date().toLocaleDateString();
-        
+
         coverPage.drawText(`Customer: ${customerName}`, {
             x: 50,
             y: 650,
             size: 12,
             color: rgb(0, 0, 0)
         });
-        
+
         coverPage.drawText(`Date: ${submittedDate}`, {
             x: 50,
             y: 630,
             size: 12,
             color: rgb(0, 0, 0)
         });
-        
+
         // Add a note about the contents
         coverPage.drawText('This document contains photos from a vehicle walkaround inspection.', {
             x: 50,
@@ -53,11 +53,61 @@ async function createWalkaroundPdf(formData, outputPath) {
             size: 12,
             color: rgb(0, 0, 0)
         });
-        
+
+        // Add customer comment if provided
+        if (formData.comment) {
+            coverPage.drawText('Customer Comments:', {
+                x: 50,
+                y: 550,
+                size: 12,
+                color: rgb(0, 0, 0),
+                font: 'Helvetica-Bold'
+            });
+
+            // Split comment into lines to fit on the page
+            const maxWidth = 500; // Maximum width for text
+            const fontSize = 12;
+            const lineHeight = 15;
+            let yPosition = 530;
+
+            // Simple word wrapping
+            const words = formData.comment.split(' ');
+            let currentLine = '';
+
+            for (const word of words) {
+                const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+                // If adding this word would make the line too long, add the current line and start a new one
+                if (testLine.length * (fontSize * 0.6) > maxWidth && currentLine) {
+                    coverPage.drawText(currentLine, {
+                        x: 50,
+                        y: yPosition,
+                        size: fontSize,
+                        color: rgb(0, 0, 0)
+                    });
+
+                    yPosition -= lineHeight;
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+
+            // Add the last line
+            if (currentLine) {
+                coverPage.drawText(currentLine, {
+                    x: 50,
+                    y: yPosition,
+                    size: fontSize,
+                    color: rgb(0, 0, 0)
+                });
+            }
+        }
+
         // Process each photo
         const photoKeys = Object.keys(formData).filter(key => key.startsWith('photo_'));
         console.log(`Found ${photoKeys.length} photos to include in PDF`);
-        
+
         // Sort the photo keys to ensure they appear in the correct order
         const orderedPhotoKeys = photoKeys.sort((a, b) => {
             const order = [
@@ -76,10 +126,10 @@ async function createWalkaroundPdf(formData, outputPath) {
                 'photo_roof',
                 'photo_vin_odometer'
             ];
-            
+
             return order.indexOf(a) - order.indexOf(b);
         });
-        
+
         // Add each photo to a new page
         for (const photoKey of orderedPhotoKeys) {
             const photoData = formData[photoKey];
@@ -87,18 +137,18 @@ async function createWalkaroundPdf(formData, outputPath) {
                 console.log(`Skipping invalid photo data for ${photoKey}`);
                 continue;
             }
-            
+
             try {
                 // Extract the image data from the data URL
                 const base64Data = photoData.split(',')[1];
                 const imageBytes = Buffer.from(base64Data, 'base64');
-                
+
                 // Get the photo title (convert photo_left_front to LEFT FRONT)
                 const photoTitle = photoKey.replace('photo_', '')
                     .split('_')
                     .map(word => word.toUpperCase())
                     .join(' ');
-                
+
                 // Embed the image in the PDF
                 let image;
                 if (photoData.includes('data:image/png')) {
@@ -109,32 +159,32 @@ async function createWalkaroundPdf(formData, outputPath) {
                     console.log(`Unsupported image format for ${photoKey}, attempting to use as PNG`);
                     image = await pdfDoc.embedPng(imageBytes);
                 }
-                
+
                 // Add a new page for the photo
                 const page = pdfDoc.addPage([612, 792]); // Standard US Letter size
-                
+
                 // Calculate dimensions to fit the image on the page with margins
                 const maxWidth = 512; // 612 - 100 (margins)
                 const maxHeight = 642; // 792 - 150 (margins + title space)
-                
+
                 const { width, height } = image.scale(1);
                 let scaledWidth = width;
                 let scaledHeight = height;
-                
+
                 // Scale down the image if it's too large
                 if (width > maxWidth || height > maxHeight) {
                     const widthRatio = maxWidth / width;
                     const heightRatio = maxHeight / height;
                     const scale = Math.min(widthRatio, heightRatio);
-                    
+
                     scaledWidth = width * scale;
                     scaledHeight = height * scale;
                 }
-                
+
                 // Center the image on the page
                 const x = (612 - scaledWidth) / 2;
                 const y = (792 - scaledHeight - 50) / 2; // Adjust for title space
-                
+
                 // Draw the photo title
                 page.drawText(photoTitle, {
                     x: 50,
@@ -142,7 +192,7 @@ async function createWalkaroundPdf(formData, outputPath) {
                     size: 18,
                     color: rgb(0, 0, 0)
                 });
-                
+
                 // Draw the image
                 page.drawImage(image, {
                     x,
@@ -150,17 +200,17 @@ async function createWalkaroundPdf(formData, outputPath) {
                     width: scaledWidth,
                     height: scaledHeight
                 });
-                
+
                 console.log(`Added ${photoTitle} to PDF`);
             } catch (error) {
                 console.error(`Error processing photo ${photoKey}:`, error);
             }
         }
-        
+
         // Save the PDF
         const pdfBytes = await pdfDoc.save();
         fs.writeFileSync(outputPath, pdfBytes);
-        
+
         console.log(`Walkaround PDF created successfully at ${outputPath}`);
     } catch (error) {
         console.error('Error creating walkaround PDF:', error);
