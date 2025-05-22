@@ -633,6 +633,20 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
   const handleStart = () => {
     setCurrentStepIndex(1); // Move to first photo step
+
+    // Directly trigger video.play() from user interaction (critical for iOS)
+    setTimeout(() => {
+      const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+      if (videoElement) {
+        console.log('Attempting to play video directly from user interaction');
+        videoElement.play().catch(err => {
+          console.error("Play error on Start tap:", err);
+
+          // If play fails, we'll try again with a user-visible button later
+          setCameraError('Camera permission denied. Please try the "Retry Camera" button below.');
+        });
+      }
+    }, 100); // Small delay to ensure the component has updated
   };
 
   const handleSubmit = async () => {
@@ -855,9 +869,9 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         {/* Video element for camera feed */}
         <video
           id="camera-feed"
-          autoPlay={true}
-          playsInline={true}
-          muted={true}
+          autoPlay
+          playsInline
+          muted
           style={{
             width: '100%',
             height: '100%',
@@ -867,7 +881,9 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             left: 0,
             display: cameraError ? 'none' : 'block',
             backgroundColor: '#000',
-            zIndex: 5
+            zIndex: 5,
+            visibility: 'visible',
+            opacity: 1
           }}
         ></video>
 
@@ -898,6 +914,15 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
                   // Reset camera error and try again
                   setCameraError(null);
                   setCameraInitialized(false);
+
+                  // Directly try to play the video (critical for iOS)
+                  setTimeout(() => {
+                    const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+                    if (videoElement && videoElement.srcObject) {
+                      console.log('Attempting to play video from retry button');
+                      videoElement.play().catch(err => console.error("Retry play error:", err));
+                    }
+                  }, 500);
                 }}
               >
                 Try Camera Again
@@ -961,6 +986,23 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       >
         Review All
       </button>
+
+      {/* Retry camera button - especially for iOS */}
+      {!isCameraLoading && !cameraError && (
+        <button
+          className={styles.retryCameraButton}
+          onClick={() => {
+            // Directly try to play the video (critical for iOS)
+            const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+            if (videoElement) {
+              console.log('Attempting to play video from retry camera button');
+              videoElement.play().catch(err => console.error("Retry camera button error:", err));
+            }
+          }}
+        >
+          Retry Camera
+        </button>
+      )}
 
       {/* Camera controls */}
       <div className={styles.cameraControls}>
