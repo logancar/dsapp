@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './CCCWalkaroundForm.module.css';
 import { submitForm } from '../services/api';
+import { compressImages } from '../utils/imageCompression';
 
 interface LocationState {
   name?: string;
@@ -463,12 +464,41 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
         formData.email = locationState.email;
       }
 
-      // Add each photo with its ID as the key
+      // Collect photos to compress
+      const photoData: Record<string, string> = {};
       photoSteps.forEach(step => {
         if (step.imageData && step.id !== 'intro' && step.id !== 'review') {
-          formData[`photo_${step.id}`] = step.imageData;
+          photoData[`photo_${step.id}`] = step.imageData;
         }
       });
+
+      // Compress all images before submission
+      console.log('Compressing images before submission...');
+      overlay.innerHTML = `
+        <div style="color: white; font-size: 24px; margin-bottom: 20px;">Compressing photos...</div>
+        <div style="width: 50px; height: 50px; border: 5px solid #3BB554; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+      `;
+
+      try {
+        const compressedPhotos = await compressImages(photoData, 1000, 0.6);
+        console.log('Images compressed successfully');
+
+        // Add compressed photos to form data
+        Object.entries(compressedPhotos).forEach(([key, value]) => {
+          formData[key] = value;
+        });
+
+        overlay.innerHTML = `
+          <div style="color: white; font-size: 24px; margin-bottom: 20px;">Submitting photos...</div>
+          <div style="width: 50px; height: 50px; border: 5px solid #3BB554; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+        `;
+      } catch (compressionError) {
+        console.error('Error compressing images:', compressionError);
+        // Fall back to original images if compression fails
+        Object.entries(photoData).forEach(([key, value]) => {
+          formData[key] = value;
+        });
+      }
 
       // Submit the form
       const result = await submitForm(
