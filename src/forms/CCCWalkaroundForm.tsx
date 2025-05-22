@@ -371,14 +371,16 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
       // Create a canvas element to capture the current video frame
       const canvas = document.createElement('canvas');
 
-      // Make sure we have valid dimensions
-      if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
-        console.error('Invalid video dimensions');
-        console.log('Video element:', videoRef.current);
-        console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-        console.log('Ready state:', videoRef.current.readyState);
+      // Make sure we have valid dimensions and videoRef is not null
+      if (!videoRef.current || videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
+        console.error('Invalid video dimensions or video element is null');
+        if (videoRef.current) {
+          console.log('Video element:', videoRef.current);
+          console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+          console.log('Ready state:', videoRef.current.readyState);
+        }
 
-        if (isIOS) {
+        if (isIOS && videoRef.current) {
           // On iOS, sometimes the video dimensions aren't reported correctly
           // Use a fallback size based on the video element's display size
           const videoRect = videoRef.current.getBoundingClientRect();
@@ -401,6 +403,13 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         try {
+          // Make sure videoRef.current is not null before drawing
+          if (!videoRef.current) {
+            console.error('Video element is null when trying to draw to canvas');
+            setIsCapturing(false);
+            return;
+          }
+
           // Draw the video frame
           context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
@@ -415,29 +424,40 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
               // On iOS, try an alternative approach
               console.log('Trying alternative capture method for iOS');
 
-              // Force a redraw of the video frame
-              videoRef.current.style.display = 'none';
-              void videoRef.current.offsetHeight; // Trigger reflow
-              videoRef.current.style.display = 'block';
+              // Force a redraw of the video frame if videoRef is available
+              if (videoRef.current) {
+                videoRef.current.style.display = 'none';
+                void videoRef.current.offsetHeight; // Trigger reflow
+                videoRef.current.style.display = 'block';
 
-              // Try again after a short delay
-              setTimeout(() => {
-                try {
-                  context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-                  const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
+                // Try again after a short delay
+                setTimeout(() => {
+                  try {
+                    // Check again that videoRef is still available
+                    if (videoRef.current) {
+                      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                      const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
 
-                  if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
-                    console.log('iOS alternative capture successful');
-                    processImageData(retryImageData);
-                  } else {
-                    console.error('iOS alternative capture failed');
+                      if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
+                        console.log('iOS alternative capture successful');
+                        processImageData(retryImageData);
+                      } else {
+                        console.error('iOS alternative capture failed');
+                        setIsCapturing(false);
+                      }
+                    } else {
+                      console.error('Video element no longer available');
+                      setIsCapturing(false);
+                    }
+                  } catch (retryError) {
+                    console.error('Error in iOS alternative capture:', retryError);
                     setIsCapturing(false);
                   }
-                } catch (retryError) {
-                  console.error('Error in iOS alternative capture:', retryError);
-                  setIsCapturing(false);
-                }
-              }, 100);
+                }, 100);
+              } else {
+                console.error('Video element not available for iOS alternative capture');
+                setIsCapturing(false);
+              }
               return;
             } else {
               setIsCapturing(false);
