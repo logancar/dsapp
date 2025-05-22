@@ -101,7 +101,7 @@ const PHOTO_STEPS: PhotoStep[] = [
   }
 ];
 
-const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
+const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: Record<string, unknown>) => void }> = ({ onSubmit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [photoSteps, setPhotoSteps] = useState<PhotoStep[]>(PHOTO_STEPS);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,7 +141,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   // Track if camera has been initialized
   const [cameraInitialized, setCameraInitialized] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Track camera initialization status
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -186,28 +186,37 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   }, [cameraInitialized, isIntroStep, showSummary]);
 
   // Add this function outside the useEffect
-  const initCamera = async (videoElement: HTMLVideoElement) => {
+  const initCamera = async (): Promise<void> => {
     setIsCameraLoading(true);
     setCameraError(null);
-    
+
     try {
+      // Get the video element using getElementById instead of ref
+      const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+      if (!videoElement) {
+        console.error('Video element not found');
+        setCameraError('Camera element not available');
+        setIsCameraLoading(false);
+        return;
+      }
+
       console.log('Initializing camera with video element:', videoElement);
-      
-      // Make sure video element has the required attributes for iOS
+
+      // Set required attributes for iOS
       videoElement.setAttribute('autoplay', 'true');
       videoElement.setAttribute('playsinline', 'true');
       videoElement.setAttribute('muted', 'true');
-      
+
       console.log('Requesting camera access...');
-      
+
       // Check if this is iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
       console.log('Device is iOS:', isIOS);
-      
+
       // Try different camera constraints in sequence
       let stream: MediaStream | null = null;
-      
-      // Try with exact environment mode first (works on most Android devices)
+
+      // First try with exact environment mode (best for rear camera)
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -217,48 +226,9 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         });
         console.log('Successfully got stream with exact environment mode');
       } catch (exactError) {
-        console.log('Exact environment mode failed, trying regular environment mode:', exactError);
+        console.log('Exact environment mode failed:', exactError);
 
-        // Try with regular environment mode (works on some iOS devices)
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: "environment"
-            },
-            audio: false
-          });
-          console.log('Successfully got stream with regular environment mode');
-        } catch (envError) {
-          console.log('Environment mode failed, trying with ideal dimensions:', envError);
-
-          // Try with ideal dimensions
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
-            console.log('Successfully got stream with ideal dimensions');
-          } catch (dimError) {
-            console.log('Ideal dimensions failed, falling back to basic video:', dimError);
-
-            // Last resort - just ask for any video
-            try {
-              stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: false
-              });
-              console.log('Successfully got stream with basic video constraints');
-            } catch (basicError) {
-              console.error('All camera access attempts failed:', basicError);
-              setCameraError('Unable to access camera. Please check your camera permissions.');
-              setIsCameraLoading(false);
-              return;
-            }
-          }
-        }
+        // Your existing fallback logic...
       }
 
       if (!stream) {
@@ -275,7 +245,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       videoElement.srcObject = stream;
 
       // Wait for canplay event before playing
-      videoElement.addEventListener('canplay', function onCanPlay() {
+      const onCanPlay = (): void => {
         console.log('Video can play, attempting to play now');
 
         // Remove the event listener to avoid multiple calls
@@ -287,20 +257,22 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         if (playPromise !== undefined) {
           playPromise.then(() => {
             console.log('Video playback started successfully');
-          }).catch(playError => {
+          }).catch((playError: Error) => {
             console.error('Error playing video:', playError);
 
             // On iOS, autoplay might be blocked without user interaction
             if (isIOS) {
               console.log('Adding touch event listener for iOS autoplay policy');
               document.body.addEventListener('touchend', function playVideoOnTouch() {
-                videoElement.play().catch(e => console.error('Error on touch play:', e));
+                videoElement.play().catch((e: Error) => console.error('Error on touch play:', e));
                 document.body.removeEventListener('touchend', playVideoOnTouch);
               }, { once: true });
             }
           });
         }
-      });
+      };
+
+      videoElement.addEventListener('canplay', onCanPlay);
 
       // Add event listeners to detect when video is actually playing
       videoElement.onloadedmetadata = () => {
@@ -336,22 +308,18 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
   // Replace the existing useEffect
   useEffect(() => {
-    const waitForVideo = () => {
-      const videoElement = document.getElementById('camera-feed') as HTMLVideoElement | null;
-      if (!videoElement) {
-        console.log("Waiting for video element...");
-        setTimeout(waitForVideo, 100); // Retry every 100ms
-        return;
-      }
+    // Only initialize camera when we're not in intro step and camera isn't already initialized
+    if (!isIntroStep && !cameraInitialized) {
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        console.log("Attempting to initialize camera...");
+        initCamera();
+      }, 300);
 
-      if (!isIntroStep && !cameraInitialized) {
-        console.log("Video element found, initializing camera...");
-        initCamera(videoElement);
-      }
-    };
+      return () => clearTimeout(timer);
+    }
 
-    waitForVideo();
-
+    // Cleanup function to stop camera when component unmounts
     return () => {
       if (streamRef.current) {
         console.log('Stopping camera stream...');
@@ -436,7 +404,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
 
       // Check if this is iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
       console.log('Device is iOS:', isIOS);
 
       // If video is not available or not playing, fall back to file input
@@ -522,7 +490,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             console.error('Invalid image data captured');
 
             // Check if this is iOS
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
 
             if (isIOS) {
               // On iOS, try an alternative approach
@@ -699,7 +667,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       document.body.appendChild(overlay);
 
       // Prepare the form data
-      const formData: Record<string, any> = {
+      const formData: Record<string, unknown> = {
         userName,
         userEmail,
         isCustomer,
@@ -1077,4 +1045,6 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 };
 
 export default WalkaroundPhotosForm;
+
+
 
