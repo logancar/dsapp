@@ -302,14 +302,23 @@
   position: fixed;
   top: 60px; /* Position below the thumbnail strip */
   left: 10px;
-  background-color: rgba(59, 181, 84, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 59, 59, 0.9); /* Bright red for better visibility */
+  border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 5px;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 10px 15px;
   z-index: 1002; /* Above other elements */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s infinite; /* Add pulsing animation */
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .nextStepInstruction {
