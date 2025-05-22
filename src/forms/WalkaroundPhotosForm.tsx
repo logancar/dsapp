@@ -203,164 +203,141 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             return;
           }
 
-          console.log('Requesting camera access...');
-
           // Check if this is iOS
           const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
           console.log('Device is iOS:', isIOS);
 
-          // iOS-specific settings
-          if (isIOS) {
+          // Make sure video element has the required attributes for iOS
+          // These need to be set as attributes directly in the DOM, not just as React props
+          videoElement.setAttribute('autoplay', 'true');
+          videoElement.setAttribute('playsinline', 'true');
+          videoElement.setAttribute('muted', 'true');
+
+          console.log('Requesting camera access...');
+
+          // Try different camera constraints in sequence
+          let stream: MediaStream | null = null;
+
+          // Try with exact environment mode first (works on most Android devices)
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { exact: "environment" }
+              },
+              audio: false
+            });
+            console.log('Successfully got stream with exact environment mode');
+          } catch (exactError) {
+            console.log('Exact environment mode failed, trying regular environment mode:', exactError);
+
+            // Try with regular environment mode (works on some iOS devices)
             try {
-              console.log('Using iOS-specific camera settings');
-              // iOS works better with simpler constraints
-              const constraints = {
+              stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                  facingMode: 'environment'
-                },
-                audio: false
-              };
-
-              const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-              // Store the stream in the ref
-              streamRef.current = stream;
-
-              // For iOS, we need to set important attributes on the video element
-              videoElement.setAttribute('autoplay', 'true');
-              videoElement.setAttribute('playsinline', 'true');
-              videoElement.setAttribute('muted', 'true');
-
-              // Set the stream as the video source
-              videoElement.srcObject = stream;
-
-              // Force play on iOS
-              videoElement.play().catch(e => {
-                console.error('Error playing video on iOS:', e);
-                // Try again with user interaction
-                document.body.addEventListener('touchend', function playVideoOnTouch() {
-                  videoElement?.play().catch(e => console.error('Error on touch play:', e));
-                  document.body.removeEventListener('touchend', playVideoOnTouch);
-                }, { once: true });
-              });
-
-              // Add event listeners for iOS
-              videoElement.onloadedmetadata = () => {
-                console.log('iOS: Video metadata loaded, dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-
-                // Force play again after metadata is loaded
-                videoElement.play().catch(e => console.error('Error playing after metadata:', e));
-              };
-
-              videoElement.onplaying = () => {
-                console.log('iOS: Video is now playing');
-                setCameraInitialized(true);
-                setIsCameraLoading(false);
-
-                // Update debug info
-                const tracks = stream.getTracks();
-                setDebugInfo({
-                  videoWidth: videoElement.videoWidth,
-                  videoHeight: videoElement.videoHeight,
-                  readyState: videoElement.readyState,
-                  hasStream: !!videoElement.srcObject,
-                  streamActive: stream.active,
-                  trackCount: tracks.length
-                });
-              };
-
-              console.log('iOS camera stream obtained successfully');
-            } catch (iosError) {
-              console.error('iOS camera access error:', iosError);
-              setCameraError('Unable to access camera on iOS. Please check your camera permissions in Settings.');
-              setIsCameraLoading(false);
-            }
-          } else {
-            // Non-iOS devices
-            try {
-              console.log('Using standard camera settings');
-              const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                  facingMode: 'environment',
-                  width: { ideal: 1280 },
-                  height: { ideal: 720 }
+                  facingMode: "environment"
                 },
                 audio: false
               });
+              console.log('Successfully got stream with regular environment mode');
+            } catch (envError) {
+              console.log('Environment mode failed, trying with ideal dimensions:', envError);
 
-              // Store the stream in the ref
-              streamRef.current = stream;
-
-              // Set the stream as the video source
-              videoElement.srcObject = stream;
-
-              // Add event listeners to detect when video is actually playing
-              videoElement.onloadedmetadata = () => {
-                console.log('Video metadata loaded, video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-                videoElement.play().catch(e => console.error('Error playing video:', e));
-              };
-
-              videoElement.onplaying = () => {
-                console.log('Video is now playing');
-                // Mark camera as initialized only when video is actually playing
-                setCameraInitialized(true);
-                setIsCameraLoading(false);
-
-                // Update debug info
-                const tracks = stream.getTracks();
-                setDebugInfo({
-                  videoWidth: videoElement.videoWidth,
-                  videoHeight: videoElement.videoHeight,
-                  readyState: videoElement.readyState,
-                  hasStream: !!videoElement.srcObject,
-                  streamActive: stream.active,
-                  trackCount: tracks.length
+              // Try with ideal dimensions
+              try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                  video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                  },
+                  audio: false
                 });
-              };
+                console.log('Successfully got stream with ideal dimensions');
+              } catch (dimError) {
+                console.log('Ideal dimensions failed, falling back to basic video:', dimError);
 
-              console.log('Camera stream obtained successfully');
-            } catch (error) {
-              console.warn('Failed with ideal settings, trying fallback settings:', error);
-
-              // Fallback to basic settings
-              const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: false
-              });
-
-              // Store the stream in the ref
-              streamRef.current = stream;
-
-              // Set the stream as the video source
-              videoElement.srcObject = stream;
-
-              // Add event listeners to detect when video is actually playing
-              videoElement.onloadedmetadata = () => {
-                console.log('Video metadata loaded (fallback), video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-                videoElement.play().catch(e => console.error('Error playing video:', e));
-              };
-
-              videoElement.onplaying = () => {
-                console.log('Video is now playing (fallback)');
-                // Mark camera as initialized only when video is actually playing
-                setCameraInitialized(true);
-                setIsCameraLoading(false);
-
-                // Update debug info
-                const tracks = stream.getTracks();
-                setDebugInfo({
-                  videoWidth: videoElement.videoWidth,
-                  videoHeight: videoElement.videoHeight,
-                  readyState: videoElement.readyState,
-                  hasStream: !!videoElement.srcObject,
-                  streamActive: stream.active,
-                  trackCount: tracks.length
-                });
-              };
-
-              console.log('Camera initialized with fallback settings');
+                // Last resort - just ask for any video
+                try {
+                  stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                  });
+                  console.log('Successfully got stream with basic video constraints');
+                } catch (basicError) {
+                  console.error('All camera access attempts failed:', basicError);
+                  setCameraError('Unable to access camera. Please check your camera permissions.');
+                  setIsCameraLoading(false);
+                  return;
+                }
+              }
             }
           }
+
+          if (!stream) {
+            console.error('Failed to get camera stream');
+            setCameraError('Unable to access camera. Please check your camera permissions.');
+            setIsCameraLoading(false);
+            return;
+          }
+
+          // Store the stream in the ref
+          streamRef.current = stream;
+
+          // Set the stream as the video source
+          videoElement.srcObject = stream;
+
+          // Wait for canplay event before playing
+          videoElement.addEventListener('canplay', function onCanPlay() {
+            console.log('Video can play, attempting to play now');
+
+            // Remove the event listener to avoid multiple calls
+            videoElement.removeEventListener('canplay', onCanPlay);
+
+            // Try to play the video
+            const playPromise = videoElement.play();
+
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                console.log('Video playback started successfully');
+              }).catch(playError => {
+                console.error('Error playing video:', playError);
+
+                // On iOS, autoplay might be blocked without user interaction
+                if (isIOS) {
+                  console.log('Adding touch event listener for iOS autoplay policy');
+                  document.body.addEventListener('touchend', function playVideoOnTouch() {
+                    videoElement.play().catch(e => console.error('Error on touch play:', e));
+                    document.body.removeEventListener('touchend', playVideoOnTouch);
+                  }, { once: true });
+                }
+              });
+            }
+          });
+
+          // Add event listeners to detect when video is actually playing
+          videoElement.onloadedmetadata = () => {
+            console.log('Video metadata loaded, dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+          };
+
+          videoElement.onplaying = () => {
+            console.log('Video is now playing');
+            setCameraInitialized(true);
+            setIsCameraLoading(false);
+
+            // Update debug info
+            if (stream) {
+              const tracks = stream.getTracks();
+              setDebugInfo({
+                videoWidth: videoElement.videoWidth,
+                videoHeight: videoElement.videoHeight,
+                readyState: videoElement.readyState,
+                hasStream: !!videoElement.srcObject,
+                streamActive: stream.active,
+                trackCount: tracks.length
+              });
+            }
+          };
+
+          console.log('Camera stream setup completed');
         } catch (error) {
           console.error('Error accessing camera:', error);
           setCameraError('Unable to access camera. Please make sure you have granted camera permissions.');
@@ -488,6 +465,27 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         });
       }
 
+      // Add a small delay before capturing to ensure frame is fully rendered
+      // This is especially important on iOS devices
+      console.log('Adding small delay before capture to ensure frame is rendered...');
+
+      // Use setTimeout to delay the capture slightly
+      setTimeout(() => {
+        captureFrame(videoElement);
+      }, 100);
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+
+      // Fall back to file input if there's an error
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    }
+  };
+
+  // Separate function to capture a frame from the video
+  const captureFrame = (videoElement: HTMLVideoElement) => {
+    try {
       // Create a canvas element to capture the current video frame
       const canvas = document.createElement('canvas');
 
@@ -520,15 +518,29 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
           if (imageData === 'data:,' || imageData.length < 1000) {
             console.error('Invalid image data captured');
 
+            // Check if this is iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
             if (isIOS) {
               // On iOS, try an alternative approach
               console.log('Trying alternative capture method for iOS');
 
-              // Try again after a short delay
+              // Try again after a longer delay
               setTimeout(() => {
                 try {
+                  // Try with a different approach for iOS
+                  // First, make sure the canvas is properly sized
+                  canvas.width = videoElement.videoWidth || 640;
+                  canvas.height = videoElement.videoHeight || 480;
+
+                  // Clear the canvas
+                  context.clearRect(0, 0, canvas.width, canvas.height);
+
+                  // Draw the video frame with explicit dimensions
                   context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                  const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
+
+                  // Try with a higher quality setting
+                  const retryImageData = canvas.toDataURL('image/jpeg', 1.0);
 
                   if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
                     console.log('iOS alternative capture successful');
@@ -843,9 +855,9 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         {/* Video element for camera feed */}
         <video
           id="camera-feed"
-          autoPlay
-          playsInline
-          muted
+          autoPlay={true}
+          playsInline={true}
+          muted={true}
           style={{
             width: '100%',
             height: '100%',
