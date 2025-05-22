@@ -12,7 +12,6 @@ import ThanksPage from './ThanksPage';
 import RentalForm from './forms/RentalForm';
 import PickupForm from './forms/PickupForm';
 import DropoffForm from './forms/DropoffForm';
-import WalkaroundPhotosForm from './forms/WalkaroundPhotosForm';
 import CCCWalkaroundForm from './forms/CCCWalkaroundForm';
 import TestConsentPopup from './pages/TestConsentPopup';
 import SendCustomerEmailPage from './pages/SendCustomerEmailPage';

@@ -153,7 +153,6 @@ const CCCWalkaroundForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubm
   // Current step
   const currentStep = photoSteps[currentStepIndex];
   const isIntroStep = currentStepIndex === 0;
-  const isReviewStep = currentStep.id === 'review';
 
   // Count completed photos
   const completedPhotos = photoSteps.filter(step =>
