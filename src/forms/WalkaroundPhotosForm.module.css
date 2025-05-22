@@ -53,6 +53,7 @@
   flex-direction: column;
   background-color: #000;
   z-index: 1000;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .thumbnailStrip {
@@ -89,6 +90,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 300px; /* Ensure minimum height */
 }
 
 /* Camera loading overlay */

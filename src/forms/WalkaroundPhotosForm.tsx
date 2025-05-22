@@ -142,10 +142,49 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   // Track if camera has been initialized
   const [cameraInitialized, setCameraInitialized] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Track camera initialization status
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
+
+  // Debug state for camera troubleshooting
+  const [debugInfo, setDebugInfo] = useState<{
+    videoWidth: number;
+    videoHeight: number;
+    readyState: number;
+    hasStream: boolean;
+    streamActive: boolean;
+    trackCount: number;
+  } | null>(null);
+
+  // Periodically check camera status and update debug info
+  useEffect(() => {
+    if (cameraInitialized && !isIntroStep && !showSummary) {
+      const checkInterval = setInterval(() => {
+        const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+        if (videoElement && streamRef.current) {
+          const tracks = streamRef.current.getTracks();
+          setDebugInfo({
+            videoWidth: videoElement.videoWidth,
+            videoHeight: videoElement.videoHeight,
+            readyState: videoElement.readyState,
+            hasStream: !!videoElement.srcObject,
+            streamActive: streamRef.current.active,
+            trackCount: tracks.length
+          });
+
+          // If stream is not active or video is not playing, try to reinitialize
+          if (!streamRef.current.active || videoElement.readyState < 2) {
+            console.log('Camera stream is not active or video is not playing, reinitializing...');
+            setCameraInitialized(false);
+          }
+        }
+      }, 5000); // Check every 5 seconds
+
+      return () => clearInterval(checkInterval);
+    }
+  }, [cameraInitialized, isIntroStep, showSummary]);
 
   // Initialize camera only once when component mounts and not in intro step
   useEffect(() => {
@@ -167,73 +206,166 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
           console.log('Requesting camera access...');
 
-          // First try with ideal settings
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
+          // Check if this is iOS
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+          console.log('Device is iOS:', isIOS);
 
-            // Store the stream in the ref
-            streamRef.current = stream;
+          // iOS-specific settings
+          if (isIOS) {
+            try {
+              console.log('Using iOS-specific camera settings');
+              // iOS works better with simpler constraints
+              const constraints = {
+                video: {
+                  facingMode: 'environment'
+                },
+                audio: false
+              };
 
-            // Set the stream as the video source
-            videoElement.srcObject = stream;
+              const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-            // Add event listeners to detect when video is actually playing
-            videoElement.onloadedmetadata = () => {
-              console.log('Video metadata loaded, video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-              videoElement.play().catch(e => console.error('Error playing video:', e));
-            };
+              // Store the stream in the ref
+              streamRef.current = stream;
 
-            videoElement.onplaying = () => {
-              console.log('Video is now playing');
-              // Mark camera as initialized only when video is actually playing
-              setCameraInitialized(true);
+              // For iOS, we need to set important attributes on the video element
+              videoElement.setAttribute('autoplay', 'true');
+              videoElement.setAttribute('playsinline', 'true');
+              videoElement.setAttribute('muted', 'true');
+
+              // Set the stream as the video source
+              videoElement.srcObject = stream;
+
+              // Force play on iOS
+              videoElement.play().catch(e => {
+                console.error('Error playing video on iOS:', e);
+                // Try again with user interaction
+                document.body.addEventListener('touchend', function playVideoOnTouch() {
+                  videoElement?.play().catch(e => console.error('Error on touch play:', e));
+                  document.body.removeEventListener('touchend', playVideoOnTouch);
+                }, { once: true });
+              });
+
+              // Add event listeners for iOS
+              videoElement.onloadedmetadata = () => {
+                console.log('iOS: Video metadata loaded, dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+
+                // Force play again after metadata is loaded
+                videoElement.play().catch(e => console.error('Error playing after metadata:', e));
+              };
+
+              videoElement.onplaying = () => {
+                console.log('iOS: Video is now playing');
+                setCameraInitialized(true);
+                setIsCameraLoading(false);
+
+                // Update debug info
+                const tracks = stream.getTracks();
+                setDebugInfo({
+                  videoWidth: videoElement.videoWidth,
+                  videoHeight: videoElement.videoHeight,
+                  readyState: videoElement.readyState,
+                  hasStream: !!videoElement.srcObject,
+                  streamActive: stream.active,
+                  trackCount: tracks.length
+                });
+              };
+
+              console.log('iOS camera stream obtained successfully');
+            } catch (iosError) {
+              console.error('iOS camera access error:', iosError);
+              setCameraError('Unable to access camera on iOS. Please check your camera permissions in Settings.');
               setIsCameraLoading(false);
-            };
+            }
+          } else {
+            // Non-iOS devices
+            try {
+              console.log('Using standard camera settings');
+              const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                  facingMode: 'environment',
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 }
+                },
+                audio: false
+              });
 
-            console.log('Camera stream obtained successfully');
-          } catch (error) {
-            console.warn('Failed with ideal settings, trying fallback settings:', error);
+              // Store the stream in the ref
+              streamRef.current = stream;
 
-            // Fallback to basic settings
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
-              audio: false
-            });
+              // Set the stream as the video source
+              videoElement.srcObject = stream;
 
-            // Store the stream in the ref
-            streamRef.current = stream;
+              // Add event listeners to detect when video is actually playing
+              videoElement.onloadedmetadata = () => {
+                console.log('Video metadata loaded, video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+                videoElement.play().catch(e => console.error('Error playing video:', e));
+              };
 
-            // Set the stream as the video source
-            videoElement.srcObject = stream;
+              videoElement.onplaying = () => {
+                console.log('Video is now playing');
+                // Mark camera as initialized only when video is actually playing
+                setCameraInitialized(true);
+                setIsCameraLoading(false);
 
-            // Add event listeners to detect when video is actually playing
-            videoElement.onloadedmetadata = () => {
-              console.log('Video metadata loaded (fallback), video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-              videoElement.play().catch(e => console.error('Error playing video:', e));
-            };
+                // Update debug info
+                const tracks = stream.getTracks();
+                setDebugInfo({
+                  videoWidth: videoElement.videoWidth,
+                  videoHeight: videoElement.videoHeight,
+                  readyState: videoElement.readyState,
+                  hasStream: !!videoElement.srcObject,
+                  streamActive: stream.active,
+                  trackCount: tracks.length
+                });
+              };
 
-            videoElement.onplaying = () => {
-              console.log('Video is now playing (fallback)');
-              // Mark camera as initialized only when video is actually playing
-              setCameraInitialized(true);
-              setIsCameraLoading(false);
-            };
+              console.log('Camera stream obtained successfully');
+            } catch (error) {
+              console.warn('Failed with ideal settings, trying fallback settings:', error);
 
-            console.log('Camera initialized with fallback settings');
+              // Fallback to basic settings
+              const stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: false
+              });
+
+              // Store the stream in the ref
+              streamRef.current = stream;
+
+              // Set the stream as the video source
+              videoElement.srcObject = stream;
+
+              // Add event listeners to detect when video is actually playing
+              videoElement.onloadedmetadata = () => {
+                console.log('Video metadata loaded (fallback), video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+                videoElement.play().catch(e => console.error('Error playing video:', e));
+              };
+
+              videoElement.onplaying = () => {
+                console.log('Video is now playing (fallback)');
+                // Mark camera as initialized only when video is actually playing
+                setCameraInitialized(true);
+                setIsCameraLoading(false);
+
+                // Update debug info
+                const tracks = stream.getTracks();
+                setDebugInfo({
+                  videoWidth: videoElement.videoWidth,
+                  videoHeight: videoElement.videoHeight,
+                  readyState: videoElement.readyState,
+                  hasStream: !!videoElement.srcObject,
+                  streamActive: stream.active,
+                  trackCount: tracks.length
+                });
+              };
+
+              console.log('Camera initialized with fallback settings');
+            }
           }
         } catch (error) {
           console.error('Error accessing camera:', error);
           setCameraError('Unable to access camera. Please make sure you have granted camera permissions.');
           setIsCameraLoading(false);
-
-          // Don't show alert, we'll display the error in the UI
         }
       };
 
@@ -324,6 +456,10 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
       console.log('Taking picture...');
       const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
 
+      // Check if this is iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      console.log('Device is iOS:', isIOS);
+
       // If video is not available or not playing, fall back to file input
       if (!videoElement || !videoElement.srcObject || videoElement.readyState < 2) {
         console.log('Video not ready, falling back to file input');
@@ -339,6 +475,19 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
 
       // Log video dimensions
       console.log('Video dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+
+      // Update debug info before capture
+      if (streamRef.current) {
+        const tracks = streamRef.current.getTracks();
+        setDebugInfo({
+          videoWidth: videoElement.videoWidth,
+          videoHeight: videoElement.videoHeight,
+          readyState: videoElement.readyState,
+          hasStream: !!videoElement.srcObject,
+          streamActive: streamRef.current.active,
+          trackCount: tracks.length
+        });
+      }
 
       // Create a canvas element to capture the current video frame
       const canvas = document.createElement('canvas');
@@ -361,25 +510,84 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         // Clear the canvas first
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the video frame
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        try {
+          // Draw the video frame
+          context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-        // Convert the canvas to a data URL
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+          // Convert the canvas to a data URL
+          const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
-        // Validate the image data
-        if (imageData === 'data:,' || imageData.length < 1000) {
-          console.error('Invalid image data captured, falling back to file input');
-          console.log('Image data:', imageData.substring(0, 100) + '...');
+          // Validate the image data
+          if (imageData === 'data:,' || imageData.length < 1000) {
+            console.error('Invalid image data captured');
 
-          if (fileInputRef.current) {
-            fileInputRef.current.click();
+            if (isIOS) {
+              // On iOS, try an alternative approach
+              console.log('Trying alternative capture method for iOS');
+
+              // Try again after a short delay
+              setTimeout(() => {
+                try {
+                  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                  const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
+
+                  if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
+                    console.log('iOS alternative capture successful');
+                    handleCapture(retryImageData);
+                  } else {
+                    console.error('iOS alternative capture failed, falling back to file input');
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }
+                } catch (retryError) {
+                  console.error('Error in iOS alternative capture:', retryError);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                  }
+                }
+              }, 500);
+              return;
+            } else {
+              console.error('Invalid image data captured, falling back to file input');
+              console.log('Image data:', imageData.substring(0, 100) + '...');
+
+              if (fileInputRef.current) {
+                fileInputRef.current.click();
+              }
+              return;
+            }
           }
-          return;
-        }
 
-        console.log('Photo captured successfully, data URL length:', imageData.length);
-        handleCapture(imageData);
+          console.log('Photo captured successfully, data URL length:', imageData.length);
+          handleCapture(imageData);
+        } catch (drawError) {
+          console.error('Error drawing to canvas:', drawError);
+
+          // Try with a different approach
+          setTimeout(() => {
+            try {
+              // Try with a different source rectangle
+              context.drawImage(videoElement, 0, 0, videoElement.videoWidth || 640, videoElement.videoHeight || 480, 0, 0, canvas.width, canvas.height);
+              const retryImageData = canvas.toDataURL('image/jpeg', 0.9);
+
+              if (retryImageData !== 'data:,' && retryImageData.length >= 1000) {
+                console.log('Alternative capture method successful');
+                handleCapture(retryImageData);
+              } else {
+                console.error('Alternative capture method failed, falling back to file input');
+                if (fileInputRef.current) {
+                  fileInputRef.current.click();
+                }
+              }
+            } catch (alternativeError) {
+              console.error('Error in alternative capture method:', alternativeError);
+              if (fileInputRef.current) {
+                fileInputRef.current.click();
+              }
+            }
+          }, 300);
+        }
       } else {
         console.error('Could not get canvas context');
         if (fileInputRef.current) {
@@ -646,7 +854,9 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
             position: 'absolute',
             top: 0,
             left: 0,
-            display: cameraError ? 'none' : 'block'
+            display: cameraError ? 'none' : 'block',
+            backgroundColor: '#000',
+            zIndex: 5
           }}
         ></video>
 
@@ -700,6 +910,30 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
         {!cameraError && !isCameraLoading && (
           <div className={styles.targetOverlay}>
             <div className={styles.targetBox}></div>
+          </div>
+        )}
+
+        {/* Debug info overlay */}
+        {debugInfo && (
+          <div style={{
+            position: 'absolute',
+            top: '50px',
+            left: '10px',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            fontSize: '12px',
+            zIndex: 30,
+            maxWidth: '300px',
+            wordBreak: 'break-word'
+          }}>
+            <div>Video Width: {debugInfo.videoWidth}</div>
+            <div>Video Height: {debugInfo.videoHeight}</div>
+            <div>Ready State: {debugInfo.readyState}</div>
+            <div>Has Stream: {debugInfo.hasStream ? 'Yes' : 'No'}</div>
+            <div>Stream Active: {debugInfo.streamActive ? 'Yes' : 'No'}</div>
+            <div>Track Count: {debugInfo.trackCount}</div>
           </div>
         )}
 
