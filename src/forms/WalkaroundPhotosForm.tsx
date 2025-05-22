@@ -108,7 +108,6 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onS
   const [showSummary, setShowSummary] = useState(false);
   const [captureStartTime, setCaptureStartTime] = useState<number | null>(null);
   const [captureTime, setCaptureTime] = useState<number | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const location = useLocation();
   const locationState = location.state as LocationState;
