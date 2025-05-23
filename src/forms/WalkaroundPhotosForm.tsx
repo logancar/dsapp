@@ -147,6 +147,30 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: Record<string, unknown>)
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
 
+  // Set up diagnostic logging for camera stream state
+  useEffect(() => {
+    // Always run diagnostic logging to help debug camera issues
+    {
+      const diagnosticInterval = setInterval(() => {
+        const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+        if (videoElement) {
+          const stream = videoElement.srcObject as MediaStream;
+          const track = stream?.getVideoTracks?.()?.[0];
+          console.log(`[DIAGNOSTIC] Video element:
+            - Has srcObject: ${!!videoElement.srcObject}
+            - readyState: ${videoElement.readyState}
+            - paused: ${videoElement.paused}
+            - Track state: ${track?.readyState || 'no-track'}
+            - Track enabled: ${track?.enabled || 'no-track'}
+            - Stream active: ${stream?.active || 'no-stream'}
+          `);
+        }
+      }, 3000); // Check every 3 seconds
+
+      return () => clearInterval(diagnosticInterval);
+    }
+  }, []);
+
   // Debug state for camera troubleshooting
   const [debugInfo, setDebugInfo] = useState<{
     videoWidth: number;
@@ -186,7 +210,7 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: Record<string, unknown>)
   }, [cameraInitialized, isIntroStep, showSummary]);
 
   // Improved camera initialization function wrapped in useCallback
-  const initCamera = useCallback(async (): Promise<void> => {
+  const initCamera = useCallback(async (): Promise<(() => void) | void> => {
     console.log('=== CAMERA INITIALIZATION STARTED ===');
     setIsCameraLoading(true);
     setCameraError(null);
@@ -407,6 +431,42 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: Record<string, unknown>)
       }, 1000);
 
       console.log('=== CAMERA INITIALIZATION COMPLETED ===');
+
+      // Set up a stream rebinding interval to prevent stream disconnection
+      // This is critical to handle React re-renders that might orphan the stream
+      const rebindInterval = setInterval(() => {
+        const videoElement = document.getElementById('camera-feed') as HTMLVideoElement;
+        if (videoElement && streamRef.current) {
+          // Check if video element lost its stream or if stream is inactive
+          const stream = videoElement.srcObject as MediaStream;
+          const track = stream?.getVideoTracks?.()?.[0];
+
+          // Log the current state for debugging
+          console.log(`[STREAM-CHECK] Video has srcObject: ${!!videoElement.srcObject}, Track state: ${track?.readyState || 'no-track'}`);
+
+          // Rebind if: no srcObject OR track ended OR readyState < 2 (not playing)
+          if (!videoElement.srcObject ||
+              (track && track.readyState === 'ended') ||
+              (videoElement.readyState < 2 && videoElement.paused)) {
+            console.log("[REBIND] Video element lost stream or stream inactive — rebinding...");
+
+            // Re-apply srcObject
+            videoElement.srcObject = streamRef.current;
+
+            // Force play again
+            videoElement.play().catch(err => console.error("[REBIND ERROR]", err));
+          }
+        }
+      }, 1000);
+
+      // Store the interval ID for cleanup
+      const rebindIntervalId = rebindInterval;
+
+      // Return a cleanup function that will be called when the component unmounts
+      return () => {
+        console.log("[CLEANUP] Clearing stream rebind interval");
+        clearInterval(rebindIntervalId);
+      };
     } catch (error) {
       console.error('Error accessing camera:', error);
       setCameraError('Unable to access camera. Please make sure you have granted camera permissions.');
@@ -416,19 +476,37 @@ const WalkaroundPhotosForm: React.FC<{ onSubmit: (data: Record<string, unknown>)
 
   // Replace the existing useEffect
   useEffect(() => {
+    // Store cleanup function returned from initCamera
+    let cleanupRebindInterval: (() => void) | undefined;
+
     // Only initialize camera when we're not in intro step and camera isn't already initialized
     if (!isIntroStep && !cameraInitialized) {
       // Small delay to ensure component is fully mounted
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         console.log("Attempting to initialize camera...");
-        initCamera();
+        // Store the cleanup function returned from initCamera
+        cleanupRebindInterval = await initCamera() as (() => void) | undefined;
       }, 300);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        // Call the cleanup function if it exists
+        if (cleanupRebindInterval) {
+          console.log('Cleaning up rebind interval from timer cleanup');
+          cleanupRebindInterval();
+        }
+      };
     }
 
     // Cleanup function to stop camera when component unmounts
     return () => {
+      // Call the cleanup function if it exists
+      if (cleanupRebindInterval) {
+        console.log('Cleaning up rebind interval from component unmount');
+        cleanupRebindInterval();
+      }
+
+      // Stop all tracks in the stream
       if (streamRef.current) {
         console.log('Stopping camera stream...');
         const tracks = streamRef.current.getTracks();
