@@ -14,7 +14,7 @@ const validIDs: Record<string, { name: string; email: string }> = {
   "9999": { name: "Lindsey", email: "lindsey@autohail.group" },
   "4444": { name: "Matthew", email: "matt.n@autohail.group" },
   "5555": { name: "Lindsey", email: "lindsey@autohail.group" },
-  "8310": { name: "Receptionist", email: "receptionist@autohail.group" },
+  "8312": { name: "Receptionist", email: "receptionist@autohail.group" },
   "3015": { name: "Bobbi", email: "bobbi@autohail.group" },
   "2540": { name: "Torry", email: "torry@autohail.group" },
 };
@@ -190,14 +190,25 @@ function HomePage() {
             <NumpadButton onClick={handleSubmit}>✓</NumpadButton>
           </div>
 
-          <motion.button
-            className={styles.customerLoginButton}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleCustomerLogin}
-          >
-            Customer Login
-          </motion.button>
+          <div className={styles.loginButtonsContainer}>
+            <motion.button
+              className={styles.customerLoginButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleCustomerLogin}
+            >
+              Customer Login
+            </motion.button>
+
+            <motion.button
+              className={styles.remoteLoginButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/remote-login')}
+            >
+              Remote Login
+            </motion.button>
+          </div>
         </motion.div>
       </div>
 

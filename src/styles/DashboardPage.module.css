@@ -270,9 +270,16 @@
   font-size: 1.2rem;
 }
 
+/* Styles for estimator buttons container */
+.estimatorButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+}
+
 /* Styles for the Send Email to Customer button */
 .emailButton {
-  margin-top: 2rem;
   padding: 0.75rem 1.5rem;
   background-color: var(--accent-primary);
   color: white;
@@ -295,11 +302,40 @@
   font-size: 1.2rem;
 }
 
+/* Styles for the Remote Submissions button */
+.submissionsButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submissionsButton:hover {
+  background-color: #2d8a42;
+}
+
+.submissionsIcon {
+  font-size: 1.2rem;
+}
+
 @media (max-width: 480px) {
-  .emailButton {
+  .estimatorButtons {
+    flex-direction: column;
+    margin-top: 1.5rem;
+  }
+
+  .emailButton,
+  .submissionsButton {
     width: 100%;
     justify-content: center;
-    margin-top: 1.5rem;
     padding: 0.75rem 1rem;
   }
 }

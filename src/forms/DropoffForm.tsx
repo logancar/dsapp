@@ -172,9 +172,21 @@ const schema = yup.object().shape({
     doorHanger: yup.boolean().required(),
     textMessage: yup.boolean().required(),
     referral: yup.boolean().required(),
-    referralName: yup.string().nullable().optional(),
-    referralAddress: yup.string().nullable().optional(),
-    referralPhone: yup.string().nullable().optional(),
+    referralName: yup.string().when('referral', {
+      is: true,
+      then: (schema) => schema.required('Referrer name is required when referral is selected'),
+      otherwise: (schema) => schema.nullable().optional()
+    }),
+    referralAddress: yup.string().when('referral', {
+      is: true,
+      then: (schema) => schema.required('Referrer address is required when referral is selected'),
+      otherwise: (schema) => schema.nullable().optional()
+    }),
+    referralPhone: yup.string().when('referral', {
+      is: true,
+      then: (schema) => schema.required('Referrer phone is required when referral is selected'),
+      otherwise: (schema) => schema.nullable().optional()
+    }),
     internet: yup.boolean().required(),
     facebook: yup.boolean().required(),
     instagram: yup.boolean().required(),
@@ -300,6 +312,155 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
       });
     }
   }, []);
+
+  // Step validation functions
+  const validateStep = (step: number): boolean => {
+    const values = getValues();
+
+    switch (step) {
+      case 1:
+        // At least one referral source must be selected
+        const referralSources = values.referralSources;
+        const hasAnySource = Object.values(referralSources).some(value => value === true);
+        if (!hasAnySource) {
+          alert('Please select at least one option for how you heard about us.');
+          return false;
+        }
+        return true;
+
+      case 2:
+        // Authorization page validation
+        if (!values.insuranceCompany?.trim()) {
+          alert('Please enter your insurance company.');
+          return false;
+        }
+        if (!values.vehicleDescription?.trim()) {
+          alert('Please enter your vehicle description.');
+          return false;
+        }
+        if (!values.vin?.trim()) {
+          alert('Please enter your VIN.');
+          return false;
+        }
+        if (values.vin.length !== 17) {
+          alert('VIN must be exactly 17 characters.');
+          return false;
+        }
+        if (!values.claimNumber?.trim()) {
+          alert('Please enter your claim number.');
+          return false;
+        }
+        if (!values.dateOfLoss?.trim()) {
+          alert('Please enter the date of loss.');
+          return false;
+        }
+        if (!values.date?.trim()) {
+          alert('Please enter the date.');
+          return false;
+        }
+        return true;
+
+      case 3:
+        // Personal Information validation
+        if (!values.howDidhear?.trim()) {
+          alert('Please provide details about how you heard about us.');
+          return false;
+        }
+        if (!values.dropDate?.trim()) {
+          alert('Please enter the drop date.');
+          return false;
+        }
+        if (!values.location?.trim()) {
+          alert('Please enter the location.');
+          return false;
+        }
+        if (!values.estimator?.trim()) {
+          alert('Please enter the estimator name.');
+          return false;
+        }
+        if (!values.name?.trim()) {
+          alert('Please enter your name.');
+          return false;
+        }
+        if (!values.phone?.trim()) {
+          alert('Please enter your phone number.');
+          return false;
+        }
+        if (!values.address?.trim()) {
+          alert('Please enter your address.');
+          return false;
+        }
+        if (!values.city?.trim()) {
+          alert('Please enter your city.');
+          return false;
+        }
+        if (!values.state?.trim()) {
+          alert('Please enter your state.');
+          return false;
+        }
+        if (!values.zip?.trim()) {
+          alert('Please enter your ZIP code.');
+          return false;
+        }
+        if (!values.email?.trim()) {
+          alert('Please enter your email.');
+          return false;
+        }
+        return true;
+
+      case 4:
+        // Vehicle Information - this step shows disabled fields auto-filled from step 2
+        // No additional validation needed since the data was already validated in step 2
+        return true;
+
+      case 5:
+        // Insurance Information validation
+        if (!values.insuredName?.trim()) {
+          alert('Please enter the insured name.');
+          return false;
+        }
+        if (!values.insuredPhone?.trim()) {
+          alert('Please enter the insured phone number.');
+          return false;
+        }
+        if (!values.provider?.trim()) {
+          alert('Please enter the insurance provider.');
+          return false;
+        }
+        if (values.deductible === undefined || values.deductible === null) {
+          alert('Please enter the deductible amount.');
+          return false;
+        }
+        if (values.hasEstimate === undefined || values.hasEstimate === null) {
+          alert('Please select whether you have an estimate.');
+          return false;
+        }
+        if (values.hasReceivedCheck === undefined || values.hasReceivedCheck === null) {
+          alert('Please select whether you have received a check.');
+          return false;
+        }
+
+        // If referral is selected, validate referral contact info
+        if (values.referralSources.referral === 'true') {
+          if (!values.referralSources.referralName?.trim()) {
+            alert('Please provide the name of who referred you.');
+            return false;
+          }
+          if (!values.referralSources.referralAddress?.trim()) {
+            alert('Please provide the address of who referred you.');
+            return false;
+          }
+          if (!values.referralSources.referralPhone?.trim()) {
+            alert('Please provide the phone number of who referred you.');
+            return false;
+          }
+        }
+        return true;
+
+      default:
+        return true;
+    }
+  };
 
   // We're now handling form submission directly in the button click handler
   // This comment is kept to maintain the structure of the file
@@ -971,7 +1132,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   </div>
                 </div>
 
-                {watch('referralSources.referral') === true && (
+                {watch('referralSources.referral') === 'true' && (
                   <div className={styles.referralInfoSection}>
                     <p className={styles.referralInfoNote}>
                       Please provide as much information as possible about who referred you so we will be able to successfully contact this person
@@ -983,6 +1144,9 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                         type="text"
                         {...register('referralSources.referralName')}
                       />
+                      {errors.referralSources?.referralName && (
+                        <span className={styles.error}>{errors.referralSources.referralName.message}</span>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -991,6 +1155,9 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                         type="text"
                         {...register('referralSources.referralAddress')}
                       />
+                      {errors.referralSources?.referralAddress && (
+                        <span className={styles.error}>{errors.referralSources.referralAddress.message}</span>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -999,6 +1166,9 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                         type="tel"
                         {...register('referralSources.referralPhone')}
                       />
+                      {errors.referralSources?.referralPhone && (
+                        <span className={styles.error}>{errors.referralSources.referralPhone.message}</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1215,10 +1385,12 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
               type="button"
               className={styles.nextButton}
               onClick={() => {
-                // Ensure we can navigate to the next step
-                setCurrentStep(currentStep + 1);
-                // Scroll to top of the page when changing steps
-                window.scrollTo(0, 0);
+                // Validate current step before proceeding
+                if (validateStep(currentStep)) {
+                  setCurrentStep(currentStep + 1);
+                  // Scroll to top of the page when changing steps
+                  window.scrollTo(0, 0);
+                }
               }}
             >
               Next

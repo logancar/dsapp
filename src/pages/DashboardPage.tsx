@@ -122,23 +122,35 @@ function DashboardPage() {
         ))}
       </div>
 
-      {/* Show "Send Email to Customer" button only for estimators */}
+      {/* Show estimator-only buttons */}
       {!isCustomer && (
-        <motion.button
-          className={styles.emailButton}
-          onClick={() => navigate('/send-customer-email', {
-            state: {
-              name: userName,
-              email: userEmail,
-              isCustomer: false
-            }
-          })}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <span className={styles.emailIcon}>✉️</span>
-          Send Email to Customer
-        </motion.button>
+        <div className={styles.estimatorButtons}>
+          <motion.button
+            className={styles.emailButton}
+            onClick={() => navigate('/send-customer-email', {
+              state: {
+                name: userName,
+                email: userEmail,
+                isCustomer: false
+              }
+            })}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className={styles.emailIcon}>✉️</span>
+            Send Email to Customer
+          </motion.button>
+
+          <motion.button
+            className={styles.submissionsButton}
+            onClick={() => navigate('/estimator-submissions')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className={styles.submissionsIcon}>📋</span>
+            Remote Submissions
+          </motion.button>
+        </div>
       )}
 
       {isPopupOpen && (

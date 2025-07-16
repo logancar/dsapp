@@ -1,5 +1,5 @@
 :root {
-  --background-color: #000000;
+  --background-color: #1a1a1a;
   --text-color: #ffffff;
   --input-background: #1a1a1a;
   --accent-primary: #3BB554;
@@ -37,6 +37,15 @@ body {
   color-scheme: dark;
 }
 
+/* App container */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
 /* Global page container */
 .page-container {
   display: flex;
@@ -54,7 +63,7 @@ body {
   .page-container {
     /* iPad specific */
     @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
-      background-color: #000000 !important;
+      background-color: #1a1a1a !important;
       min-height: 100vh;
       min-height: -webkit-fill-available;
     }

@@ -50,7 +50,7 @@ body {
   min-height: 100vh;
   overflow-y: auto !important; /* Force enable scrolling */
   width: 100%;
-  background-color: #000000 !important;
+  background-color: var(--background-primary) !important;
   color: #ffffff;
   -webkit-text-size-adjust: 100%;
 }

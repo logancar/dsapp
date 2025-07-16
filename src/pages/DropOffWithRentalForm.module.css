@@ -1,0 +1,214 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #000;
+  color: white;
+  padding: 1rem;
+}
+
+.stepContainer {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem 0;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #3BB554;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #ccc;
+  margin-bottom: 2rem;
+}
+
+.backButton {
+  background: none;
+  border: 2px solid #3BB554;
+  color: #3BB554;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.backButton:hover {
+  background-color: #3BB554;
+  color: white;
+}
+
+.submitSection {
+  display: flex;
+  justify-content: center;
+  margin: 3rem 0;
+  padding: 2rem;
+}
+
+.proceedButton {
+  background-color: #3BB554;
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 0.75rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 181, 84, 0.3);
+}
+
+.proceedButton:hover:not(.disabled) {
+  background-color: #2d8a42;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 181, 84, 0.4);
+}
+
+.proceedButton.disabled {
+  background-color: #555;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.completionContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 3rem;
+}
+
+.successIcon {
+  font-size: 5rem;
+  margin-bottom: 2rem;
+}
+
+.successTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #3BB554;
+  margin-bottom: 1rem;
+}
+
+.successMessage {
+  font-size: 1.2rem;
+  color: #ccc;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Popup styles */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background-color: #1a1a1a;
+  border-radius: 1rem;
+  padding: 3rem;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.popupIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.popupTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3BB554;
+  margin-bottom: 1rem;
+}
+
+.popupMessage {
+  font-size: 1.1rem;
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.popupButtons {
+  display: flex;
+  justify-content: center;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .header {
+    padding: 1rem 0;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .proceedButton {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .successTitle {
+    font-size: 2rem;
+  }
+  
+  .successMessage {
+    font-size: 1rem;
+  }
+  
+  .completionContainer {
+    padding: 2rem 1rem;
+  }
+  
+  .popup {
+    padding: 2rem;
+    width: 95%;
+  }
+  
+  .popupIcon {
+    font-size: 3rem;
+  }
+  
+  .popupTitle {
+    font-size: 1.5rem;
+  }
+  
+  .popupMessage {
+    font-size: 1rem;
+  }
+}

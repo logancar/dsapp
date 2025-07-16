@@ -175,22 +175,49 @@
   }
 }
 
+/* Login Buttons Container */
+.loginButtonsContainer {
+  display: flex;
+  gap: 12px;
+  margin: 20px auto 0 auto;
+  width: 100%;
+  max-width: 400px;
+  justify-content: center;
+}
+
 /* Customer Login Button */
 .customerLoginButton {
   background-color: #222;
   border: 2px solid #3BB554;
   color: #3BB554;
-  padding: 12px 24px;
+  padding: 12px 16px;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  margin-top: 20px;
   transition: all 0.2s ease;
-  width: 100%;
-  max-width: 300px;
+  flex: 1;
+  min-width: 0;
 }
 
 .customerLoginButton:hover {
+  background-color: #2a2a2a;
+}
+
+/* Remote Login Button */
+.remoteLoginButton {
+  background-color: #222;
+  border: 2px solid #3BB554;
+  color: #3BB554;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 0;
+}
+
+.remoteLoginButton:hover {
   background-color: #2a2a2a;
 }
 
@@ -281,6 +308,19 @@
 
 .loginButton:hover {
   background-color: #309144;
+}
+
+/* Responsive adjustments for login buttons */
+@media only screen and (max-device-width: 428px) {
+  .loginButtonsContainer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .customerLoginButton, .remoteLoginButton {
+    font-size: 16px;
+    padding: 14px 20px;
+  }
 }
 
 /* Responsive adjustments for modal */
