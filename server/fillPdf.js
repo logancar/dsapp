@@ -251,7 +251,7 @@ async function fillPdf(pdfType, formData, outputPath) {
             {
                 field: "signature",
                 x: 63.4912,  // Use exact coordinates from the actual signature1 field
-                y: 412.798,  // Increased by 20 pixels to move signature up
+                y: 457.798,  // Increased by 65 pixels total (20 + 45) to move signature up
                 width: 150,
                 height: 32,
                 page: 1,  // Second page (0-indexed as page 1)
