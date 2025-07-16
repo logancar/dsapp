@@ -2,8 +2,9 @@
 // Note: Twilio client-side operations should be handled via backend API
 
 // Twilio configuration from environment variables
-const TWILIO_ACCOUNT_SID = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
-const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+// Note: These are currently unused as Twilio client-side operations are handled via backend API
+// const TWILIO_ACCOUNT_SID = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
+// const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
 const TWILIO_PHONE_NUMBER = import.meta.env.VITE_TWILIO_PHONE_NUMBER;
 
 // Twilio client is not available in browser - use backend API instead

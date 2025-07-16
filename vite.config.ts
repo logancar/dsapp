@@ -9,12 +9,12 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            // Prevent Node.js modules from being bundled
-            'twilio': false,
-            'events': false,
-            'fs': false,
-            'path': false,
-            'crypto': false,
+            // Prevent Node.js modules from being bundled - use empty modules
+            'twilio': 'data:text/javascript,export default {}',
+            'events': 'data:text/javascript,export default {}',
+            'fs': 'data:text/javascript,export default {}',
+            'path': 'data:text/javascript,export default {}',
+            'crypto': 'data:text/javascript,export default {}',
         }
     },
     optimizeDeps: {

@@ -24,14 +24,14 @@ interface DropoffFormData {
     waze: boolean;
     mailer: boolean;
     tvCommercial: boolean;
-    tvChannel?: string | null;
+    tvChannel?: string;
     radioCommercial: boolean;
     doorHanger: boolean;
     textMessage: boolean;
     referral: boolean;
-    referralName?: string | null;
-    referralAddress?: string | null;
-    referralPhone?: string | null;
+    referralName?: string;
+    referralAddress?: string;
+    referralPhone?: string;
     internet: boolean;
     facebook: boolean;
     instagram: boolean;
@@ -41,9 +41,9 @@ interface DropoffFormData {
     prime: boolean;
     pandora: boolean;
     billboard: boolean;
-    billboardLocation?: string | null;
+    billboardLocation?: string;
     outsideSales: boolean;
-    salesPersonName?: string | null;
+    salesPersonName?: string;
     yelp: boolean;
     insurance: boolean;
     repeat: boolean;
@@ -71,7 +71,7 @@ interface DropoffFormData {
   // Personal Information
   name: string;
   phone: string;
-  altPhone?: string | null;
+  altPhone?: string;
   address: string;
   city: string;
   state: string;
@@ -90,16 +90,16 @@ interface DropoffFormData {
   provider: string;
   deductible: number;
   hasEstimate: boolean;
-  hasEstimateCopy?: boolean | null;
+  hasEstimateCopy?: boolean;
   hasReceivedCheck: boolean;
-  hasCheckedCashed?: boolean | null;
-  adjusterName?: string | null;
-  adjusterPhone?: string | null;
+  hasCheckedCashed?: boolean;
+  adjusterName?: string;
+  adjusterPhone?: string;
 
   // Reference Information (optional)
-  referenceAddress?: string | null;
-  referencePhone?: string | null;
-  referenceEmail?: string | null;
+  referenceAddress?: string;
+  referencePhone?: string;
+  referenceEmail?: string;
 
   // Repair Authorization
   repairPermission: boolean;
@@ -133,7 +133,7 @@ const schema = yup.object().shape({
   dateOfLoss: yup.string().required('Date of loss is required'),
   name: yup.string().required('Name is required'),
   phone: yup.string().required('Phone is required'),
-  altPhone: yup.string().nullable().optional(),
+  altPhone: yup.string().optional(),
   address: yup.string().required('Address is required'),
   city: yup.string().required('City is required'),
   state: yup.string().required('State is required'),
@@ -148,14 +148,14 @@ const schema = yup.object().shape({
   provider: yup.string().required('Provider is required'),
   deductible: yup.number().required('Deductible is required'),
   hasEstimate: yup.boolean().required(),
-  hasEstimateCopy: yup.boolean().nullable().optional(),
+  hasEstimateCopy: yup.boolean().optional(),
   hasReceivedCheck: yup.boolean().required(),
-  hasCheckedCashed: yup.boolean().nullable().optional(),
-  adjusterName: yup.string().nullable().optional(),
-  adjusterPhone: yup.string().nullable().optional(),
-  referenceAddress: yup.string().nullable().optional(),
-  referencePhone: yup.string().nullable().optional(),
-  referenceEmail: yup.string().email('Invalid email').nullable().optional(),
+  hasCheckedCashed: yup.boolean().optional(),
+  adjusterName: yup.string().optional(),
+  adjusterPhone: yup.string().optional(),
+  referenceAddress: yup.string().optional(),
+  referencePhone: yup.string().optional(),
+  referenceEmail: yup.string().email('Invalid email').optional(),
   repairPermission: yup.boolean().required(),
   additionalRepairs: yup.boolean().required(),
   payment: yup.boolean().required(),
@@ -167,7 +167,7 @@ const schema = yup.object().shape({
     waze: yup.boolean().required(),
     mailer: yup.boolean().required(),
     tvCommercial: yup.boolean().required(),
-    tvChannel: yup.string().nullable().optional(),
+    tvChannel: yup.string().optional(),
     radioCommercial: yup.boolean().required(),
     doorHanger: yup.boolean().required(),
     textMessage: yup.boolean().required(),
@@ -175,17 +175,17 @@ const schema = yup.object().shape({
     referralName: yup.string().when('referral', {
       is: true,
       then: (schema) => schema.required('Referrer name is required when referral is selected'),
-      otherwise: (schema) => schema.nullable().optional()
+      otherwise: (schema) => schema.optional()
     }),
     referralAddress: yup.string().when('referral', {
       is: true,
       then: (schema) => schema.required('Referrer address is required when referral is selected'),
-      otherwise: (schema) => schema.nullable().optional()
+      otherwise: (schema) => schema.optional()
     }),
     referralPhone: yup.string().when('referral', {
       is: true,
       then: (schema) => schema.required('Referrer phone is required when referral is selected'),
-      otherwise: (schema) => schema.nullable().optional()
+      otherwise: (schema) => schema.optional()
     }),
     internet: yup.boolean().required(),
     facebook: yup.boolean().required(),
@@ -196,9 +196,9 @@ const schema = yup.object().shape({
     prime: yup.boolean().required(),
     pandora: yup.boolean().required(),
     billboard: yup.boolean().required(),
-    billboardLocation: yup.string().nullable().optional(),
+    billboardLocation: yup.string().optional(),
     outsideSales: yup.boolean().required(),
-    salesPersonName: yup.string().nullable().optional(),
+    salesPersonName: yup.string().optional(),
     yelp: yup.boolean().required(),
     insurance: yup.boolean().required(),
     repeat: yup.boolean().required(),
@@ -233,14 +233,14 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
         waze: false,
         mailer: false,
         tvCommercial: false,
-        tvChannel: null,
+        tvChannel: undefined,
         radioCommercial: false,
         doorHanger: false,
         textMessage: false,
         referral: false,
-        referralName: null,
-        referralAddress: null,
-        referralPhone: null,
+        referralName: undefined,
+        referralAddress: undefined,
+        referralPhone: undefined,
         internet: false,
         facebook: false,
         instagram: false,
@@ -250,22 +250,22 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
         prime: false,
         pandora: false,
         billboard: false,
-        billboardLocation: null,
+        billboardLocation: undefined,
         outsideSales: false,
-        salesPersonName: null,
+        salesPersonName: undefined,
         yelp: false,
         insurance: false,
         repeat: false,
         other: false
       },
-      hasEstimateCopy: null,
-      hasCheckedCashed: null,
-      altPhone: null,
-      adjusterName: null,
-      adjusterPhone: null,
-      referenceAddress: null,
-      referencePhone: null,
-      referenceEmail: null
+      hasEstimateCopy: undefined,
+      hasCheckedCashed: undefined,
+      altPhone: undefined,
+      adjusterName: undefined,
+      adjusterPhone: undefined,
+      referenceAddress: undefined,
+      referencePhone: undefined,
+      referenceEmail: undefined
     },
     resolver: yupResolver(schema)
   });
@@ -441,7 +441,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
         }
 
         // If referral is selected, validate referral contact info
-        if (values.referralSources.referral === 'true') {
+        if (values.referralSources.referral === true) {
           if (!values.referralSources.referralName?.trim()) {
             alert('Please provide the name of who referred you.');
             return false;
@@ -1132,7 +1132,7 @@ export default function DropoffForm({ onSubmit }: DropoffFormProps) {
                   </div>
                 </div>
 
-                {watch('referralSources.referral') === 'true' && (
+                {watch('referralSources.referral') === true && (
                   <div className={styles.referralInfoSection}>
                     <p className={styles.referralInfoNote}>
                       Please provide as much information as possible about who referred you so we will be able to successfully contact this person
