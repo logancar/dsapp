@@ -70,8 +70,8 @@ async function fillPdf(pdfType, formData, outputPath) {
             customerName: "Customer_Name",
 
             // Acknowledgments with initials
-            rentalInitials: "Rental_Initials_es_:signer:initials",
-            reviewsInitials: "Review_Initials_es_:signer:initials",
+            rentalInitials: "Rental_Initials",
+            reviewsInitials: "Review_Initials3",
 
             // Date
             date: "Date"
@@ -210,8 +210,8 @@ async function fillPdf(pdfType, formData, outputPath) {
         pickup: [
             {
                 field: "signature",
-                x: 153,  // Moved left by 50% from center (306/2)
-                y: 150,  // Adjusted to be in the signature line area
+                x: 128,  // Moved left by 25 pixels from previous position
+                y: 125,  // Moved down by 25 pixels from previous position
                 width: 200,
                 height: 50,
                 page: 0,
