@@ -210,8 +210,8 @@ async function fillPdf(pdfType, formData, outputPath) {
         pickup: [
             {
                 field: "signature",
-                x: 128,  // Moved left by 25 pixels from previous position
-                y: 125,  // Moved down by 25 pixels from previous position
+                x: 88,   // Moved left 40 more pixels (128 - 40)
+                y: 80,   // Moved down 45 more pixels (125 - 45)
                 width: 200,
                 height: 50,
                 page: 0,
